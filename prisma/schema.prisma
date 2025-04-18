@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?
+  firstName     String
+  lastName      String
+  dni           String?
+  photoUrl      String?
+  googleId      String?   @unique
+  createdAt     DateTime  @default(now())
+
+  matches       Match[]   @relation("CreatorMatches")
+  applications  Application[]
+}
+
+model Match {
+  id              String      @id @default(uuid())
+  date            DateTime
+  time            String
+  location        String
+  category        String
+  status          MatchStatus @default(WAITING)
+  createdAt       DateTime    @default(now())
+  creatorId       String
+  creator         User        @relation("CreatorMatches", fields: [creatorId], references: [id])
+
+  // confirmedPlayers User[]     @relation("ConfirmedPlayers", references: [id])
+  applications     Application[]
+}
+
+model Application {
+  id            String             @id @default(uuid())
+  message       String?
+  phoneNumber   String?
+  createdAt     DateTime           @default(now())
+  matchId       String
+  userId        String
+  status        ApplicationStatus  @default(PENDING)
+
+  match         Match              @relation(fields: [matchId], references: [id])
+  user          User               @relation(fields: [userId], references: [id])
+}
+
+enum MatchStatus {
+  WAITING
+  INCOMPLETE
+  CONFIRMED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
