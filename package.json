@@ -8,7 +8,8 @@
     "start": "node build/server.js",
     "pgen": "prisma generate",
     "pmig": "prisma migrate dev",
-    "pstu": "prisma studio"
+    "pstu": "prisma studio",
+    "pseed": "tsx prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
@@ -17,7 +18,8 @@
     "dotenv": "^16.0.0",
     "express": "^4.18.0",
     "google-auth-library": "^8.7.0",
-    "jsonwebtoken": "^9.0.0"
+    "jsonwebtoken": "^9.0.0",
+    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
