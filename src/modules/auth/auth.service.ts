@@ -16,10 +16,9 @@ interface RegisterDTO {
 }
 
 export const register = async (data: RegisterDTO) => {
-  let passwordHash: string | undefined;
-  if (data.password) {
-    passwordHash = await hashPassword(data.password);
-  }
+  let passwordHash: string;
+  passwordHash = await hashPassword(data.password!);
+
   const user = await prisma.user.create({
     data: {
       email: data.email,

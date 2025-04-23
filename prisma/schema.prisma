@@ -8,11 +8,16 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  email       String   @unique
-  name        String
-  phoneNumber String?
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String?
+  firstName    String
+  lastName     String
+  phoneNumber  String?
+  createdAt    DateTime @default(now())
+  dni          String?
+  photoUrl     String?
+  googleId     String?  @unique
 
   player Player?
 }
