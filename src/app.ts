@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRouter from './modules/auth/auth.router';
 import matchRouter from './modules/match/match.router';
+import { authenticate } from './middlewares/auth.middleware';
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+
+app.use(authenticate as RequestHandler);
+
 app.use('/api/matches', matchRouter);
 
 export default app;

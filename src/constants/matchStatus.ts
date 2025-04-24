@@ -1,0 +1,5 @@
+export const MATCH_STATUS = {
+    PENDING: 'PENDING',
+    CLOSED: 'CLOSED',
+    COMPLETED: 'COMPLETED',
+};

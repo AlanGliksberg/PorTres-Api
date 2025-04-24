@@ -1,9 +1,16 @@
 import { Request, Response } from 'express';
 import * as matchService from './match.service';
+import { MatchDTO } from '../../types/matchTypes';
+import { ErrorResponse, OkResponse } from '../../types/response';
 
-export const createMatch = async (req: Request, res: Response) => {
-  const match = await matchService.createMatch(req.body);
-  res.status(201).json(match);
+export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
+  try {
+    const match = await matchService.createMatch(req.user, req.body);
+    res.status(200).json(new OkResponse(match));
+  } catch (e) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error creating match " + e));
+  }
 };
 
 export const getMatches = async (_req: Request, res: Response) => {

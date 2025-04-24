@@ -32,7 +32,7 @@ model Match {
   statusId        String
   createdAt       DateTime @default(now())
   creatorId       String
-  creator         Player   @relation("creatorMatch", fields: [creatorId], references: [id]) // Relación para el creador
+  creator         Player   @relation("creatorMatch", fields: [creatorId], references: [id])
 
   status  MatchStatus @relation(fields: [statusId], references: [id])
   players Player[]    @relation("matchPlayers") // Relación para los jugadores
@@ -42,10 +42,10 @@ model Match {
 
 model Player {
   id            String  @id @default(uuid())
-  name          String
-  lastName      String
-  level         String
-  rankingPoints Int
+  name          String?
+  lastName      String?
+  level         String?
+  rankingPoints Int?
   phone         String?
 
   teams   Team[]

@@ -3,14 +3,19 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-    // Insertar los registros en MatchStatus, incluyendo el campo description
-    await prisma.matchStatus.createMany({
-        data: [
-            { name: 'WAITING', description: 'The match is waiting for players.' },
-            { name: 'INCOMPLETE', description: 'The match has not been completed.' },
-            { name: 'CONFIRMED', description: 'The match has been confirmed with players.' }
-        ],
-    });
+    await Promise.all(
+        [
+            { name: 'PENDING', description: 'The match is waiting for players.' },
+            { name: 'CLOSED', description: 'The match has been confirmed with players.' },
+            { name: 'COMPLETED', description: 'The match has finished and results were loaded.' }
+        ].map(status =>
+            prisma.matchStatus.upsert({
+                where: { name: status.name },
+                update: {},
+                create: status
+            })
+        )
+    );
 
     console.log('MatchStatus records created!');
 }
