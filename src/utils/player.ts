@@ -32,7 +32,7 @@ export const createOrGetPlayers = async (players: PlayerDTO[]) => {
 
     const playerPromises = players.map(async (player: PlayerDTO) => {
         if (player.id) {
-            return { id: (await getPlayerById(player.id))!.id };
+            return { id: player.id };
         }
         if (player.phone) {
             const existingPlayer = await getPlayerByPhone(player.phone);
