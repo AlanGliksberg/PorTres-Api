@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import authRouter from './modules/auth/auth.router';
 import matchRouter from './modules/match/match.router';
+import playerRouter from './modules/player/player.router';
 import { authenticate } from './middlewares/auth.middleware';
 
 dotenv.config();
@@ -21,5 +22,6 @@ app.use('/api/auth', authRouter);
 app.use(authenticate as RequestHandler);
 
 app.use('/api/matches', matchRouter);
+app.use('/api/player', playerRouter);
 
 export default app;

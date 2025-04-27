@@ -4,9 +4,9 @@ export type TeamDTO = {
 };
 
 export type PlayerDTO = {
-    id: string;
+    id?: string;
     name: string;
     lastName: string;
     level: string;
-    phone: string | null;
+    phone?: string;
 };

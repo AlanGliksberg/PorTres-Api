@@ -1,4 +1,3 @@
-import prisma from "../prisma/client";
 import { PlayerDTO } from "../types/playerTypes";
 import { createOrGetPlayers } from "./player";
 
