@@ -10,30 +10,32 @@ export const createMatch = async (user: User, data: MatchDTO) => {
 
   const matchStatus: MatchStatus | null = await prisma.matchStatus.findUnique({
     where: {
-      name: teams?.team1?.players?.length + teams?.team2?.players?.length === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING
+      name: teams?.team1?.length + teams?.team2?.length === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING
     }
   });
 
   if (!matchStatus) throw new Error("no match status");
 
   const player = await getPlayerByUserId(user.id);
+  const asd = {
+    date: new Date(date),
+    time,
+    location,
+    category,
+    pointsDeviation,
+    statusId: matchStatus.id,
+    creatorPlayerId: player!.id,
+    teams: {
+      create: [
+        await createTeam(1, teams?.team1),
+        await createTeam(2, teams?.team2),
+      ]
+    }
+  }
+  console.log("asd", JSON.stringify(asd))
 
   const match = await prisma.match.create({
-    data: {
-      date: new Date(date),
-      time,
-      location,
-      category,
-      pointsDeviation,
-      statusId: matchStatus.id,
-      creatorId: player!.id,
-      teams: {
-        create: [
-          await createTeam(teams?.team1?.teamNumber || 1, teams?.team1?.players),
-          await createTeam(teams?.team2?.teamNumber || 2, teams?.team2?.players),
-        ]
-      }
-    }
+    data: asd
   });
 
   return match;

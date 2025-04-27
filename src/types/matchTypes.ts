@@ -1,4 +1,4 @@
-import { TeamDTO } from "./playerTypes";
+import { PlayerDTO } from "./playerTypes";
 
 export interface MatchDTO {
     date: Date;
@@ -6,9 +6,9 @@ export interface MatchDTO {
     location: string;
     category: string;
     pointsDeviation: number;
-    creatorId: string;
+    creatorPlayerId: string;
     teams: {
-        team1: TeamDTO;
-        team2: TeamDTO;
+        team1: PlayerDTO[];
+        team2: PlayerDTO[];
     };
 }
