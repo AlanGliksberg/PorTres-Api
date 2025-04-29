@@ -6,10 +6,10 @@ import { Request } from "../../types/common";
 
 export const createplayer = async (req: Request<CreatePlayerRequest>, res: Response) => {
     try {
-        const player = await playerService.createPlayer(req.body.player, req.user);
+        const player = await playerService.createPlayer(req.body, req.user);
         res.status(200).json(new OkResponse(player));
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
-        res.status(500).json(new ErrorResponse("Error creating player " + e));
+        res.status(500).json(new ErrorResponse("Error creating player", e));
     }
 }

@@ -4,6 +4,8 @@ import { MatchDTO } from '../../types/matchTypes';
 import { MATCH_STATUS } from '../../constants/matchStatus';
 import { createTeam } from '../../utils/match';
 import { getPlayerByUserId } from '../../utils/player';
+import { CustomError } from '../../types/customError';
+import { ErrorCode } from '../../constants/errorCode';
 
 export const createMatch = async (user: User, data: MatchDTO) => {
   const { date, time, location, category, pointsDeviation, teams } = data;
@@ -14,7 +16,7 @@ export const createMatch = async (user: User, data: MatchDTO) => {
     }
   });
 
-  if (!matchStatus) throw new Error("no match status");
+  if (!matchStatus) throw new CustomError("No match status", ErrorCode.MATCH_STATUS);
 
   const player = await getPlayerByUserId(user.id);
   const asd = {

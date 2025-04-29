@@ -4,6 +4,8 @@ import { hashPassword, verifyPassword } from '../../utils/hash';
 import { signToken } from '../../utils/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { creatUser } from '../../utils/auth';
+import { CustomError } from '../../types/customError';
+import { ErrorCode } from '../../constants/errorCode';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -36,16 +38,16 @@ export const register = async (data: RegisterDTO) => {
 
 export const login = async ({ email, password }: { email: string; password: string }) => {
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !user.passwordHash) throw new Error('Invalid credentials');
+  if (!user || !user.passwordHash) throw new CustomError('Invalid credentials', ErrorCode.INVALID_CREDENTIALS);
   const valid = await verifyPassword(password, user.passwordHash);
-  if (!valid) throw new Error('Invalid credentials');
+  if (!valid) throw new CustomError('Invalid credentials', ErrorCode.INVALID_CREDENTIALS);
   return getToken(user);
 };
 
 export const loginWithGoogle = async (idToken: string) => {
   const ticket = await googleClient.verifyIdToken({ idToken });
   const payload = ticket.getPayload();
-  if (!payload || !payload.email || !payload.sub) throw new Error('Invalid Google token');
+  if (!payload || !payload.email || !payload.sub) throw new CustomError('Invalid Google token', ErrorCode.INVALID_GOOGLE_TOKEN);
   let user = await prisma.user.findUnique({ where: { googleId: payload.sub } });
   if (!user) {
     user = await creatUser({
