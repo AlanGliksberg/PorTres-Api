@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as matchService from './match.service';
 import { MatchDTO } from '../../types/matchTypes';
 import { ErrorResponse, OkResponse } from '../../types/response';
+import { Request } from "../../types/common";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {

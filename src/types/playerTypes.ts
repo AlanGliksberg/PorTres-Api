@@ -5,3 +5,12 @@ export type PlayerDTO = {
     level: string;
     phone?: string;
 };
+
+export type CreatePlayerRequest = {
+    player: PlayerDTO;
+    answers: PlayerAnswersDTO;
+}
+
+export type PlayerAnswersDTO = {
+    knowsLevel: boolean;
+}
