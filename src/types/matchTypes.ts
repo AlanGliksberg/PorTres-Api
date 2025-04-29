@@ -1,4 +1,5 @@
-import { PlayerDTO } from "./playerTypes";
+import { Gender } from "../constants/gender";
+import { TeamDTO } from "./team";
 
 export interface MatchDTO {
     date: Date;
@@ -7,8 +8,6 @@ export interface MatchDTO {
     category: string;
     pointsDeviation: number;
     creatorPlayerId: string;
-    teams: {
-        team1: PlayerDTO[];
-        team2: PlayerDTO[];
-    };
+    gender: Gender;
+    teams?: TeamDTO;
 }

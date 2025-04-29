@@ -1,12 +1,17 @@
 import { User } from "@prisma/client";
-import { PlayerDTO } from "../../types/playerTypes";
+import { PlayerAnswersDTO, PlayerDTO } from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getPlayerByUserId } from "../../utils/player";
 
-export const createPlayer = async (data: PlayerDTO, user: User) => {
-    let player = await getPlayerByUserId(user.id);
-    if (player) return player;
+export const createPlayer = async (answers: PlayerAnswersDTO, user: User) => {
+    let existingPlayer = await getPlayerByUserId(user.id);
+    if (existingPlayer) return existingPlayer;
 
-    player = await createPlayerDB(data, user.id);
+    const player: PlayerDTO = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        gender: answers.gender,
+        phone: answers.phone
+    }
 
-    return player
+    return await createPlayerDB(player, answers, user.id);
 }

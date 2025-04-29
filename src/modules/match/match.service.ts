@@ -8,36 +8,36 @@ import { CustomError } from '../../types/customError';
 import { ErrorCode } from '../../constants/errorCode';
 
 export const createMatch = async (user: User, data: MatchDTO) => {
-  const { date, time, location, category, pointsDeviation, teams } = data;
+  const { date, time, location, category, pointsDeviation, teams, gender } = data;
 
+  // TODO - ver si se puede refactorizar asociando un codigo al status
   const matchStatus: MatchStatus | null = await prisma.matchStatus.findUnique({
     where: {
-      name: teams?.team1?.length + teams?.team2?.length === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING
+      name: (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING
     }
   });
 
   if (!matchStatus) throw new CustomError("No match status", ErrorCode.MATCH_STATUS);
 
   const player = await getPlayerByUserId(user.id);
-  const asd = {
-    date: new Date(date),
-    time,
-    location,
-    category,
-    pointsDeviation,
-    statusId: matchStatus.id,
-    creatorPlayerId: player!.id,
-    teams: {
-      create: [
-        await createTeam(1, teams?.team1),
-        await createTeam(2, teams?.team2),
-      ]
-    }
-  }
-  console.log("asd", JSON.stringify(asd))
 
   const match = await prisma.match.create({
-    data: asd
+    data: {
+      date: new Date(date),
+      time,
+      location,
+      category,
+      pointsDeviation,
+      statusId: matchStatus.id,
+      creatorPlayerId: player!.id,
+      gender,
+      teams: {
+        create: [
+          await createTeam(1, teams?.team1, gender),
+          await createTeam(2, teams?.team2, gender),
+        ]
+      }
+    }
   });
 
   return match;

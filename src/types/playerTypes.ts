@@ -1,16 +1,19 @@
+import { Gender } from "../constants/gender";
+
 export type PlayerDTO = {
     id?: string;
-    name: string;
+    firstName: string;
     lastName: string;
-    level: string;
+    level?: string;
     phone?: string;
+    gender: Gender;
 };
 
-export type CreatePlayerRequest = {
-    player: PlayerDTO;
-    answers: PlayerAnswersDTO;
-}
+export type CreatePlayerRequest = PlayerAnswersDTO;
 
 export type PlayerAnswersDTO = {
+    level: string;
+    phone?: string;
+    gender: Gender;
     knowsLevel: boolean;
 }
