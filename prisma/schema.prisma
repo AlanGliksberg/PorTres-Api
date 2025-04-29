@@ -43,7 +43,7 @@ model Match {
 
 model Player {
   id            String  @id @default(uuid())
-  name          String?
+  firstName     String?
   lastName      String?
   level         String?
   rankingPoints Int?
