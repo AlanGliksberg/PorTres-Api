@@ -33,6 +33,7 @@ model Match {
   createdAt       DateTime @default(now())
   creatorPlayerId String
   creator         Player   @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
+  gender          String
 
   status  MatchStatus @relation(fields: [statusId], references: [id])
   players Player[]    @relation("matchPlayers") // Relación para los jugadores
@@ -47,6 +48,7 @@ model Player {
   level         String?
   rankingPoints Int?
   phone         String? @unique
+  gender        String
 
   teams   Team[]
   matches Match[] @relation("matchPlayers") // Relación inversa para los jugadores
