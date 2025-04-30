@@ -1,7 +1,6 @@
 export enum ErrorCode {
   INVALID_CREDENTIALS = 1,
   INVALID_GOOGLE_TOKEN = 2,
-  MATCH_STATUS = 3,
   INVALID_GENDER = 4,
   NO_PLAYER = 5
 }

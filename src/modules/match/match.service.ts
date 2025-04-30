@@ -4,21 +4,13 @@ import { MatchDTO } from "../../types/matchTypes";
 import { MATCH_STATUS } from "../../constants/matchStatus";
 import { createTeam } from "../../utils/match";
 import { getPlayerByUserId } from "../../utils/player";
-import { CustomError } from "../../types/customError";
-import { ErrorCode } from "../../constants/errorCode";
 import { GENDER } from "../../constants/gender";
 
 export const createMatch = async (user: User, data: MatchDTO) => {
   const { date, time, location, category, pointsDeviation, teams, gender } = data;
 
-  // TODO - ver si se puede refactorizar asociando un codigo al status
-  const matchStatus: MatchStatus | null = await prisma.matchStatus.findUnique({
-    where: {
-      name: (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING
-    }
-  });
-
-  if (!matchStatus) throw new CustomError("No match status", ErrorCode.MATCH_STATUS);
+  const matchStatus: MATCH_STATUS =
+    (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
 
   const player = await getPlayerByUserId(user.id);
 
@@ -29,9 +21,9 @@ export const createMatch = async (user: User, data: MatchDTO) => {
       location,
       category,
       pointsDeviation,
-      statusId: matchStatus.id,
-      creatorPlayerId: player!.id,
       gender,
+      creator: { connect: { id: player!.id } },
+      status: { connect: { name: matchStatus } },
       teams: {
         create: [await createTeam(1, teams?.team1, gender), await createTeam(2, teams?.team2, gender)]
       }
