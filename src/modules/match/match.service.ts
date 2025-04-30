@@ -43,6 +43,14 @@ export const createMatch = async (user: User, data: MatchDTO) => {
   return match;
 };
 
-export const getMatches = () => {
-  return prisma.match.findMany();
+export const getMatches = async (page: number, pageSize: number) => {
+  return await prisma.match.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: {
+      status: {
+        name: MATCH_STATUS.PENDING
+      }
+    }
+  });
 };

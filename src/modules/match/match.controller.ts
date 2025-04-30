@@ -14,7 +14,16 @@ export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   }
 };
 
-export const getMatches = async (_req: Request, res: Response) => {
-  const matches = await matchService.getMatches();
-  res.json(matches);
+export const getOpenMatches = async (req: Request, res: Response) => {
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+
+    const matches = await matchService.getMatches(pageNumber, pageSizeNumber);
+    res.json(matches);
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting matches", e));
+  }
 };
