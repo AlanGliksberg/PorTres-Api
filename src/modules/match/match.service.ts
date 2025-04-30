@@ -6,6 +6,7 @@ import { createTeam } from '../../utils/match';
 import { getPlayerByUserId } from '../../utils/player';
 import { CustomError } from '../../types/customError';
 import { ErrorCode } from '../../constants/errorCode';
+import { GENDER } from '../../constants/gender';
 
 export const createMatch = async (user: User, data: MatchDTO) => {
   const { date, time, location, category, pointsDeviation, teams, gender } = data;
@@ -43,14 +44,20 @@ export const createMatch = async (user: User, data: MatchDTO) => {
   return match;
 };
 
-export const getMatches = async (page: number, pageSize: number) => {
+export const getOpenMatches = async (matchGender: GENDER, page: number, pageSize: number) => {
   return await prisma.match.findMany({
     skip: (page - 1) * pageSize,
     take: pageSize,
     where: {
       status: {
         name: MATCH_STATUS.PENDING
-      }
+      },
+      AND: [{
+        OR: [
+          { gender: GENDER.X },
+          { gender: matchGender }
+        ]
+      }]
     }
   });
 };

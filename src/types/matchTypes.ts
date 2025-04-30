@@ -1,4 +1,4 @@
-import { Gender } from "../constants/gender";
+import { GENDER } from "../constants/gender";
 import { TeamDTO } from "./team";
 
 export interface MatchDTO {
@@ -8,6 +8,12 @@ export interface MatchDTO {
     category: string;
     pointsDeviation: number;
     creatorPlayerId: string;
-    gender: Gender;
+    gender: GENDER;
     teams?: TeamDTO;
+}
+
+export interface GetOpenMatchesRequest {
+    gender?: GENDER;
+    page: string;
+    pageSize: string;
 }

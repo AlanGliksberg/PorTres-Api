@@ -1,5 +1,5 @@
 import { Player } from "@prisma/client";
-import { Gender } from "../constants/gender";
+import { GENDER } from "../constants/gender";
 import prisma from "../prisma/client";
 import { PlayerAnswersDTO, PlayerDTO } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
@@ -29,7 +29,7 @@ const getPlayerByPhone = async (phone: string) => {
     });
 }
 
-export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGender: Gender) => {
+export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
     if (!players || players.length === 0) {
         return [];
     }
@@ -38,7 +38,7 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
         if (player.id) {
             const existingPlayer = await getPlayerById(player.id);
             if (!existingPlayer) throw new CustomError("No player", ErrorCode.NO_PLAYER);
-            verifyGender(allowedGender, existingPlayer.gender as Gender);
+            verifyGender(allowedGender, existingPlayer.gender as GENDER);
             return { id: player.id };
         }
 
@@ -86,8 +86,8 @@ const calculateInitialRankingPoints = (level: string) => {
     return 500; // TODO - calcular puntos según nivel
 }
 
-function verifyGender(allowedGender: Gender, playerGender: Gender | undefined) {
-    if (allowedGender === Gender.X || !playerGender) return;
+function verifyGender(allowedGender: GENDER, playerGender: GENDER | undefined) {
+    if (allowedGender === GENDER.X || !playerGender) return;
 
     if (playerGender !== allowedGender) throw new CustomError(`Invalid gender | Allowed gender: ${allowedGender} | Gender: ${playerGender}`, ErrorCode.INVALID_GENDER);
 }

@@ -1,4 +1,4 @@
-import { Gender } from "../constants/gender";
+import { GENDER } from "../constants/gender";
 
 export type PlayerDTO = {
     id?: string;
@@ -6,7 +6,7 @@ export type PlayerDTO = {
     lastName: string;
     level?: string;
     phone?: string;
-    gender: Gender;
+    gender: GENDER;
 };
 
 export type CreatePlayerRequest = PlayerAnswersDTO;
@@ -14,6 +14,6 @@ export type CreatePlayerRequest = PlayerAnswersDTO;
 export type PlayerAnswersDTO = {
     level: string;
     phone?: string;
-    gender: Gender;
+    gender: GENDER;
     knowsLevel: boolean;
 }
