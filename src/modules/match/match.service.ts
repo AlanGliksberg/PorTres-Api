@@ -49,10 +49,10 @@ export const getOpenMatches = async (matchGender: GENDER, page: number, pageSize
     skip: (page - 1) * pageSize,
     take: pageSize,
     where: {
-      status: {
-        name: MATCH_STATUS.PENDING
-      },
       AND: [{
+        status: {
+          name: MATCH_STATUS.PENDING
+        },
         OR: [
           { gender: GENDER.X },
           { gender: matchGender }
