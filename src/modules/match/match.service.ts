@@ -57,3 +57,22 @@ export const getOpenMatches = async (matchGender: GENDER, page: number, pageSize
     }
   });
 };
+
+export const getMyMatches = async (playerId: string, page: number, pageSize: number) => {
+  return await prisma.match.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: {
+      OR: [
+        { creatorPlayerId: playerId },
+        {
+          players: {
+            some: {
+              id: playerId
+            }
+          }
+        }
+      ]
+    }
+  });
+};

@@ -1,4 +1,3 @@
-import { Player } from "@prisma/client";
 import { GENDER } from "../constants/gender";
 import prisma from "../prisma/client";
 import { PlayerAnswersDTO, PlayerDTO } from "../types/playerTypes";

@@ -35,3 +35,19 @@ export const getOpenMatches = async (req: Request<GetOpenMatchesRequest>, res: R
     res.status(500).json(new ErrorResponse("Error getting matches", e));
   }
 };
+
+export const getMyMatches = async (req: Request, res: Response) => {
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+    const user = req.user;
+    const player = await getPlayerByUserId(user.id);
+
+    const matches = await matchService.getMyMatches(player!.id, pageNumber, pageSizeNumber);
+    res.json(matches);
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting matches", e));
+  }
+};

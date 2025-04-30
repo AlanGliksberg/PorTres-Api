@@ -4,5 +4,6 @@ import * as matchController from "./match.controller";
 const router = Router();
 router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
+router.get("/me", matchController.getMyMatches);
 
 export default router;
