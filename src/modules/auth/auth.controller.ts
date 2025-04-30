@@ -1,6 +1,6 @@
-import { Response } from 'express';
-import * as authService from './auth.service';
-import { ErrorResponse, OkResponse } from '../../types/response';
+import { Response } from "express";
+import * as authService from "./auth.service";
+import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 
 export const register = async (req: Request, res: Response) => {
@@ -9,7 +9,7 @@ export const register = async (req: Request, res: Response) => {
     res.status(200).json(new OkResponse(user));
   } catch (e: any) {
     console.log(e);
-    res.status(500).json(new ErrorResponse("Register error", e))
+    res.status(500).json(new ErrorResponse("Register error", e));
   }
 };
 
@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response) => {
     res.status(200).json(new OkResponse({ token }));
   } catch (e: any) {
     console.log(e);
-    res.status(500).json(new ErrorResponse("Login error", e))
+    res.status(500).json(new ErrorResponse("Login error", e));
   }
 };
 
@@ -29,6 +29,6 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
     res.status(200).json(new OkResponse({ token }));
   } catch (e: any) {
     console.log(e);
-    res.status(500).json(new ErrorResponse("Google error", e))
+    res.status(500).json(new ErrorResponse("Google error", e));
   }
 };

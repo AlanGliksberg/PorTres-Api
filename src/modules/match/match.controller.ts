@@ -1,10 +1,10 @@
-import { Response } from 'express';
-import * as matchService from './match.service';
-import { GetOpenMatchesRequest, MatchDTO } from '../../types/matchTypes';
-import { ErrorResponse, OkResponse } from '../../types/response';
+import { Response } from "express";
+import * as matchService from "./match.service";
+import { GetOpenMatchesRequest, MatchDTO } from "../../types/matchTypes";
+import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
-import { getPlayerByUserId } from '../../utils/player';
-import { GENDER } from '../../constants/gender';
+import { getPlayerByUserId } from "../../utils/player";
+import { GENDER } from "../../constants/gender";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {

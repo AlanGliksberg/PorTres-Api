@@ -1,12 +1,12 @@
-import { MatchStatus, User } from '@prisma/client';
-import prisma from '../../prisma/client';
-import { MatchDTO } from '../../types/matchTypes';
-import { MATCH_STATUS } from '../../constants/matchStatus';
-import { createTeam } from '../../utils/match';
-import { getPlayerByUserId } from '../../utils/player';
-import { CustomError } from '../../types/customError';
-import { ErrorCode } from '../../constants/errorCode';
-import { GENDER } from '../../constants/gender';
+import { MatchStatus, User } from "@prisma/client";
+import prisma from "../../prisma/client";
+import { MatchDTO } from "../../types/matchTypes";
+import { MATCH_STATUS } from "../../constants/matchStatus";
+import { createTeam } from "../../utils/match";
+import { getPlayerByUserId } from "../../utils/player";
+import { CustomError } from "../../types/customError";
+import { ErrorCode } from "../../constants/errorCode";
+import { GENDER } from "../../constants/gender";
 
 export const createMatch = async (user: User, data: MatchDTO) => {
   const { date, time, location, category, pointsDeviation, teams, gender } = data;
@@ -33,10 +33,7 @@ export const createMatch = async (user: User, data: MatchDTO) => {
       creatorPlayerId: player!.id,
       gender,
       teams: {
-        create: [
-          await createTeam(1, teams?.team1, gender),
-          await createTeam(2, teams?.team2, gender),
-        ]
+        create: [await createTeam(1, teams?.team1, gender), await createTeam(2, teams?.team2, gender)]
       }
     }
   });
@@ -49,15 +46,14 @@ export const getOpenMatches = async (matchGender: GENDER, page: number, pageSize
     skip: (page - 1) * pageSize,
     take: pageSize,
     where: {
-      AND: [{
-        status: {
-          name: MATCH_STATUS.PENDING
-        },
-        OR: [
-          { gender: GENDER.X },
-          { gender: matchGender }
-        ]
-      }]
+      AND: [
+        {
+          status: {
+            name: MATCH_STATUS.PENDING
+          },
+          OR: [{ gender: GENDER.X }, { gender: matchGender }]
+        }
+      ]
     }
   });
 };

@@ -1,16 +1,17 @@
-
 # PadelCole-Api
 
 ### Descripción
+
 Esta es la API backend de **PadelCole**, una aplicación que conecta a jugadores de pádel para crear y unirse a partidos. La aplicación permite registrar usuarios, iniciar sesión (con Google o correo y contraseña), crear partidos, aplicar a partidos y ver el historial de partidos.
 
 ### Funcionalidades:
+
 - **Autenticación**:
   - Registro de usuarios (con Google o con correo y contraseña).
   - Login con Google y correo/contraseña.
   - Sesión persistente con JWT.
-  
 - **Partidos**:
+
   - Los usuarios pueden **crear partidos** con fecha, hora, lugar y categoría.
   - Los usuarios pueden **aplicar** para unirse a partidos disponibles.
   - Los creadores de los partidos pueden **aceptar o rechazar** aplicaciones de jugadores.
@@ -27,17 +28,20 @@ Esta es la API backend de **PadelCole**, una aplicación que conecta a jugadores
 ### Instalación
 
 1. Clona el repositorio:
+
    ```bash
    git clone https://github.com/tu-usuario/PadelCole-Api.git
    cd PadelCole-Api
    ```
 
 2. Instala las dependencias:
+
    ```bash
    pnpm install
    ```
 
 3. Configura las variables de entorno en el archivo `.env`:
+
    ```env
    DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/padelcole"
    JWT_SECRET="your_jwt_secret_here"
@@ -45,16 +49,19 @@ Esta es la API backend de **PadelCole**, una aplicación que conecta a jugadores
    ```
 
 4. Genera el cliente de Prisma:
+
    ```bash
    pnpm prisma generate
    ```
 
 5. Realiza las migraciones para crear la base de datos:
+
    ```bash
    pnpm prisma migrate dev --name init
    ```
 
 6. Levanta el servidor en modo desarrollo:
+
    ```bash
    pnpm dev
    ```
