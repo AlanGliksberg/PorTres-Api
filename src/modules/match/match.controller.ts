@@ -1,10 +1,11 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
-import { GetOpenMatchesRequest, MatchDTO } from "../../types/matchTypes";
+import { GetMatchesRequest, MatchDTO, MatchFilters } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
-import { GENDER } from "../../constants/gender";
+import { GENDER } from "../../types/playerTypes";
+import { parseMatchFilters } from "../../utils/match";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {
@@ -16,19 +17,16 @@ export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   }
 };
 
-export const getOpenMatches = async (req: Request<GetOpenMatchesRequest>, res: Response) => {
+export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
-    const { page = 1, pageSize = 10, gender } = req.query;
-    const pageNumber = parseInt(page as string, 10);
-    const pageSizeNumber = parseInt(pageSize as string, 10);
-    let matchGender = gender;
-    if (!gender) {
+    const filters = parseMatchFilters(req.query);
+    if (!req.query.gender) {
       const user = req.user;
       const player = await getPlayerByUserId(user.id);
-      matchGender = player?.gender as GENDER;
+      filters.genders = [player?.gender as GENDER, GENDER.X];
     }
 
-    const matches = await matchService.getOpenMatches(matchGender!, pageNumber, pageSizeNumber);
+    const matches = await matchService.getOpenMatches(filters);
     res.json(matches);
   } catch (e: any) {
     console.error(e);
@@ -36,15 +34,13 @@ export const getOpenMatches = async (req: Request<GetOpenMatchesRequest>, res: R
   }
 };
 
-export const getMyMatches = async (req: Request, res: Response) => {
+export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
-    const { page = 1, pageSize = 10 } = req.query;
-    const pageNumber = parseInt(page as string, 10);
-    const pageSizeNumber = parseInt(pageSize as string, 10);
+    const filters = parseMatchFilters(req.query);
     const user = req.user;
     const player = await getPlayerByUserId(user.id);
 
-    const matches = await matchService.getMyMatches(player!.id, pageNumber, pageSizeNumber);
+    const matches = await matchService.getMyMatches(player!, filters);
     res.json(matches);
   } catch (e: any) {
     console.error(e);

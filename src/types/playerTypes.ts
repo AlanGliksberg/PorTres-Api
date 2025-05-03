@@ -1,5 +1,3 @@
-import { GENDER } from "../constants/gender";
-
 export type PlayerDTO = {
   id?: string;
   firstName: string;
@@ -17,3 +15,9 @@ export type PlayerAnswersDTO = {
   gender: GENDER;
   knowsLevel: boolean;
 };
+
+export enum GENDER {
+  M = "Male",
+  F = "Female",
+  X = "Mixed"
+}

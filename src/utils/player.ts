@@ -1,6 +1,5 @@
-import { GENDER } from "../constants/gender";
 import prisma from "../prisma/client";
-import { PlayerAnswersDTO, PlayerDTO } from "../types/playerTypes";
+import { GENDER, PlayerAnswersDTO, PlayerDTO } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 

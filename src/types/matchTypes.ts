@@ -1,4 +1,4 @@
-import { GENDER } from "../constants/gender";
+import { GENDER } from "./playerTypes";
 import { TeamDTO } from "./team";
 
 export interface MatchDTO {
@@ -12,8 +12,22 @@ export interface MatchDTO {
   teams?: TeamDTO;
 }
 
-export interface GetOpenMatchesRequest {
-  gender?: GENDER;
+export type GetMatchesRequest = {
+  gender?: string | string[];
+  status?: string | string[];
   page: string;
   pageSize: string;
+};
+
+export type MatchFilters = {
+  genders?: GENDER[];
+  status?: MATCH_STATUS[];
+  page: number;
+  pageSize: number;
+};
+
+export enum MATCH_STATUS {
+  PENDING = "PENDING",
+  CLOSED = "CLOSED",
+  COMPLETED = "COMPLETED"
 }
