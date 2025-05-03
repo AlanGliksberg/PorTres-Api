@@ -5,7 +5,7 @@ import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
 import { GENDER } from "../../types/playerTypes";
-import { parseMatchFilters } from "../../utils/match";
+import { parseMatches, parseMatchFilters } from "../../utils/match";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {
@@ -27,7 +27,8 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
     }
 
     const matches = await matchService.getOpenMatches(filters);
-    res.json(matches);
+    const parsedMatches = parseMatches(matches);
+    res.json(parsedMatches);
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));
@@ -41,7 +42,8 @@ export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Respons
     const player = await getPlayerByUserId(user.id);
 
     const matches = await matchService.getMyMatches(player!, filters);
-    res.json(matches);
+    const parsedMatches = parseMatches(matches);
+    res.json(parsedMatches);
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));

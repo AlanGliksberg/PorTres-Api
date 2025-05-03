@@ -14,8 +14,7 @@ export const createMatch = async (user: User, data: MatchDTO) => {
 
   const match = await prisma.match.create({
     data: {
-      date: new Date(date),
-      time,
+      dateTime: `${date}T${time}:00.000Z`,
       location,
       category,
       pointsDeviation,
