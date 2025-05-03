@@ -24,8 +24,7 @@ model User {
 
 model Match {
   id              String   @id @default(uuid())
-  date            DateTime @db.Date
-  time            DateTime @db.Time
+  dateTime        DateTime
   location        String
   category        String
   pointsDeviation Int
