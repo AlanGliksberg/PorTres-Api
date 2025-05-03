@@ -44,6 +44,14 @@ export const getOpenMatches = async (filters: MatchFilters) => {
         },
         getDBFilter(filters)
       ]
+    },
+    include: {
+      status: true,
+      teams: {
+        include: {
+          players: true
+        }
+      }
     }
   });
 };
@@ -69,6 +77,14 @@ export const getMyMatches = async (player: Player, filters: MatchFilters) => {
         },
         getDBFilter(filters)
       ]
+    },
+    include: {
+      status: true,
+      teams: {
+        include: {
+          players: true
+        }
+      }
     }
   });
 };
