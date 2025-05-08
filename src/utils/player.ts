@@ -1,7 +1,9 @@
 import prisma from "../prisma/client";
-import { GENDER, PlayerAnswersDTO, PlayerDTO } from "../types/playerTypes";
+import { GENDER, GetPlayersRequest, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
+import { convertStringIntoArray, parsePagesFilters } from "./common";
+import { Prisma } from "@prisma/client";
 
 export const getPlayerByUserId = async (userId: string) => {
   return await prisma.player.findUnique({
@@ -92,3 +94,51 @@ function verifyGender(allowedGender: GENDER, playerGender: GENDER | undefined) {
       ErrorCode.INVALID_GENDER
     );
 }
+
+export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {
+  const { page, pageSize, gender, name, level, pointsDeviation } = filters;
+  const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
+  let matchGenders = convertStringIntoArray<GENDER>(gender);
+  const pointsDeviationNumber = parseInt(pointsDeviation!, 10) || undefined;
+
+  return {
+    page: pageNumber,
+    pageSize: pageSizeNumber,
+    genders: matchGenders,
+    name,
+    level,
+    pointsDeviation: pointsDeviationNumber
+  };
+};
+
+export const getDBFilter = (filters: PlayerFilters) => {
+  // TODO - filtro por nivel
+  const where: Prisma.PlayerWhereInput = {};
+  const { genders, name, level, pointsDeviation } = filters;
+  if (genders && genders.length > 0) where.gender = { in: genders };
+  if (name) {
+    const names = name.trim().split(" ").filter(Boolean);
+    if (names.length === 1) {
+      where.OR = [
+        {
+          firstName: {
+            contains: name,
+            mode: "insensitive"
+          }
+        },
+        {
+          lastName: {
+            contains: name,
+            mode: "insensitive"
+          }
+        }
+      ];
+    } else {
+      where.AND = names.map((n) => ({
+        OR: [{ firstName: { contains: n, mode: "insensitive" } }, { lastName: { contains: n, mode: "insensitive" } }]
+      }));
+    }
+  }
+
+  return where;
+};

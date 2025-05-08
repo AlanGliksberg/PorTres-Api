@@ -9,3 +9,9 @@ export const convertStringIntoArray = <P = string>(data: string | string[] | und
 
   return [data as P];
 };
+
+export const parsePagesFilters = (page: string, pageSize: string): [number, number] => {
+  const pageNumber = parseInt(page, 10) || 1;
+  const pageSizeNumber = parseInt(pageSize, 10) || 10;
+  return [pageNumber, pageSizeNumber];
+};
