@@ -4,7 +4,7 @@ import { GENDER, PlayerDTO } from "../types/playerTypes";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { createOrGetPlayers } from "./player";
 
-export const createTeam = async (teamNumber: number, players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
+export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
   return {
     teamNumber,
     players: { connect: await createOrGetPlayers(players, allowedGender) }

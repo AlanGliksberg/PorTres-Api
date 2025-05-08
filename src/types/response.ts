@@ -11,7 +11,7 @@ export class OkResponse implements CustomResponse {
   data: any;
   message?: string;
 
-  constructor(data: any) {
+  constructor(data?: any) {
     this.error = false;
     this.data = data;
   }

@@ -34,10 +34,11 @@ model Match {
   creator         Player   @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
   gender          String
 
-  status  MatchStatus @relation(fields: [statusId], references: [id])
-  players Player[]    @relation("matchPlayers") // Relación para los jugadores
-  teams   Team[]
-  sets    Set[]
+  status      MatchStatus   @relation(fields: [statusId], references: [id])
+  players     Player[]      @relation("matchPlayers")
+  teams       Team[]
+  sets        Set[]
+  Application Application[]
 }
 
 model Player {
@@ -54,7 +55,8 @@ model Player {
   userId  String? @unique
   user    User?   @relation(fields: [userId], references: [id])
 
-  Match Match[] @relation("creatorMatch")
+  Match       Match[]       @relation("creatorMatch")
+  Application Application[]
 }
 
 model Team {
@@ -80,4 +82,27 @@ model Set {
   setNumber  Int
   team1Score Int
   team2Score Int
+}
+
+model Application {
+  id         String            @id @default(uuid())
+  matchId    String
+  playerId   String
+  teamNumber Int
+  message    String?
+  phone      String?
+  status     ApplicationStatus @default(PENDING)
+  reason     String?
+  createdAt  DateTime          @default(now())
+
+  match  Match  @relation(fields: [matchId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, playerId])
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

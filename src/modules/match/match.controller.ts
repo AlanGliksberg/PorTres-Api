@@ -10,7 +10,7 @@ import { parseMatches, parseMatchFilters } from "../../utils/match";
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {
     const match = await matchService.createMatch(req.user, req.body);
-    res.status(200).json(new OkResponse(match));
+    res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error creating match", e));
@@ -28,7 +28,7 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 
     const matches = await matchService.getOpenMatches(filters);
     const parsedMatches = parseMatches(matches);
-    res.json(parsedMatches);
+    res.status(200).json(new OkResponse({ matches: parsedMatches }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));
@@ -43,7 +43,7 @@ export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Respons
 
     const matches = await matchService.getMyMatches(player!, filters);
     const parsedMatches = parseMatches(matches);
-    res.json(parsedMatches);
+    res.status(200).json(new OkResponse({ matches: parsedMatches }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));
