@@ -6,6 +6,7 @@ import matchRouter from "./modules/match/match.router";
 import playerRouter from "./modules/player/player.router";
 import applicationRouter from "./modules/application/application.router";
 import { authenticate } from "./middlewares/auth.middleware";
+import { requestLogger } from "./middlewares/logger";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
+app.use(requestLogger);
 app.use("/api/auth", authRouter);
 
 app.use(authenticate as RequestHandler);
