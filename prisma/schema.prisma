@@ -65,6 +65,8 @@ model Team {
   match      Match    @relation(fields: [matchId], references: [id])
   players    Player[]
   teamNumber Int
+
+  @@unique([matchId, teamNumber])
 }
 
 model MatchStatus {

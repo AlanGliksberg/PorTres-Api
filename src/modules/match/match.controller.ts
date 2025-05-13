@@ -9,7 +9,7 @@ import { parseMatches, parseMatchFilters } from "../../utils/match";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {
-    const match = await matchService.createMatch(req.user, req.body);
+    const match = await matchService.createMatch(req.user.playerId, req.body);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
@@ -38,10 +38,8 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);
-    const user = req.user;
-    const player = await getPlayerByUserId(user.id);
 
-    const matches = await matchService.getMyMatches(player!, filters);
+    const matches = await matchService.getMyMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
     res.status(200).json(new OkResponse({ matches: parsedMatches }));
   } catch (e: any) {

@@ -3,6 +3,8 @@ import { GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTyp
 import { GENDER, PlayerDTO } from "../types/playerTypes";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { createOrGetPlayers } from "./player";
+import { ApplicationWithRelations } from "../types/application";
+import prisma from "../prisma/client";
 
 export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
   return {
@@ -41,5 +43,30 @@ export const parseMatches = (matches: Match[]) => {
       date: date.split("T")[0],
       time: date.split("T")[1].substring(0, 5)
     };
+  });
+};
+
+export const addPlayerToMatchFromApplication = async (application: NonNullable<ApplicationWithRelations>) => {
+  return await prisma.match.update({
+    where: { id: application.matchId },
+    data: {
+      teams: {
+        update: {
+          where: {
+            matchId_teamNumber: {
+              matchId: application.matchId,
+              teamNumber: application.teamNumber
+            }
+          },
+          data: {
+            players: {
+              connect: {
+                id: application.playerId
+              }
+            }
+          }
+        }
+      }
+    }
   });
 };

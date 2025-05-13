@@ -1,11 +1,13 @@
-import { User } from "@prisma/client";
+import { ApplicationStatus, Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
-import { getPlayerByUserId } from "../../utils/player";
 import { CreateApplicationBody } from "../../types/application";
+import { changeApplicationStatus, getApplicationById } from "../../utils/application";
+import { MATCH_STATUS } from "../../types/matchTypes";
+import { addPlayerToMatchFromApplication } from "../../utils/match";
 
-export const applyToMatch = async (user: User, data: CreateApplicationBody) => {
+export const applyToMatch = async (playerId: string, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
 
   const match = await prisma.match.findUnique({
@@ -25,15 +27,44 @@ export const applyToMatch = async (user: User, data: CreateApplicationBody) => {
   if (team?.players && team?.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
-  const player = await getPlayerByUserId(user.id);
-
   return prisma.application.create({
     data: {
       matchId,
-      playerId: player!.id,
+      playerId,
       teamNumber: data.teamNumber,
       message: data.message,
       phone: data.phone
     }
   });
+};
+
+export const acceptApplication = async (playerId: string, applicationId: string) => {
+  const include: Prisma.ApplicationInclude = {
+    match: {
+      include: {
+        teams: {
+          include: {
+            players: true
+          }
+        },
+        status: true
+      }
+    }
+  };
+  const application = await getApplicationById(applicationId, include);
+
+  if (!application) throw new CustomError("Invalid application", ErrorCode.APPLICATION_NO_EXIST);
+  if (application.status !== ApplicationStatus.PENDING)
+    throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
+  if (application.match?.status.name !== MATCH_STATUS.PENDING)
+    throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
+  if (application.match.teams.find((t) => t.teamNumber === application.teamNumber)!.players.length >= 2)
+    throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
+
+  const [result] = await Promise.all([
+    changeApplicationStatus(applicationId, ApplicationStatus.ACCEPTED),
+    addPlayerToMatchFromApplication(application)
+  ]);
+
+  return result;
 };

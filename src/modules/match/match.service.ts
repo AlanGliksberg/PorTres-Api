@@ -1,16 +1,13 @@
-import { ApplicationStatus, Player, User } from "@prisma/client";
+import { ApplicationStatus, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
-import { getPlayerByUserId } from "../../utils/player";
 
-export const createMatch = async (user: User, data: MatchDTO) => {
+export const createMatch = async (playerId: string, data: MatchDTO) => {
   const { date, time, location, category, pointsDeviation, teams, gender } = data;
 
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
-
-  const player = await getPlayerByUserId(user.id);
 
   const match = await prisma.match.create({
     data: {
@@ -19,7 +16,7 @@ export const createMatch = async (user: User, data: MatchDTO) => {
       category,
       pointsDeviation,
       gender,
-      creator: { connect: { id: player!.id } },
+      creator: { connect: { id: playerId } },
       status: { connect: { name: matchStatus } },
       teams: {
         create: [await createTeam(1, teams?.team1, gender), await createTeam(2, teams?.team2, gender)]
@@ -56,7 +53,7 @@ export const getOpenMatches = async (filters: MatchFilters) => {
   });
 };
 
-export const getMyMatches = async (player: Player, filters: MatchFilters) => {
+export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
   const { page, pageSize } = filters;
   return await prisma.match.findMany({
     skip: (page - 1) * pageSize,
@@ -65,11 +62,11 @@ export const getMyMatches = async (player: Player, filters: MatchFilters) => {
       AND: [
         {
           OR: [
-            { creatorPlayerId: player.id },
+            { creatorPlayerId: playerId },
             {
               players: {
                 some: {
-                  id: player.id
+                  id: playerId
                 }
               }
             }
