@@ -1,4 +1,4 @@
-import { Player, User } from "@prisma/client";
+import { ApplicationStatus, Player, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
@@ -101,7 +101,12 @@ export const getMatchById = async (matchId: string) => {
         }
       },
       sets: true,
-      status: true
+      status: true,
+      application: {
+        where: {
+          status: ApplicationStatus.PENDING
+        }
+      }
     }
   });
 };
