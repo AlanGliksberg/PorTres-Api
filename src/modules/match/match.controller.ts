@@ -49,3 +49,14 @@ export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Respons
     res.status(500).json(new ErrorResponse("Error getting matches", e));
   }
 };
+
+export const getMatchDetails = async (req: Request, res: Response) => {
+  try {
+    const matchId = req.params.id;
+    const match = await matchService.getMatchById(matchId);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting match", e));
+  }
+};

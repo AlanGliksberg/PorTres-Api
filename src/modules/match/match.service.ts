@@ -88,3 +88,20 @@ export const getMyMatches = async (player: Player, filters: MatchFilters) => {
     }
   });
 };
+
+export const getMatchById = async (matchId: string) => {
+  return await prisma.match.findUnique({
+    where: {
+      id: matchId
+    },
+    include: {
+      teams: {
+        include: {
+          players: true
+        }
+      },
+      sets: true,
+      status: true
+    }
+  });
+};

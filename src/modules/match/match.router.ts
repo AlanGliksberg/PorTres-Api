@@ -5,5 +5,6 @@ const router = Router();
 router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
 router.get("/me", matchController.getMyMatches);
+router.get("/details/:id", matchController.getMatchDetails);
 
 export default router;
