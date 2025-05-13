@@ -27,10 +27,18 @@ export const applyToMatch = async (playerId: string, data: CreateApplicationBody
   if (team?.players && team?.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
-  return prisma.application.create({
+  return await prisma.application.create({
     data: {
-      matchId,
-      playerId,
+      match: {
+        connect: {
+          id: matchId
+        }
+      },
+      player: {
+        connect: {
+          id: playerId
+        }
+      },
       teamNumber: data.teamNumber,
       message: data.message,
       phone: data.phone
