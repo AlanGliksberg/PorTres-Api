@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import { signToken } from "../../utils/jwt";
@@ -41,7 +41,7 @@ export const register = async (data: RegisterDTO) => {
 };
 
 export const login = async ({ email, password }: { email: string; password: string }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email }, include: { player: true } });
   if (!user || !user.passwordHash) throw new CustomError("Invalid credentials", ErrorCode.INVALID_CREDENTIALS);
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) throw new CustomError("Invalid credentials", ErrorCode.INVALID_CREDENTIALS);
@@ -53,7 +53,7 @@ export const loginWithGoogle = async (idToken: string) => {
   const payload = ticket.getPayload();
   if (!payload || !payload.email || !payload.sub)
     throw new CustomError("Invalid Google token", ErrorCode.INVALID_GOOGLE_TOKEN);
-  let user = await prisma.user.findUnique({ where: { googleId: payload.sub } });
+  let user = await prisma.user.findUnique({ where: { googleId: payload.sub }, include: { player: true } });
   if (!user) {
     user = await creatUser({
       email: payload.email,
@@ -66,7 +66,11 @@ export const loginWithGoogle = async (idToken: string) => {
   return getToken(user);
 };
 
-const getToken = (user: User) => {
-  const { passwordHash, ...userWithoutPassword } = user;
-  return signToken(userWithoutPassword);
+const getToken = (
+  user: Prisma.UserGetPayload<{
+    include: { player: true };
+  }>
+) => {
+  const { passwordHash, player, ...userWithoutPassword } = user;
+  return signToken({ playerId: player?.id, ...userWithoutPassword });
 };
