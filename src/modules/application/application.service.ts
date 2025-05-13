@@ -69,7 +69,7 @@ export const acceptApplication = async (playerId: string, applicationId: string)
   if (application.match.teams.find((t) => t.teamNumber === application.teamNumber)!.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
-  const [result] = await Promise.all([
+  const [result, _] = await Promise.all([
     changeApplicationStatus(applicationId, ApplicationStatus.ACCEPTED),
     addPlayerToMatchFromApplication(application)
   ]);
