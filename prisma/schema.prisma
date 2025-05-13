@@ -38,7 +38,7 @@ model Match {
   players     Player[]      @relation("matchPlayers")
   teams       Team[]
   sets        Set[]
-  Application Application[]
+  application Application[]
 }
 
 model Player {
@@ -55,8 +55,8 @@ model Player {
   userId  String? @unique
   user    User?   @relation(fields: [userId], references: [id])
 
-  Match       Match[]       @relation("creatorMatch")
-  Application Application[]
+  match       Match[]       @relation("creatorMatch")
+  application Application[]
 }
 
 model Team {
@@ -72,7 +72,7 @@ model MatchStatus {
   name        String @unique
   description String
 
-  Match Match[]
+  match Match[]
 }
 
 model Set {
