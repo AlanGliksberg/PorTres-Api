@@ -11,6 +11,7 @@ export interface MatchDTO {
   creatorPlayerId: string;
   gender: GENDER;
   teams?: TeamDTO;
+  duration: number;
 }
 
 export type GetMatchesRequest = {

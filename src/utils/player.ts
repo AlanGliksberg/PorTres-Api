@@ -42,25 +42,17 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
       return { id: player.id };
     }
 
-    verifyGender(allowedGender, player.gender);
-
-    if (player.phone) {
-      const existingPlayer = await getPlayerByPhone(player.phone);
-      if (existingPlayer) return { id: existingPlayer.id };
-    }
-    const createdPlayer = await createPlayer(player);
+    //TODO - agregar validaciones de campos
+    // firstName - lastName - level
+    const createdPlayer = await createTemporalPlayer(player);
     return { id: createdPlayer.id };
   });
 
   return Promise.all(playerPromises);
 };
 
-export const createPlayer = async (player: PlayerDTO, answers?: PlayerAnswersDTO, userId?: string) => {
-  let level = player.level;
-  if (answers) {
-    level = calculatePlayerLevel(answers);
-  }
-
+export const createPlayer = async (player: PlayerDTO, answers: PlayerAnswersDTO, userId: string) => {
+  const level = calculatePlayerLevel(answers);
   const rankingPoints = calculateInitialRankingPoints(level!); // TODO - calcular cantidad según level
 
   return await prisma.player.create({
@@ -72,6 +64,16 @@ export const createPlayer = async (player: PlayerDTO, answers?: PlayerAnswersDTO
       level: level,
       rankingPoints,
       userId
+    }
+  });
+};
+
+export const createTemporalPlayer = async (player: PlayerDTO) => {
+  return await prisma.player.create({
+    data: {
+      firstName: player.firstName,
+      lastName: player.lastName,
+      level: player.level
     }
   });
 };

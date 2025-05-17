@@ -6,7 +6,7 @@ export type PlayerDTO = {
   lastName: string;
   level?: string;
   phone?: string;
-  gender: GENDER;
+  gender?: GENDER;
 };
 
 export type CreatePlayerRequest = PlayerAnswersDTO;
