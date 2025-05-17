@@ -48,7 +48,7 @@ model Player {
   level         String?
   rankingPoints Int?
   phone         String? @unique
-  gender        String
+  gender        String?
 
   teams   Team[]
   matches Match[] @relation("matchPlayers") // Relación inversa para los jugadores
