@@ -27,12 +27,13 @@ model Match {
   dateTime        DateTime
   location        String
   category        String
-  pointsDeviation Int
+  pointsDeviation Int?
   statusId        String
   createdAt       DateTime @default(now())
   creatorPlayerId String
   creator         Player   @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
   gender          String
+  duration        Int
 
   status      MatchStatus   @relation(fields: [statusId], references: [id])
   players     Player[]      @relation("matchPlayers")
