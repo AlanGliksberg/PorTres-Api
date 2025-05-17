@@ -21,6 +21,9 @@ interface RegisterDTO {
 
 export const register = async (data: RegisterDTO) => {
   let passwordHash: string;
+  //TODO - validar contraseña
+  // 8 chars min
+  // 1 may 1 min
   passwordHash = await hashPassword(data.password!);
 
   const user = await creatUser({
