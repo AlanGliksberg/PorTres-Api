@@ -11,7 +11,7 @@ import { requestLogger } from "./middlewares/logger";
 dotenv.config();
 const app = express();
 const corsOptions = {
-  origin: ["http://localhost:3000", "https://twqmv4c3-3000.brs.devtunnels.ms"],
+  origin: ["http://localhost:3000", "http://localhost:8081"],
   methods: ["GET", "POST", "PUT", "DELETE"]
 };
 
