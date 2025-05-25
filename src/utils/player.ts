@@ -30,14 +30,6 @@ export const getPlayerById = async <T extends Prisma.PlayerInclude>(
   })) as any;
 };
 
-const getPlayerByPhone = async (phone: string) => {
-  return await prisma.player.findUnique({
-    where: {
-      phone
-    }
-  });
-};
-
 export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGenderId: string) => {
   if (!players || players.length === 0) {
     return [];
