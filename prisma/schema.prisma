@@ -26,6 +26,7 @@ model Match {
   id              String   @id @default(uuid())
   dateTime        DateTime
   location        String
+  description     String?
   category        String
   pointsDeviation Int?
   statusId        String
