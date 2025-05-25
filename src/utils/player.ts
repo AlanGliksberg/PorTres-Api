@@ -4,21 +4,30 @@ import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { Prisma } from "@prisma/client";
+import { getGenderById } from "./gender";
 
-export const getPlayerByUserId = async (userId: string) => {
-  return await prisma.player.findUnique({
+export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
+  userId: string,
+  include?: T
+): Promise<Prisma.PlayerGetPayload<{ include: T }> | null> => {
+  return (await prisma.player.findUnique({
     where: {
       userId: userId
-    }
-  });
+    },
+    include
+  })) as any;
 };
 
-export const getPlayerById = async (playerId: string) => {
-  return await prisma.player.findUnique({
+export const getPlayerById = async <T extends Prisma.PlayerInclude>(
+  playerId: string,
+  include?: T
+): Promise<Prisma.PlayerGetPayload<{ include: T }> | null> => {
+  return (await prisma.player.findUnique({
     where: {
       id: playerId
-    }
-  });
+    },
+    include
+  })) as any;
 };
 
 const getPlayerByPhone = async (phone: string) => {
@@ -29,16 +38,18 @@ const getPlayerByPhone = async (phone: string) => {
   });
 };
 
-export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
+export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGenderId: string) => {
   if (!players || players.length === 0) {
     return [];
   }
 
   const playerPromises = players.map(async (player: PlayerDTO) => {
     if (player.id) {
-      const existingPlayer = await getPlayerById(player.id);
+      const existingPlayer: Prisma.PlayerGetPayload<{
+        include: { gender: true };
+      }> | null = await getPlayerById(player.id, { gender: true });
       if (!existingPlayer) throw new CustomError("No player", ErrorCode.NO_PLAYER);
-      verifyGender(allowedGender, existingPlayer.gender as GENDER);
+      await verifyGender(allowedGenderId, existingPlayer.gender?.code as GENDER);
       return { id: player.id };
     }
 
@@ -59,7 +70,7 @@ export const createPlayer = async (player: PlayerDTO, answers: PlayerAnswersDTO,
     data: {
       firstName: player.firstName,
       lastName: player.lastName,
-      gender: player.gender,
+      genderId: player.genderId,
       phone: player.phone,
       level: level,
       rankingPoints,
@@ -87,15 +98,16 @@ const calculateInitialRankingPoints = (level: string) => {
   return 500; // TODO - calcular puntos según nivel
 };
 
-function verifyGender(allowedGender: GENDER, playerGender: GENDER | undefined) {
-  if (allowedGender === GENDER.X || !playerGender) return;
+const verifyGender = async (allowedGenderId: string, playerGender: GENDER | undefined) => {
+  const allowedGender = await getGenderById(allowedGenderId);
+  if (allowedGender?.code === GENDER.X || !playerGender) return;
 
-  if (playerGender !== allowedGender)
+  if (!allowedGender || playerGender !== allowedGender.code)
     throw new CustomError(
-      `Invalid gender | Allowed gender: ${allowedGender} | Gender: ${playerGender}`,
+      `Invalid gender | Allowed gender: ${allowedGenderId} | Gender: ${playerGender}`,
       ErrorCode.INVALID_GENDER
     );
-}
+};
 
 export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {
   const { page, pageSize, gender, name, level, pointsDeviation } = filters;
@@ -117,7 +129,7 @@ export const getDBFilter = (filters: PlayerFilters) => {
   // TODO - filtro por nivel
   const where: Prisma.PlayerWhereInput = {};
   const { genders, name, level, pointsDeviation } = filters;
-  if (genders && genders.length > 0) where.gender = { in: genders };
+  if (genders && genders.length > 0) where.gender = { code: { in: genders } };
   if (name) {
     const names = name.trim().split(" ").filter(Boolean);
     if (names.length === 1) {

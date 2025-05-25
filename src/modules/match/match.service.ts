@@ -4,7 +4,7 @@ import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
 
 export const createMatch = async (playerId: string, data: MatchDTO) => {
-  const { date, time, location, description, category, pointsDeviation, teams, gender, duration } = data;
+  const { date, time, location, description, category, pointsDeviation, teams, genderId, duration } = data;
 
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
@@ -16,11 +16,15 @@ export const createMatch = async (playerId: string, data: MatchDTO) => {
       description,
       category,
       pointsDeviation,
-      gender,
+      gender: {
+        connect: {
+          id: genderId
+        }
+      },
       creator: { connect: { id: playerId } },
       status: { connect: { name: matchStatus } },
       teams: {
-        create: [await createTeam(1, teams?.team1, gender), await createTeam(2, teams?.team2, gender)]
+        create: [await createTeam(1, teams?.team1, genderId), await createTeam(2, teams?.team2, genderId)]
       },
       duration
     }

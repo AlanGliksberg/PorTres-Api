@@ -10,7 +10,7 @@ export interface MatchDTO {
   category: string;
   pointsDeviation: number;
   creatorPlayerId: string;
-  gender: GENDER;
+  genderId: string;
   teams?: TeamDTO;
   duration: number;
 }

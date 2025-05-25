@@ -10,7 +10,7 @@ export const createPlayer = async (answers: PlayerAnswersDTO, user: User) => {
   const player: PlayerDTO = {
     firstName: user.firstName,
     lastName: user.lastName,
-    gender: answers.gender,
+    genderId: answers.genderId,
     phone: answers.phone
   };
 

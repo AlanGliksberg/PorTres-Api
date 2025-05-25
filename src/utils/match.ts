@@ -6,10 +6,10 @@ import { createOrGetPlayers } from "./player";
 import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
 
-export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGender: GENDER) => {
+export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: string) => {
   return {
     teamNumber,
-    players: { connect: await createOrGetPlayers(players, allowedGender) }
+    players: { connect: await createOrGetPlayers(players, allowedGenderId) }
   };
 };
 
@@ -34,7 +34,7 @@ export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
 export const getDBFilter = (filters: MatchFilters) => {
   const where: Prisma.MatchWhereInput = {};
   const { genders, status } = filters;
-  if (genders && genders.length > 0) where.gender = { in: genders };
+  if (genders && genders.length > 0) where.gender = { code: { in: genders } };
   if (status && status.length > 0) where.status = { name: { in: status } };
   return where;
 };

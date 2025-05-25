@@ -6,6 +6,7 @@ import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
 import { GENDER } from "../../types/playerTypes";
 import { parseMatches, parseMatchFilters } from "../../utils/match";
+import { Prisma } from "@prisma/client";
 
 export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
   try {
@@ -23,8 +24,10 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
     const filters = parseMatchFilters(req.query);
     if (!req.query.gender) {
       const user = req.user;
-      const player = await getPlayerByUserId(user.id);
-      filters.genders = [player?.gender as GENDER, GENDER.X];
+      const player: Prisma.PlayerGetPayload<{
+        include: { gender: true };
+      }> | null = await getPlayerByUserId(user.id, { gender: true });
+      filters.genders = [player?.gender?.code as GENDER, GENDER.X];
     }
 
     const [matches, totalMatches] = await matchService.getOpenMatches(filters);
@@ -39,9 +42,10 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);
-
+    console.log(req.user);
     const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
+    console.log({ matches: parsedMatches, totalMatches });
     res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {
     console.error(e);

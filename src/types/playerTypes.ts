@@ -6,7 +6,7 @@ export type PlayerDTO = {
   lastName: string;
   level?: string;
   phone?: string;
-  gender?: GENDER;
+  genderId?: string;
 };
 
 export type CreatePlayerRequest = PlayerAnswersDTO;
@@ -14,14 +14,14 @@ export type CreatePlayerRequest = PlayerAnswersDTO;
 export type PlayerAnswersDTO = {
   level: string;
   phone?: string;
-  gender: GENDER;
+  genderId: string;
   knowsLevel: boolean;
 };
 
 export enum GENDER {
-  M = "Male",
-  F = "Female",
-  X = "Mixed"
+  C = "C",
+  D = "D",
+  X = "X"
 }
 
 export type GetPlayersRequest = {
