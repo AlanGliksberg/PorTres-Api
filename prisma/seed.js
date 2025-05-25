@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  await Promise.all(
-    [
+  await Promise.all([
+    ...[
       { name: "PENDING", description: "Pendiente" },
       { name: "CLOSED", description: "Cerrado" },
       { name: "COMPLETED", description: "Confirmado" }
@@ -14,10 +14,22 @@ async function main() {
         update: {},
         create: status
       })
+    ),
+    ...[
+      { code: "C", name: "Caballero", pluralName: "Caballeros" },
+      { code: "D", name: "Dama", pluralName: "Damas" },
+      { code: "X", name: "Mixto", pluralName: "Mixto" }
+    ].map((gender) =>
+      prisma.gender.upsert({
+        where: { code: gender.code },
+        update: {},
+        create: gender
+      })
     )
-  );
+  ]);
 
   console.log("MatchStatus records created!");
+  console.log("Gender records created!");
 }
 
 main()

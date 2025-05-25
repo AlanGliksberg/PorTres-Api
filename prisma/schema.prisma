@@ -32,10 +32,11 @@ model Match {
   statusId        String
   createdAt       DateTime @default(now())
   creatorPlayerId String
-  creator         Player   @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
-  gender          String
+  genderId        String
   duration        Int
 
+  creator     Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
+  gender      Gender        @relation(fields: [genderId], references: [id])
   status      MatchStatus   @relation(fields: [statusId], references: [id])
   players     Player[]      @relation("matchPlayers")
   teams       Team[]
@@ -49,24 +50,25 @@ model Player {
   lastName      String?
   level         String?
   rankingPoints Int?
-  phone         String? @unique
-  gender        String?
+  phone         String?
+  userId        String? @unique
+  genderId      String?
 
-  teams   Team[]
-  matches Match[] @relation("matchPlayers") // Relación inversa para los jugadores
-  userId  String? @unique
-  user    User?   @relation(fields: [userId], references: [id])
-
+  teams       Team[]
+  matches     Match[]       @relation("matchPlayers")
+  gender      Gender?       @relation(fields: [genderId], references: [id])
+  user        User?         @relation(fields: [userId], references: [id])
   match       Match[]       @relation("creatorMatch")
   application Application[]
 }
 
 model Team {
-  id         String   @id @default(uuid())
+  id         String @id @default(uuid())
   matchId    String
-  match      Match    @relation(fields: [matchId], references: [id])
-  players    Player[]
   teamNumber Int
+
+  match   Match    @relation(fields: [matchId], references: [id])
+  players Player[]
 
   @@unique([matchId, teamNumber])
 }
@@ -82,27 +84,38 @@ model MatchStatus {
 model Set {
   id         String @id @default(uuid())
   matchId    String
-  match      Match  @relation(fields: [matchId], references: [id])
   setNumber  Int
   team1Score Int
   team2Score Int
+
+  match Match @relation(fields: [matchId], references: [id])
 }
 
 model Application {
-  id         String            @id @default(uuid())
+  id         String   @id @default(uuid())
   matchId    String
   playerId   String
   teamNumber Int
   message    String?
   phone      String?
-  status     ApplicationStatus @default(PENDING)
   reason     String?
-  createdAt  DateTime          @default(now())
+  createdAt  DateTime @default(now())
 
-  match  Match  @relation(fields: [matchId], references: [id])
-  player Player @relation(fields: [playerId], references: [id])
+  status ApplicationStatus @default(PENDING)
+  match  Match             @relation(fields: [matchId], references: [id])
+  player Player            @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
+}
+
+model Gender {
+  id         String @id @default(uuid())
+  code       String @unique
+  name       String
+  pluralName String
+
+  Match  Match[]
+  Player Player[]
 }
 
 enum ApplicationStatus {
