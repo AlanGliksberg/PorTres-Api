@@ -14,14 +14,18 @@ export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undef
 };
 
 export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
-  const { page, pageSize, gender, status } = filters;
+  const { page, pageSize, gender, status, createdBy: createdByParam, isPlayer: isPlayerParam } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
   let matchGenders = convertStringIntoArray<GENDER>(gender);
   let matchStatus = convertStringIntoArray<MATCH_STATUS>(status);
+  let createdBy = createdByParam === undefined ? undefined : createdByParam === "true";
+  let isPlayer = isPlayerParam === undefined ? undefined : isPlayerParam === "true";
 
   return {
     genders: matchGenders,
     status: matchStatus,
+    createdBy,
+    isPlayer,
     page: pageNumber,
     pageSize: pageSizeNumber
   };

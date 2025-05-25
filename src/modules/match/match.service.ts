@@ -55,23 +55,26 @@ export const getOpenMatches = async (filters: MatchFilters) => {
 };
 
 export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
-  const { page, pageSize } = filters;
+  const { page, pageSize, createdBy, isPlayer } = filters;
+
+  const or = [];
+  if (createdBy) or.push({ creatorPlayerId: playerId });
+  if (isPlayer)
+    or.push({
+      players: {
+        some: {
+          id: playerId
+        }
+      }
+    });
+
   return await prisma.match.findMany({
     skip: (page - 1) * pageSize,
     take: pageSize,
     where: {
       AND: [
         {
-          OR: [
-            { creatorPlayerId: playerId },
-            {
-              players: {
-                some: {
-                  id: playerId
-                }
-              }
-            }
-          ]
+          OR: or
         },
         getDBFilter(filters)
       ]
