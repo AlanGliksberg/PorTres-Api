@@ -30,28 +30,35 @@ export const createMatch = async (playerId: string, data: MatchDTO) => {
 
 export const getOpenMatches = async (filters: MatchFilters) => {
   const { page, pageSize } = filters;
-  return await prisma.match.findMany({
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    where: {
-      AND: [
-        {
-          status: {
-            name: MATCH_STATUS.PENDING
+  const where = {
+    AND: [
+      {
+        status: {
+          name: MATCH_STATUS.PENDING
+        }
+      },
+      getDBFilter(filters)
+    ]
+  };
+
+  return await prisma.$transaction([
+    prisma.match.findMany({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      where,
+      include: {
+        status: true,
+        teams: {
+          include: {
+            players: true
           }
-        },
-        getDBFilter(filters)
-      ]
-    },
-    include: {
-      status: true,
-      teams: {
-        include: {
-          players: true
         }
       }
-    }
-  });
+    }),
+    prisma.match.count({
+      where
+    })
+  ]);
 };
 
 export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
@@ -68,26 +75,33 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
       }
     });
 
-  return await prisma.match.findMany({
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    where: {
-      AND: [
-        {
-          OR: or
-        },
-        getDBFilter(filters)
-      ]
-    },
-    include: {
-      status: true,
-      teams: {
-        include: {
-          players: true
+  const where = {
+    AND: [
+      {
+        OR: or
+      },
+      getDBFilter(filters)
+    ]
+  };
+
+  return await prisma.$transaction([
+    prisma.match.findMany({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      where,
+      include: {
+        status: true,
+        teams: {
+          include: {
+            players: true
+          }
         }
       }
-    }
-  });
+    }),
+    prisma.match.count({
+      where
+    })
+  ]);
 };
 
 export const getMatchById = async (matchId: string) => {

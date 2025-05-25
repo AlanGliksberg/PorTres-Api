@@ -27,9 +27,9 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
       filters.genders = [player?.gender as GENDER, GENDER.X];
     }
 
-    const matches = await matchService.getOpenMatches(filters);
+    const [matches, totalMatches] = await matchService.getOpenMatches(filters);
     const parsedMatches = parseMatches(matches);
-    res.status(200).json(new OkResponse({ matches: parsedMatches }));
+    res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));
@@ -40,9 +40,9 @@ export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Respons
   try {
     const filters = parseMatchFilters(req.query);
 
-    const matches = await matchService.getMyMatches(req.user.playerId, filters);
+    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
-    res.status(200).json(new OkResponse({ matches: parsedMatches }));
+    res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting matches", e));
