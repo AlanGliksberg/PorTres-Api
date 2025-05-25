@@ -6,6 +6,7 @@ export interface MatchDTO {
   date: Date;
   time: string;
   location: string;
+  description?: string;
   category: string;
   pointsDeviation: number;
   creatorPlayerId: string;
