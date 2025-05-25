@@ -5,15 +5,9 @@ const prisma = new PrismaClient();
 async function main() {
   await Promise.all(
     [
-      { name: "PENDING", description: "The match is waiting for players." },
-      {
-        name: "CLOSED",
-        description: "The match has been confirmed with players."
-      },
-      {
-        name: "COMPLETED",
-        description: "The match has finished and results were loaded."
-      }
+      { name: "PENDING", description: "Pendiente" },
+      { name: "CLOSED", description: "Cerrado" },
+      { name: "COMPLETED", description: "Confirmado" }
     ].map((status) =>
       prisma.matchStatus.upsert({
         where: { name: status.name },
