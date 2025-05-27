@@ -96,9 +96,14 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
       where,
       include: {
         status: true,
+        gender: true,
         teams: {
           include: {
-            players: true
+            players: {
+              include: {
+                gender: true
+              }
+            }
           }
         }
       }
