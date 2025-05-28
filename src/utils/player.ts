@@ -40,7 +40,7 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
       const existingPlayer: Prisma.PlayerGetPayload<{
         include: { gender: true };
       }> | null = await getPlayerById(player.id, { gender: true });
-      if (!existingPlayer) throw new CustomError("No player", ErrorCode.NO_PLAYER);
+      if (!existingPlayer) throw new CustomError("No player exists with id: " + player.id, ErrorCode.NO_PLAYER);
       await verifyGender(allowedGenderId, existingPlayer.gender?.code as GENDER);
       return { id: player.id };
     }
