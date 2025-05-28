@@ -108,6 +108,9 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
             }
           }
         }
+      },
+      orderBy: {
+        createdAt: "desc"
       }
     }),
     prisma.match.count({
