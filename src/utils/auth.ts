@@ -11,3 +11,19 @@ export const creatUser = async (data: Prisma.UserCreateInput) => {
 
   return user;
 };
+
+export const getUserSelect = () => {
+  return {
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+      createdAt: true,
+      dni: true,
+      photoUrl: true,
+      googleId: true
+    }
+  };
+};

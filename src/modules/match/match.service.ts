@@ -2,6 +2,7 @@ import { ApplicationStatus, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
+import { getUserSelect } from "../../utils/auth";
 
 export const createMatch = async (playerId: string, data: MatchDTO) => {
   const { date, time, location, description, category, pointsDeviation, teams, genderId, duration } = data;
@@ -101,7 +102,8 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
           include: {
             players: {
               include: {
-                gender: true
+                gender: true,
+                user: getUserSelect()
               }
             }
           }
