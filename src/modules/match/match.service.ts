@@ -1,4 +1,4 @@
-import { ApplicationStatus, User } from "@prisma/client";
+import { ApplicationStatus, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
@@ -71,7 +71,25 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
   const { page, pageSize, createdBy, isPlayer } = filters;
 
   const or = [];
-  if (createdBy) or.push({ creatorPlayerId: playerId });
+  const include: Prisma.MatchInclude = {
+    status: true,
+    gender: true,
+    teams: {
+      include: {
+        players: {
+          include: {
+            gender: true,
+            user: getUserSelect()
+          }
+        }
+      }
+    }
+  };
+  if (createdBy) {
+    or.push({ creatorPlayerId: playerId });
+    ((include.teams! as Prisma.Match$teamsArgs).include!.players! as Prisma.Team$playersArgs).include!.application =
+      true;
+  }
   if (isPlayer)
     or.push({
       players: {
@@ -95,20 +113,7 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
       skip: (page - 1) * pageSize,
       take: pageSize,
       where,
-      include: {
-        status: true,
-        gender: true,
-        teams: {
-          include: {
-            players: {
-              include: {
-                gender: true,
-                user: getUserSelect()
-              }
-            }
-          }
-        }
-      },
+      include,
       orderBy: {
         createdAt: "desc"
       }
