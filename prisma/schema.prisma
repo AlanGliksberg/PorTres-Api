@@ -35,13 +35,13 @@ model Match {
   genderId        String
   duration        Int
 
-  creator     Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
-  gender      Gender        @relation(fields: [genderId], references: [id])
-  status      MatchStatus   @relation(fields: [statusId], references: [id])
-  players     Player[]      @relation("matchPlayers")
-  teams       Team[]
-  sets        Set[]
-  application Application[]
+  creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
+  gender       Gender        @relation(fields: [genderId], references: [id])
+  status       MatchStatus   @relation(fields: [statusId], references: [id])
+  players      Player[]      @relation("matchPlayers")
+  teams        Team[]
+  sets         Set[]
+  applications Application[]
 }
 
 model Player {
@@ -54,12 +54,12 @@ model Player {
   userId        String? @unique
   genderId      String?
 
-  teams       Team[]
-  matches     Match[]       @relation("matchPlayers")
-  gender      Gender?       @relation(fields: [genderId], references: [id])
-  user        User?         @relation(fields: [userId], references: [id])
-  match       Match[]       @relation("creatorMatch")
-  application Application[]
+  teams        Team[]
+  matches      Match[]       @relation("matchPlayers")
+  gender       Gender?       @relation(fields: [genderId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+  match        Match[]       @relation("creatorMatch")
+  applications Application[]
 }
 
 model Team {

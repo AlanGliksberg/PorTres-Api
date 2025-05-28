@@ -87,8 +87,11 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
   };
   if (createdBy) {
     or.push({ creatorPlayerId: playerId });
-    ((include.teams! as Prisma.Match$teamsArgs).include!.players! as Prisma.Team$playersArgs).include!.application =
-      true;
+    ((include.teams! as Prisma.Match$teamsArgs).include!.players! as Prisma.Team$playersArgs).include!.applications = {
+      where: {
+        status: ApplicationStatus.PENDING
+      }
+    };
   }
   if (isPlayer)
     or.push({
@@ -137,7 +140,7 @@ export const getMatchById = async (matchId: string) => {
       },
       sets: true,
       status: true,
-      application: {
+      applications: {
         where: {
           status: ApplicationStatus.PENDING
         }
