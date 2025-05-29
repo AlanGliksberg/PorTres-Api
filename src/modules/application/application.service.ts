@@ -23,7 +23,7 @@ export const applyToMatch = async (playerId: string, data: CreateApplicationBody
   if (!match) throw new CustomError("No existing match with id: " + matchId, ErrorCode.NO_MATCH);
 
   // TODO - ver si se puede postular a cualquiera de los dos equipos
-  // TODO - no se pueden postular el creador del partido, jugadores ya en el partido y jugadores con aplicaciones en el partido
+  // TODO - no se pueden postular el creador del partido y jugadores ya en el partido
   const team = match.teams.find((m) => m.teamNumber === teamNumber);
   if (team?.players && team?.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
