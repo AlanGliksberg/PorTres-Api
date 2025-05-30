@@ -122,9 +122,10 @@ model Gender {
 }
 
 model Level {
-  id       String @id @default(uuid())
-  code     String @unique
-  genderId String
+  id          String @id @default(uuid())
+  code        String @unique
+  description String
+  genderId    String
 
   Gender Gender   @relation(fields: [genderId], references: [id])
   Player Player[]

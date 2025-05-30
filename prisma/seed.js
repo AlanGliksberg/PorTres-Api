@@ -27,9 +27,41 @@ async function main() {
       })
     )
   ]);
-
   console.log("MatchStatus records created!");
   console.log("Gender records created!");
+
+  const levels = [];
+  levels.push(
+    ...[...Array(9)].map((x, i) => ({
+      code: `C${i + 1}`,
+      description: `C${i + 1}`,
+      Gender: { connect: { code: "C" } }
+    }))
+  );
+  levels.push(
+    ...[...Array(9)].map((x, i) => ({
+      code: `D${i + 1}`,
+      description: `D${i + 1}`,
+      Gender: { connect: { code: "D" } }
+    }))
+  );
+  levels.push(
+    ...[...Array(9)].map((x, i) => ({
+      code: `M${i + 7}`,
+      description: `Suma ${i + 7}`,
+      Gender: { connect: { code: "X" } }
+    }))
+  );
+
+  levels.map(
+    async (level) =>
+      await prisma.level.upsert({
+        where: { code: level.code },
+        update: {},
+        create: level
+      })
+  );
+  console.log("Level records created!");
 }
 
 main()
