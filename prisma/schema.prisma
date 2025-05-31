@@ -53,15 +53,16 @@ model Player {
   phone         String?
   userId        String? @unique
   genderId      String?
+  positionId    String?
 
-  position     PlayerPosition
+  position     PlayerPosition? @relation(fields: [positionId], references: [id])
   teams        Team[]
-  matches      Match[]        @relation("matchPlayers")
-  gender       Gender?        @relation(fields: [genderId], references: [id])
-  user         User?          @relation(fields: [userId], references: [id])
-  match        Match[]        @relation("creatorMatch")
+  matches      Match[]         @relation("matchPlayers")
+  gender       Gender?         @relation(fields: [genderId], references: [id])
+  user         User?           @relation(fields: [userId], references: [id])
+  match        Match[]         @relation("creatorMatch")
   applications Application[]
-  level        Level?         @relation(fields: [levelId], references: [id])
+  level        Level?          @relation(fields: [levelId], references: [id])
 }
 
 model Team {
@@ -122,12 +123,21 @@ model Gender {
 }
 
 model Level {
+  id            String @id @default(uuid())
+  code          String @unique
+  description   String
+  genderId      String
+  initialPoints Int
+
+  Gender Gender   @relation(fields: [genderId], references: [id])
+  Player Player[]
+}
+
+model PlayerPosition {
   id          String @id @default(uuid())
   code        String @unique
   description String
-  genderId    String
 
-  Gender Gender   @relation(fields: [genderId], references: [id])
   Player Player[]
 }
 
@@ -135,10 +145,4 @@ enum ApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
-}
-
-enum PlayerPosition {
-  REVES
-  DRIVE
-  INDISTINTO
 }

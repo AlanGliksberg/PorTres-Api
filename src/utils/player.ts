@@ -1,9 +1,9 @@
 import prisma from "../prisma/client";
-import { GENDER, GetPlayersRequest, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
+import { GENDER, GetPlayersRequest, LEVEL, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
-import { Prisma } from "@prisma/client";
+import { Level, Prisma } from "@prisma/client";
 import { getGenderById } from "./gender";
 
 export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
@@ -54,18 +54,19 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
   return Promise.all(playerPromises);
 };
 
-export const createPlayer = async (player: PlayerDTO, answers: PlayerAnswersDTO, userId: string) => {
-  const level = calculatePlayerLevel(answers);
-  const rankingPoints = calculateInitialRankingPoints(level!); // TODO - calcular cantidad según level
+export const createPlayer = async (name: string, lastName: string, answers: PlayerAnswersDTO, userId: string) => {
+  const level = await calculatePlayerLevel(answers);
+  const rankingPoints = level.initialPoints;
 
   return await prisma.player.create({
     data: {
-      firstName: player.firstName,
-      lastName: player.lastName,
-      genderId: player.genderId,
-      phone: player.phone,
-      level: level,
+      firstName: name,
+      lastName: lastName,
+      genderId: answers.genderId,
+      phone: answers.phone,
+      levelId: level.id,
       rankingPoints,
+      positionId: answers.positionId,
       userId
     }
   });
@@ -76,18 +77,25 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
     data: {
       firstName: player.firstName,
       lastName: player.lastName,
-      level: player.level
+      levelId: player.levelId
     }
   });
 };
 
-const calculatePlayerLevel = (answers: PlayerAnswersDTO): string => {
-  if (answers.knowsLevel) return answers.level;
-  return "C5"; // TODO - calcular nivel según respuestas
-};
+const calculatePlayerLevel = async (answers: PlayerAnswersDTO): Promise<Level> => {
+  let where;
+  if (answers.knowsLevel) where = { id: answers.levelId };
+  else {
+    where = { code: LEVEL.C5 }; // TODO - calcular nivel según respuestas
+  }
 
-const calculateInitialRankingPoints = (level: string) => {
-  return 500; // TODO - calcular puntos según nivel
+  const level = await prisma.level.findUnique({
+    where
+  });
+
+  if (!level) throw new CustomError("Nivel inválido", ErrorCode.LEVEL_INVALID);
+
+  return level;
 };
 
 const verifyGender = async (allowedGenderId: string, playerGender: GENDER | undefined) => {

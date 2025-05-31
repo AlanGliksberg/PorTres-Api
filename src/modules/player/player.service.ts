@@ -14,7 +14,7 @@ export const createPlayer = async (answers: PlayerAnswersDTO, user: User) => {
     phone: answers.phone
   };
 
-  return await createPlayerDB(player, answers, user.id);
+  return await createPlayerDB(player.firstName, player.lastName, answers, user.id);
 };
 
 export const getPlayers = async (filters: PlayerFilters) => {
