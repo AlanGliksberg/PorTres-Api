@@ -48,7 +48,7 @@ model Player {
   id            String  @id @default(uuid())
   firstName     String?
   lastName      String?
-  levelId       String?
+  categoryId    String?
   rankingPoints Int?
   phone         String?
   userId        String? @unique
@@ -62,7 +62,7 @@ model Player {
   user           User?           @relation(fields: [userId], references: [id])
   matchesCreated Match[]         @relation("creatorMatch")
   applications   Application[]
-  category       Category?       @relation(fields: [levelId], references: [id])
+  category       Category?       @relation(fields: [categoryId], references: [id])
 }
 
 model Team {

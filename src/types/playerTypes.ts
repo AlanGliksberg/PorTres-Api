@@ -4,7 +4,7 @@ export type PlayerDTO = {
   id?: string;
   firstName: string;
   lastName: string;
-  levelId?: string;
+  categoryId?: string;
   phone?: string;
   genderId?: string;
 };
@@ -12,10 +12,10 @@ export type PlayerDTO = {
 export type CreatePlayerRequest = PlayerAnswersDTO;
 
 export type PlayerAnswersDTO = {
-  levelId: string;
+  categoryId: string;
   phone?: string;
   genderId: string;
-  knowsLevel: boolean;
+  knowsCategory: boolean;
   positionId: string;
 };
 
@@ -28,14 +28,14 @@ export enum GENDER {
 export type GetPlayersRequest = {
   gender?: string | string[];
   name?: string;
-  level?: string;
+  category?: string;
   pointsDeviation?: string;
 } & PageFilterString;
 
 export type PlayerFilters = {
   genders?: GENDER[];
   name?: string;
-  level?: string;
+  categoryId?: string;
   pointsDeviation?: number;
 } & PageFilterNumber;
 

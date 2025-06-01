@@ -69,14 +69,14 @@ async function main() {
   );
 
   categories.map(
-    async (level) =>
+    async (category) =>
       await prisma.category.upsert({
-        where: { code: level.code },
+        where: { code: category.code },
         update: {},
-        create: level
+        create: category
       })
   );
-  console.log("Level records created!");
+  console.log("Category records created!");
 }
 
 main()

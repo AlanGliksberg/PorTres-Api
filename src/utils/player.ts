@@ -46,7 +46,7 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
     }
 
     //TODO - agregar validaciones de campos
-    // firstName - lastName - level
+    // firstName - lastName - category
     const createdPlayer = await createTemporalPlayer(player);
     return { id: createdPlayer.id };
   });
@@ -55,8 +55,8 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
 };
 
 export const createPlayer = async (name: string, lastName: string, answers: PlayerAnswersDTO, userId: string) => {
-  const level = await calculatePlayerLevel(answers);
-  const rankingPoints = level.initialPoints;
+  const category = await calculatePlayerCategory(answers);
+  const rankingPoints = category.initialPoints;
 
   return await prisma.player.create({
     data: {
@@ -64,7 +64,7 @@ export const createPlayer = async (name: string, lastName: string, answers: Play
       lastName: lastName,
       genderId: answers.genderId,
       phone: answers.phone,
-      levelId: level.id,
+      categoryId: category.id,
       rankingPoints,
       positionId: answers.positionId,
       userId
@@ -77,26 +77,26 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
     data: {
       firstName: player.firstName,
       lastName: player.lastName,
-      levelId: player.levelId
+      categoryId: player.categoryId
     }
   });
 };
 
-const calculatePlayerLevel = async (answers: PlayerAnswersDTO): Promise<Category> => {
+const calculatePlayerCategory = async (answers: PlayerAnswersDTO): Promise<Category> => {
   let where;
-  if (answers.knowsLevel) where = { id: answers.levelId };
+  if (answers.knowsCategory) where = { id: answers.categoryId };
   else {
     let categoryCode = CATEGORY.C5;
     where = { code: categoryCode }; // TODO - calcular nivel según respuestas
   }
 
-  const level = await prisma.category.findUnique({
+  const category = await prisma.category.findUnique({
     where
   });
 
-  if (!level) throw new CustomError("Nivel inválido", ErrorCode.LEVEL_INVALID);
+  if (!category) throw new CustomError("Nivel inválido", ErrorCode.CATEGORY_INVALID);
 
-  return level;
+  return category;
 };
 
 const verifyGender = async (allowedGenderId: string, playerGender: GENDER | undefined) => {
@@ -111,7 +111,7 @@ const verifyGender = async (allowedGenderId: string, playerGender: GENDER | unde
 };
 
 export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {
-  const { page, pageSize, gender, name, level, pointsDeviation } = filters;
+  const { page, pageSize, gender, name, category, pointsDeviation } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
   let matchGenders = convertStringIntoArray<GENDER>(gender);
   const pointsDeviationNumber = parseInt(pointsDeviation!, 10) || undefined;
@@ -121,7 +121,7 @@ export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters =>
     pageSize: pageSizeNumber,
     genders: matchGenders,
     name,
-    level,
+    categoryId: category,
     pointsDeviation: pointsDeviationNumber
   };
 };
@@ -129,7 +129,7 @@ export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters =>
 export const getDBFilter = (filters: PlayerFilters) => {
   // TODO - filtro por nivel
   const where: Prisma.PlayerWhereInput = {};
-  const { genders, name, level, pointsDeviation } = filters;
+  const { genders, name, categoryId, pointsDeviation } = filters;
   if (genders && genders.length > 0) where.gender = { code: { in: genders } };
   if (name) {
     const names = name.trim().split(" ").filter(Boolean);
