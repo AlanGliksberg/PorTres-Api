@@ -42,35 +42,35 @@ async function main() {
   console.log("Gender records created!");
   console.log("PlayerPosition records created!");
 
-  const levels = [];
-  levels.push(
+  const categories = [];
+  categories.push(
     ...[...Array(9)].map((x, i) => ({
       code: `C${i + 1}`,
       description: `C${i + 1}`,
       initialPoints: 1000 - (i + 1) * 100,
-      Gender: { connect: { code: "C" } }
+      gender: { connect: { code: "C" } }
     }))
   );
-  levels.push(
+  categories.push(
     ...[...Array(9)].map((x, i) => ({
       code: `D${i + 1}`,
       description: `D${i + 1}`,
       initialPoints: 1000 - (i + 1) * 100,
-      Gender: { connect: { code: "D" } }
+      gender: { connect: { code: "D" } }
     }))
   );
-  levels.push(
+  categories.push(
     ...[...Array(9)].map((x, i) => ({
       code: `M${i + 7}`,
-      description: `Suma ${i + 7}`,
+      description: `Mixto +${i + 7}`,
       initialPoints: 0,
-      Gender: { connect: { code: "X" } }
+      gender: { connect: { code: "X" } }
     }))
   );
 
-  levels.map(
+  categories.map(
     async (level) =>
-      await prisma.level.upsert({
+      await prisma.category.upsert({
         where: { code: level.code },
         update: {},
         create: level

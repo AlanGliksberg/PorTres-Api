@@ -39,7 +39,7 @@ export type PlayerFilters = {
   pointsDeviation?: number;
 } & PageFilterNumber;
 
-export enum LEVEL {
+export enum CATEGORY {
   C1 = "C1",
   C2 = "C2",
   C3 = "C3",

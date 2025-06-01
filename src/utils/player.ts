@@ -1,9 +1,9 @@
 import prisma from "../prisma/client";
-import { GENDER, GetPlayersRequest, LEVEL, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
+import { GENDER, GetPlayersRequest, CATEGORY, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
-import { Level, Prisma } from "@prisma/client";
+import { Category, Prisma } from "@prisma/client";
 import { getGenderById } from "./gender";
 
 export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
@@ -82,14 +82,15 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
   });
 };
 
-const calculatePlayerLevel = async (answers: PlayerAnswersDTO): Promise<Level> => {
+const calculatePlayerLevel = async (answers: PlayerAnswersDTO): Promise<Category> => {
   let where;
   if (answers.knowsLevel) where = { id: answers.levelId };
   else {
-    where = { code: LEVEL.C5 }; // TODO - calcular nivel según respuestas
+    let categoryCode = CATEGORY.C5;
+    where = { code: categoryCode }; // TODO - calcular nivel según respuestas
   }
 
-  const level = await prisma.level.findUnique({
+  const level = await prisma.category.findUnique({
     where
   });
 

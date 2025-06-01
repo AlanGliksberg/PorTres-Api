@@ -9,7 +9,8 @@
     "pgen": "prisma generate",
     "pmig": "prisma migrate dev",
     "pstu": "prisma studio",
-    "pseed": "tsx prisma/seed.js"
+    "pseed": "tsx prisma/seed.js",
+    "pclean": "tsx prisma/clean.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
