@@ -84,6 +84,8 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
         players: {
           include: {
             gender: true,
+            category: true,
+            position: true,
             user: getUserSelect()
           }
         }
