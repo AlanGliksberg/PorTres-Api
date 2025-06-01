@@ -7,7 +7,7 @@ export interface MatchDTO {
   time: string;
   location: string;
   description?: string;
-  category: string;
+  categoryId: string;
   pointsDeviation: number;
   creatorPlayerId: string;
   genderId: string;

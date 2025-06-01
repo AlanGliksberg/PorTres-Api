@@ -5,7 +5,7 @@ import { createTeam, getDBFilter } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
 
 export const createMatch = async (playerId: string, data: MatchDTO) => {
-  const { date, time, location, description, category, pointsDeviation, teams, genderId, duration } = data;
+  const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
@@ -15,8 +15,12 @@ export const createMatch = async (playerId: string, data: MatchDTO) => {
       dateTime: `${date}T${time}:00.000Z`,
       location,
       description,
-      category,
       pointsDeviation,
+      category: {
+        connect: {
+          id: categoryId
+        }
+      },
       gender: {
         connect: {
           id: genderId

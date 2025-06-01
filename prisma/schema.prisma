@@ -27,7 +27,7 @@ model Match {
   dateTime        DateTime
   location        String
   description     String?
-  category        String
+  categoryId      String
   pointsDeviation Int?
   statusId        String
   createdAt       DateTime @default(now())
@@ -42,6 +42,7 @@ model Match {
   teams        Team[]
   sets         Set[]
   applications Application[]
+  category     Category      @relation(fields: [categoryId], references: [id])
 }
 
 model Player {
@@ -131,6 +132,7 @@ model Category {
 
   gender  Gender   @relation(fields: [genderId], references: [id])
   players Player[]
+  matches Match[]
 }
 
 model PlayerPosition {
