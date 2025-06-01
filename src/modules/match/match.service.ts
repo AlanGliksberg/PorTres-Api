@@ -78,6 +78,7 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
   const include: Prisma.MatchInclude = {
     status: true,
     gender: true,
+    category: true,
     teams: {
       include: {
         players: {
