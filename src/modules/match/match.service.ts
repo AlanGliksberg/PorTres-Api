@@ -1,10 +1,10 @@
 import { ApplicationStatus, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { MatchDTO, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
+import { MatchDto, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
 
-export const createMatch = async (playerId: string, data: MatchDTO) => {
+export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
   const matchStatus: MATCH_STATUS =
@@ -71,7 +71,7 @@ export const getOpenMatches = async (filters: MatchFilters) => {
   ]);
 };
 
-export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
+export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
   const { page, pageSize, createdBy, isPlayer } = filters;
 
   const or = [];
@@ -134,7 +134,7 @@ export const getMyMatches = async (playerId: string, filters: MatchFilters) => {
   ]);
 };
 
-export const getMatchById = async (matchId: string) => {
+export const getMatchById = async (matchId: number) => {
   return await prisma.match.findUnique({
     where: {
       id: matchId

@@ -1,17 +1,17 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
-import { GetMatchesRequest, MatchDTO, MatchFilters } from "../../types/matchTypes";
+import { GetMatchesRequest, MatchDto, MatchFilters } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
 import { GENDER } from "../../types/playerTypes";
-import { parseMatches, parseMatchFilters } from "../../utils/match";
+import { parseMatches, parseMatchFilters, validateCreateMatchBody } from "../../utils/match";
 import { Prisma } from "@prisma/client";
 
-export const createMatch = async (req: Request<MatchDTO>, res: Response) => {
+export const createMatch = async (req: Request<MatchDto>, res: Response) => {
   try {
-    // TODO - validar campos
-    const match = await matchService.createMatch(req.user.playerId, req.body);
+    validateCreateMatchBody(req.body);
+    const match = await matchService.createMatch(req.user.playerId!, req.body);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
@@ -42,7 +42,7 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);
-    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
+    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId!, filters);
     const parsedMatches = parseMatches(matches);
     res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {

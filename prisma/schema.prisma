@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           Int      @id @default(autoincrement())
   email        String   @unique
   passwordHash String?
   firstName    String
@@ -23,16 +23,16 @@ model User {
 }
 
 model Match {
-  id              String   @id @default(uuid())
+  id              Int      @id @default(autoincrement())
   dateTime        DateTime
   location        String
   description     String?
-  categoryId      String
+  categoryId      Int
   pointsDeviation Int?
-  statusId        String
+  statusId        Int
   createdAt       DateTime @default(now())
-  creatorPlayerId String
-  genderId        String
+  creatorPlayerId Int
+  genderId        Int
   duration        Int
 
   creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
@@ -46,15 +46,15 @@ model Match {
 }
 
 model Player {
-  id            String  @id @default(uuid())
+  id            Int     @id @default(autoincrement())
   firstName     String?
   lastName      String?
-  categoryId    String?
+  categoryId    Int?
   rankingPoints Int?
   phone         String?
-  userId        String? @unique
-  genderId      String?
-  positionId    String?
+  userId        Int?    @unique
+  genderId      Int?
+  positionId    Int?
 
   position       PlayerPosition? @relation(fields: [positionId], references: [id])
   teams          Team[]
@@ -67,8 +67,8 @@ model Player {
 }
 
 model Team {
-  id         String @id @default(uuid())
-  matchId    String
+  id         Int @id @default(autoincrement())
+  matchId    Int
   teamNumber Int
 
   match   Match    @relation(fields: [matchId], references: [id])
@@ -78,7 +78,7 @@ model Team {
 }
 
 model MatchStatus {
-  id          String @id @default(uuid())
+  id          Int    @id @default(autoincrement())
   name        String @unique
   description String
 
@@ -86,8 +86,8 @@ model MatchStatus {
 }
 
 model Set {
-  id         String @id @default(uuid())
-  matchId    String
+  id         Int @id @default(autoincrement())
+  matchId    Int
   setNumber  Int
   team1Score Int
   team2Score Int
@@ -96,9 +96,9 @@ model Set {
 }
 
 model Application {
-  id         String   @id @default(uuid())
-  matchId    String
-  playerId   String
+  id         Int      @id @default(autoincrement())
+  matchId    Int
+  playerId   Int
   teamNumber Int
   message    String?
   phone      String?
@@ -113,7 +113,7 @@ model Application {
 }
 
 model Gender {
-  id         String @id @default(uuid())
+  id         Int    @id @default(autoincrement())
   code       String @unique
   name       String
   pluralName String
@@ -124,10 +124,10 @@ model Gender {
 }
 
 model Category {
-  id            String @id @default(uuid())
+  id            Int    @id @default(autoincrement())
   code          String @unique
   description   String
-  genderId      String
+  genderId      Int
   initialPoints Int
 
   gender  Gender   @relation(fields: [genderId], references: [id])
@@ -136,7 +136,7 @@ model Category {
 }
 
 model PlayerPosition {
-  id          String @id @default(uuid())
+  id          Int    @id @default(autoincrement())
   code        String @unique
   description String
 

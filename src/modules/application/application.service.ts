@@ -7,7 +7,7 @@ import { changeApplicationStatus, getApplicationById } from "../../utils/applica
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 
-export const applyToMatch = async (playerId: string, data: CreateApplicationBody) => {
+export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
 
   const match = await prisma.match.findUnique({
@@ -47,7 +47,7 @@ export const applyToMatch = async (playerId: string, data: CreateApplicationBody
   });
 };
 
-export const acceptApplication = async (playerId: string, applicationId: string) => {
+export const acceptApplication = async (playerId: number, applicationId: number) => {
   const include: Prisma.ApplicationInclude = {
     match: {
       include: {

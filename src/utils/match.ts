@@ -1,12 +1,14 @@
 import { Match, Prisma } from "@prisma/client";
-import { GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
+import { MatchDto, GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
 import { GENDER, PlayerDTO } from "../types/playerTypes";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { createOrGetPlayers } from "./player";
 import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
+import { CustomError } from "../types/customError";
+import { ErrorCode } from "../constants/errorCode";
 
-export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: string) => {
+export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   return {
     teamNumber,
     players: { connect: await createOrGetPlayers(players, allowedGenderId) }
@@ -74,3 +76,11 @@ export const addPlayerToMatchFromApplication = async (application: NonNullable<A
     }
   });
 };
+
+export const validateCreateMatchBody = (body: MatchDto) => {
+  // TODO - completar
+  if (!body.date || !body.time || !body.location || !body.duration)
+    throw new CustomError("Body incorrecto", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
+
+
+}

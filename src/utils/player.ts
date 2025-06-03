@@ -1,5 +1,12 @@
 import prisma from "../prisma/client";
-import { GENDER, GetPlayersRequest, CATEGORY, PlayerAnswersDTO, PlayerDTO, PlayerFilters } from "../types/playerTypes";
+import {
+  GENDER,
+  GetPlayersRequest,
+  CATEGORY,
+  PlayerDTO,
+  PlayerFilters,
+  CreatePlayerBody
+} from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
@@ -7,7 +14,7 @@ import { Category, Prisma } from "@prisma/client";
 import { getGenderById } from "./gender";
 
 export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
-  userId: string,
+  userId: number,
   include?: T
 ): Promise<Prisma.PlayerGetPayload<{ include: T }> | null> => {
   return (await prisma.player.findUnique({
@@ -19,7 +26,7 @@ export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
 };
 
 export const getPlayerById = async <T extends Prisma.PlayerInclude>(
-  playerId: string,
+  playerId: number,
   include?: T
 ): Promise<Prisma.PlayerGetPayload<{ include: T }> | null> => {
   return (await prisma.player.findUnique({
@@ -30,7 +37,7 @@ export const getPlayerById = async <T extends Prisma.PlayerInclude>(
   })) as any;
 };
 
-export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGenderId: string) => {
+export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   if (!players || players.length === 0) {
     return [];
   }
@@ -54,7 +61,7 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
   return Promise.all(playerPromises);
 };
 
-export const createPlayer = async (name: string, lastName: string, answers: PlayerAnswersDTO, userId: string) => {
+export const createPlayer = async (name: string, lastName: string, answers: CreatePlayerBody, userId: number) => {
   const category = await calculatePlayerCategory(answers);
   const rankingPoints = category.initialPoints;
 
@@ -82,7 +89,7 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
   });
 };
 
-const calculatePlayerCategory = async (answers: PlayerAnswersDTO): Promise<Category> => {
+const calculatePlayerCategory = async (answers: CreatePlayerBody): Promise<Category> => {
   let where;
   if (answers.knowsCategory) where = { id: answers.categoryId };
   else {
@@ -99,7 +106,7 @@ const calculatePlayerCategory = async (answers: PlayerAnswersDTO): Promise<Categ
   return category;
 };
 
-const verifyGender = async (allowedGenderId: string, playerGender: GENDER | undefined) => {
+const verifyGender = async (allowedGenderId: number, playerGender: GENDER | undefined) => {
   const allowedGender = await getGenderById(allowedGenderId);
   if (allowedGender?.code === GENDER.X || !playerGender) return;
 
@@ -113,6 +120,7 @@ const verifyGender = async (allowedGenderId: string, playerGender: GENDER | unde
 export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {
   const { page, pageSize, gender, name, category, pointsDeviation } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
+  // TODO - refactor recibir gender como number en vez de string
   let matchGenders = convertStringIntoArray<GENDER>(gender);
   const pointsDeviationNumber = parseInt(pointsDeviation!, 10) || undefined;
 
@@ -156,4 +164,15 @@ export const getDBFilter = (filters: PlayerFilters) => {
   }
 
   return where;
+};
+
+export const validateCreatePlayerBody = (body: CreatePlayerBody) => {
+  if (
+    !body.genderId ||
+    !Number(body.genderId) ||
+    !body.positionId ||
+    !Number(body.positionId) ||
+    !((body.knowsCategory && body.categoryId && Number(body.categoryId)) || !(!body.knowsCategory && body.answers))
+  )
+    throw new CustomError("Body incorrecto", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
 };

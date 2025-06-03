@@ -2,15 +2,15 @@ import { PageFilterNumber, PageFilterString } from "./common";
 import { GENDER } from "./playerTypes";
 import { TeamDTO } from "./team";
 
-export interface MatchDTO {
+export interface MatchDto {
   date: Date;
   time: string;
   location: string;
   description?: string;
-  categoryId: string;
+  categoryId: number;
   pointsDeviation: number;
-  creatorPlayerId: string;
-  genderId: string;
+  creatorPlayerId: number;
+  genderId: number;
   teams?: TeamDTO;
   duration: number;
 }

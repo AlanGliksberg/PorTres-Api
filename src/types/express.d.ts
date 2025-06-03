@@ -1,11 +1,10 @@
 import { User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 declare global {
   namespace Express {
     interface Request {
-      user: Prisma.UserGetPayload<{
-        include: { player: true };
-      }>;
+      user: User & { playerId?: number };
     }
   }
 }

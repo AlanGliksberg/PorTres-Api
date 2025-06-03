@@ -8,10 +8,15 @@ import * as applicationService from "./application.service";
 
 export const applyToMatch = async (req: Request<CreateApplicationBody>, res: Response) => {
   try {
-    if (!req.body.matchId || !req.body.teamNumber || !(req.body.teamNumber === 1 || req.body.teamNumber === 2))
+    if (
+      !req.body.matchId ||
+      !Number(req.body.matchId) ||
+      !req.body.teamNumber ||
+      !(req.body.teamNumber === 1 || req.body.teamNumber === 2)
+    )
       throw new CustomError("Invalid request", ErrorCode.APPLICATION_REQUEST_ERROR);
 
-    const application = await applicationService.applyToMatch(req.user.playerId, req.body);
+    const application = await applicationService.applyToMatch(req.user.playerId!, req.body);
     res.status(200).json(new OkResponse({ application }));
   } catch (e: any) {
     console.error(e);
@@ -22,7 +27,8 @@ export const applyToMatch = async (req: Request<CreateApplicationBody>, res: Res
 export const acceptApplication = async (req: Request, res: Response) => {
   try {
     const applicationId = req.params.id as string;
-    const application = await applicationService.acceptApplication(req.user.playerId, applicationId);
+    // TODO - validar que sea un numero
+    const application = await applicationService.acceptApplication(req.user.playerId!, Number(applicationId));
     res.status(200).json(new OkResponse({ application }));
   } catch (e: any) {
     console.error(e);

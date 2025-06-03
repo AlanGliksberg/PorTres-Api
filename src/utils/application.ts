@@ -3,7 +3,7 @@ import prisma from "../prisma/client";
 import { ApplicationWithRelations } from "../types/application";
 
 export const getApplicationById = async (
-  applicationId: string,
+  applicationId: number,
   include?: Prisma.ApplicationInclude
 ): Promise<ApplicationWithRelations> => {
   return await prisma.application.findUnique({
@@ -14,7 +14,7 @@ export const getApplicationById = async (
   });
 };
 
-export const changeApplicationStatus = async (applicationId: string, newStatus: ApplicationStatus) => {
+export const changeApplicationStatus = async (applicationId: number, newStatus: ApplicationStatus) => {
   return await prisma.application.update({
     where: {
       id: applicationId

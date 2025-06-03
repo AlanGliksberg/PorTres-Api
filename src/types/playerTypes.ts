@@ -1,23 +1,24 @@
 import { PageFilterNumber, PageFilterString } from "./common";
 
 export type PlayerDTO = {
-  id?: string;
+  id?: number;
   firstName: string;
   lastName: string;
-  categoryId?: string;
+  categoryId?: number;
   phone?: string;
-  genderId?: string;
+  genderId?: number;
 };
 
-export type CreatePlayerRequest = PlayerAnswersDTO;
-
-export type PlayerAnswersDTO = {
-  categoryId: string;
+export type CreatePlayerBody = {
+  categoryId: number;
   phone?: string;
-  genderId: string;
+  genderId: number;
   knowsCategory: boolean;
-  positionId: string;
+  positionId: number;
+  answers: PlayerAnswer[];
 };
+
+export type PlayerAnswer = {};
 
 export enum GENDER {
   C = "C",

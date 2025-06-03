@@ -1,7 +1,7 @@
 import { Application, Match, MatchStatus, Player, Team } from "@prisma/client";
 
 export type CreateApplicationBody = {
-  matchId: string;
+  matchId: number;
   teamNumber: 1 | 2;
   message?: string;
   phone?: string;
