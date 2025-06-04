@@ -1,12 +1,5 @@
 import prisma from "../prisma/client";
-import {
-  GENDER,
-  GetPlayersRequest,
-  CATEGORY,
-  PlayerDTO,
-  PlayerFilters,
-  CreatePlayerBody
-} from "../types/playerTypes";
+import { GENDER, GetPlayersRequest, CATEGORY, PlayerDTO, PlayerFilters, CreatePlayerBody } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
@@ -84,7 +77,8 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
     data: {
       firstName: player.firstName,
       lastName: player.lastName,
-      categoryId: player.categoryId
+      categoryId: player.categoryId,
+      genderId: player.genderId
     }
   });
 };
