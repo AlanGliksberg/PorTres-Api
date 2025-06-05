@@ -106,7 +106,7 @@ const verifyGender = async (allowedGenderId: number, playerGender: GENDER | unde
 
   if (!allowedGender || playerGender !== allowedGender.code)
     throw new CustomError(
-      `Invalid gender | Allowed gender: ${allowedGenderId} | Gender: ${playerGender}`,
+      `Invalid gender | Allowed gender: ${allowedGender?.name} | Gender: ${playerGender}`,
       ErrorCode.INVALID_GENDER
     );
 };
