@@ -7,6 +7,7 @@ export type PlayerDTO = {
   categoryId?: number;
   phone?: string;
   genderId?: number;
+  positionId?: number;
 };
 
 export type CreatePlayerBody = {

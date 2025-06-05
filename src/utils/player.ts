@@ -78,7 +78,9 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
       firstName: player.firstName,
       lastName: player.lastName,
       categoryId: player.categoryId,
-      genderId: player.genderId
+      genderId: player.genderId,
+      phone: player.phone,
+      positionId: player.positionId
     }
   });
 };
