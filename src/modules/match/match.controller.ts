@@ -53,8 +53,20 @@ export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Respons
 
 export const getMatchDetails = async (req: Request, res: Response) => {
   try {
-    const matchId = req.params.id;
+    const matchId = Number(req.params.id);
     const match = await matchService.getMatchById(matchId);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting match", e));
+  }
+};
+
+export const deleteMatch = async (req: Request, res: Response) => {
+  try {
+    const matchId = Number(req.params.id);
+    const match = await matchService.deleteMatch(matchId);
+    // TODO - notificar a jugadores
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);

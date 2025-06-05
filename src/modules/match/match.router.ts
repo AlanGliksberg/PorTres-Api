@@ -6,5 +6,6 @@ router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
 router.get("/me", matchController.getMyMatches);
 router.get("/details/:id", matchController.getMatchDetails);
+router.delete("/:id", matchController.deleteMatch);
 
 export default router;

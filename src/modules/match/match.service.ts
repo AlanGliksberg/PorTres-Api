@@ -114,7 +114,12 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       {
         OR: or
       },
-      getDBFilter(filters)
+      getDBFilter(filters),
+      {
+        status: {
+          name: MATCH_STATUS.PENDING
+        }
+      }
     ]
   };
 
@@ -150,6 +155,21 @@ export const getMatchById = async (matchId: number) => {
       applications: {
         where: {
           status: ApplicationStatus.PENDING
+        }
+      }
+    }
+  });
+};
+
+export const deleteMatch = async (matchId: number) => {
+  return await prisma.match.update({
+    where: {
+      id: matchId
+    },
+    data: {
+      status: {
+        connect: {
+          name: MATCH_STATUS.CANCELLED
         }
       }
     }

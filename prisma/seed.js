@@ -7,7 +7,8 @@ async function main() {
     ...[
       { name: "PENDING", description: "Pendiente" },
       { name: "CLOSED", description: "Cerrado" },
-      { name: "COMPLETED", description: "Confirmado" }
+      { name: "COMPLETED", description: "Confirmado" },
+      { name: "CANCELLED", description: "Cancelado" }
     ].map((status) =>
       prisma.matchStatus.upsert({
         where: { name: status.name },
