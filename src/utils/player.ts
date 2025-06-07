@@ -138,16 +138,17 @@ export const getDBFilter = (filters: PlayerFilters) => {
   if (name) {
     const names = name.trim().split(" ").filter(Boolean);
     if (names.length === 1) {
+      const trimmedName = name.trim();
       where.OR = [
         {
           firstName: {
-            contains: name,
+            contains: trimmedName,
             mode: "insensitive"
           }
         },
         {
           lastName: {
-            contains: name,
+            contains: trimmedName,
             mode: "insensitive"
           }
         }
