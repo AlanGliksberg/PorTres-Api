@@ -19,10 +19,15 @@ export const createPlayer = async (answers: CreatePlayerBody, user: User) => {
 
 export const getPlayers = async (filters: PlayerFilters) => {
   const { page, pageSize } = filters;
+  const where = getDBFilter(filters);
+  where.userId = {
+    not: null
+  };
+
   return await prisma.player.findMany({
     skip: (page - 1) * pageSize,
     take: pageSize,
-    where: getDBFilter(filters),
+    where,
     include: {
       position: true,
       category: true,
