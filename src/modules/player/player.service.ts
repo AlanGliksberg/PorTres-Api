@@ -22,6 +22,14 @@ export const getPlayers = async (filters: PlayerFilters) => {
   return await prisma.player.findMany({
     skip: (page - 1) * pageSize,
     take: pageSize,
-    where: getDBFilter(filters)
+    where: getDBFilter(filters),
+    include: {
+      position: true,
+      category: true,
+      gender: true
+    },
+    orderBy: {
+      firstName: "asc"
+    }
   });
 };

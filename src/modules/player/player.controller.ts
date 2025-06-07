@@ -19,8 +19,8 @@ export const createplayer = async (req: Request<CreatePlayerBody>, res: Response
 export const getplayers = async (req: Request<GetPlayersRequest>, res: Response) => {
   try {
     const filters = parsePlayerFilters(req.query);
-    const player = await playerService.getPlayers(filters);
-    res.status(200).json(new OkResponse({ player }));
+    const players = await playerService.getPlayers(filters);
+    res.status(200).json(new OkResponse({ players }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error creating player", e));
