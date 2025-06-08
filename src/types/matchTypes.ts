@@ -29,6 +29,12 @@ export type MatchFilters = {
   isPlayer?: boolean;
 } & PageFilterNumber;
 
+export type AddPlayerToMatchRequest = {
+  matchId: number;
+  teamNumber: number;
+  playerId: number;
+};
+
 export enum MATCH_STATUS {
   PENDING = "PENDING",
   CLOSED = "CLOSED",

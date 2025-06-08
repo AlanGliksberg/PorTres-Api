@@ -1,6 +1,6 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
-import { GetMatchesRequest, MatchDto, MatchFilters } from "../../types/matchTypes";
+import { AddPlayerToMatchRequest, GetMatchesRequest, MatchDto, MatchFilters } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
@@ -71,5 +71,17 @@ export const deleteMatch = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting match", e));
+  }
+};
+
+export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, res: Response) => {
+  try {
+    // TODO - agregar validaciones de campos
+    // solo el creador del partido puede agregar jugadores
+    const match = await matchService.addPlayerToMatch(req.body);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error adding player to match", e));
   }
 };

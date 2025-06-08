@@ -1,6 +1,6 @@
 import { ApplicationStatus, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { MatchDto, MatchFilters, MATCH_STATUS } from "../../types/matchTypes";
+import { MatchDto, MatchFilters, MATCH_STATUS, AddPlayerToMatchRequest } from "../../types/matchTypes";
 import { createTeam, getDBFilter } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
 
@@ -171,6 +171,34 @@ export const deleteMatch = async (matchId: number) => {
       status: {
         connect: {
           name: MATCH_STATUS.CANCELLED
+        }
+      }
+    }
+  });
+};
+
+export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
+  return await prisma.match.update({
+    where: {
+      id: data.matchId
+    },
+    data: {
+      players: {
+        connect: { id: data.playerId }
+      },
+      teams: {
+        update: {
+          where: {
+            matchId_teamNumber: {
+              matchId: data.matchId,
+              teamNumber: data.teamNumber
+            }
+          },
+          data: {
+            players: {
+              connect: { id: data.playerId }
+            }
+          }
         }
       }
     }
