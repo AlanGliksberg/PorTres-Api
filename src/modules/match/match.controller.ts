@@ -79,6 +79,7 @@ export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, re
     // TODO - agregar validaciones de campos
     // solo el creador del partido puede agregar jugadores
     const match = await matchService.addPlayerToMatch(req.body);
+    // TODO - notificar jugador
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
