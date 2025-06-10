@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { CreatePlayerBody, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
+import { CreatePlayerBody, GENDER, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getDBFilter, getPlayerByUserId } from "../../utils/player";
 import prisma from "../../prisma/client";
 
@@ -36,5 +36,31 @@ export const getPlayers = async (filters: PlayerFilters) => {
     orderBy: {
       firstName: "asc"
     }
+  });
+};
+
+export const getGenders = async (filterBoth: boolean) => {
+  const where = filterBoth ? { code: { not: GENDER.X } } : {};
+  return await prisma.gender.findMany({
+    where
+  });
+};
+
+export const getPositions = async () => {
+  return await prisma.playerPosition.findMany();
+};
+
+export const getCategories = async (filterBoth: boolean) => {
+  const where = filterBoth
+    ? {
+        gender: {
+          code: {
+            not: GENDER.X
+          }
+        }
+      }
+    : {};
+  return await prisma.category.findMany({
+    where
   });
 };
