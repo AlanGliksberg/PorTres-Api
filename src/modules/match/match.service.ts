@@ -10,6 +10,9 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
 
+  const team1 = await createTeam(1, teams?.team1, genderId);
+  const team2 = await createTeam(2, teams?.team2, genderId);
+
   const match = await prisma.match.create({
     data: {
       dateTime: `${date}T${time}:00.000Z`,
@@ -28,8 +31,9 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
       },
       creator: { connect: { id: playerId } },
       status: { connect: { name: matchStatus } },
+      players: { connect: [...team1.players.connect, ...team2.players.connect] },
       teams: {
-        create: [await createTeam(1, teams?.team1, genderId), await createTeam(2, teams?.team2, genderId)]
+        create: [team1, team2]
       },
       duration
     }
@@ -178,6 +182,8 @@ export const deleteMatch = async (matchId: number) => {
 };
 
 export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
+  // TODO - validar que el equipo tenga un lugar dispobile
+  // no se puede incluir un jugador que ya esta en el partido
   return await prisma.match.update({
     where: {
       id: data.matchId
@@ -199,6 +205,22 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
               connect: { id: data.playerId }
             }
           }
+        }
+      }
+    },
+    include: { players: true }
+  });
+};
+
+export const changeState = async (matchId: number, status: MATCH_STATUS) => {
+  return await prisma.match.update({
+    where: {
+      id: matchId
+    },
+    data: {
+      status: {
+        connect: {
+          name: status
         }
       }
     }

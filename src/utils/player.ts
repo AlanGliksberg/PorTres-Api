@@ -141,7 +141,6 @@ export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters =>
 };
 
 export const getDBFilter = (filters: PlayerFilters) => {
-  // TODO - filtro por nivel
   const where: Prisma.PlayerWhereInput = {};
   const { genders, name, categories, positions, pointsDeviation } = filters;
   if (genders && genders.length > 0) where.gender = { code: { in: genders } };
