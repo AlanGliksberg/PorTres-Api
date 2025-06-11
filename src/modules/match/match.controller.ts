@@ -27,7 +27,7 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
       const player: Prisma.PlayerGetPayload<{
         include: { gender: true };
       }> | null = await getPlayerByUserId(user.id, { gender: true });
-      filters.genders = [player?.gender?.code as GENDER, GENDER.X];
+      filters.genders = [player?.gender?.code as GENDER, GENDER.MIXTO];
     }
 
     const [matches, totalMatches] = await matchService.getOpenMatches(filters);

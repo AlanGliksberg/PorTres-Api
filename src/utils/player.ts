@@ -1,5 +1,13 @@
 import prisma from "../prisma/client";
-import { GENDER, GetPlayersRequest, CATEGORY, PlayerDTO, PlayerFilters, CreatePlayerBody } from "../types/playerTypes";
+import {
+  GENDER,
+  GetPlayersRequest,
+  CATEGORY,
+  PlayerDTO,
+  PlayerFilters,
+  CreatePlayerBody,
+  POSITION
+} from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
@@ -104,7 +112,7 @@ const calculatePlayerCategory = async (answers: CreatePlayerBody): Promise<Categ
 
 const verifyGender = async (allowedGenderId: number, playerGender: GENDER | undefined) => {
   const allowedGender = await getGenderById(allowedGenderId);
-  if (allowedGender?.code === GENDER.X || !playerGender) return;
+  if (allowedGender?.code === GENDER.MIXTO || !playerGender) return;
 
   if (!allowedGender || playerGender !== allowedGender.code)
     throw new CustomError(
@@ -114,18 +122,20 @@ const verifyGender = async (allowedGenderId: number, playerGender: GENDER | unde
 };
 
 export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {
-  const { page, pageSize, gender, name, category, pointsDeviation } = filters;
+  const { page, pageSize, gender, name, category, position, pointsDeviation } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
-  // TODO - refactor recibir gender como number en vez de string
-  let matchGenders = convertStringIntoArray<GENDER>(gender);
+  const genders = convertStringIntoArray<GENDER>(gender);
+  const positions = convertStringIntoArray<POSITION>(position);
+  const categories = convertStringIntoArray<CATEGORY>(category);
   const pointsDeviationNumber = parseInt(pointsDeviation!, 10) || undefined;
 
   return {
     page: pageNumber,
     pageSize: pageSizeNumber,
-    genders: matchGenders,
     name,
-    categoryId: category,
+    genders,
+    categories,
+    positions,
     pointsDeviation: pointsDeviationNumber
   };
 };
@@ -133,8 +143,10 @@ export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters =>
 export const getDBFilter = (filters: PlayerFilters) => {
   // TODO - filtro por nivel
   const where: Prisma.PlayerWhereInput = {};
-  const { genders, name, categoryId, pointsDeviation } = filters;
+  const { genders, name, categories, positions, pointsDeviation } = filters;
   if (genders && genders.length > 0) where.gender = { code: { in: genders } };
+  if (categories && categories.length > 0) where.category = { code: { in: categories } };
+  if (positions && positions.length > 0) where.position = { code: { in: positions } };
   if (name) {
     const names = name.trim().split(" ").filter(Boolean);
     if (names.length === 1) {

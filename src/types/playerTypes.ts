@@ -16,28 +16,24 @@ export type CreatePlayerBody = {
   genderId: number;
   knowsCategory: boolean;
   positionId: number;
-  answers: PlayerAnswer[];
+  answers: PlayerAnswers[];
 };
 
-export type PlayerAnswer = {};
-
-export enum GENDER {
-  C = "C",
-  D = "D",
-  X = "X"
-}
+export type PlayerAnswers = {};
 
 export type GetPlayersRequest = {
-  gender?: string | string[];
   name?: string;
-  category?: string;
+  gender?: string | string[];
+  category?: string | string[];
+  position?: string | string[];
   pointsDeviation?: string;
 } & PageFilterString;
 
 export type PlayerFilters = {
   genders?: GENDER[];
   name?: string;
-  categoryId?: string;
+  categories?: CATEGORY[];
+  positions?: POSITION[];
   pointsDeviation?: number;
 } & PageFilterNumber;
 
@@ -69,4 +65,16 @@ export enum CATEGORY {
   M13 = "M13",
   M14 = "M14",
   M15 = "M15"
+}
+
+export enum GENDER {
+  CABALLERO = "C",
+  DAMA = "D",
+  MIXTO = "X"
+}
+
+export enum POSITION {
+  REVES = "R",
+  DERECHA = "D",
+  INDISTINTO = "X"
 }

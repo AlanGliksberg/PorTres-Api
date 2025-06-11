@@ -40,7 +40,7 @@ export const getPlayers = async (filters: PlayerFilters) => {
 };
 
 export const getGenders = async (filterBoth: boolean) => {
-  const where = filterBoth ? { code: { not: GENDER.X } } : {};
+  const where = filterBoth ? { code: { not: GENDER.MIXTO } } : {};
   return await prisma.gender.findMany({
     where
   });
@@ -55,7 +55,7 @@ export const getCategories = async (filterBoth: boolean) => {
     ? {
         gender: {
           code: {
-            not: GENDER.X
+            not: GENDER.MIXTO
           }
         }
       }
