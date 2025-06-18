@@ -70,6 +70,7 @@ export const getMatchDetails = async (req: Request, res: Response) => {
 
 export const deleteMatch = async (req: Request, res: Response) => {
   try {
+    // TODO - solo el creador del partido lo puede eliminar
     const matchId = Number(req.params.id);
     const match = await matchService.deleteMatch(matchId);
     // TODO - notificar a jugadores
