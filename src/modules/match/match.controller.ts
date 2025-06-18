@@ -1,12 +1,6 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
-import {
-  AddPlayerToMatchRequest,
-  GetMatchesRequest,
-  MATCH_STATUS,
-  MatchDto,
-  MatchFilters
-} from "../../types/matchTypes";
+import { AddPlayerToMatchRequest, GetMatchesRequest, MATCH_STATUS, MatchDto } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
