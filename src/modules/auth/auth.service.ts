@@ -6,18 +6,9 @@ import { OAuth2Client } from "google-auth-library";
 import { creatUser } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
+import { RegisterDTO } from "../../types/auth";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-interface RegisterDTO {
-  email: string;
-  password?: string;
-  firstName: string;
-  lastName: string;
-  dni?: string;
-  photoUrl?: string;
-  googleId?: string;
-}
 
 export const register = async (data: RegisterDTO) => {
   let passwordHash: string;
