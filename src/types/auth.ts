@@ -6,4 +6,5 @@ export interface RegisterDTO {
   dni?: string;
   photoUrl?: string;
   googleId?: string;
+  phone?: string;
 }

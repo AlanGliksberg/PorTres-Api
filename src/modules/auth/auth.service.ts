@@ -24,8 +24,9 @@ export const register = async (data: RegisterDTO) => {
     lastName: data.lastName,
     dni: data.dni || null,
     photoUrl: data.photoUrl || null,
-    googleId: data.googleId || null
+    phoneNumber: data.phone || null
   });
+
   return {
     id: user.id,
     email: user.email,
