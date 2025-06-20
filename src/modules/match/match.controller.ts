@@ -7,6 +7,8 @@ import { getPlayerByUserId } from "../../utils/player";
 import { GENDER } from "../../types/playerTypes";
 import { parseMatches, parseMatchFilters, validateCreateMatchBody } from "../../utils/match";
 import { Prisma } from "@prisma/client";
+import { CustomError } from "../../types/customError";
+import { ErrorCode } from "../../constants/errorCode";
 
 export const createMatch = async (req: Request<MatchDto>, res: Response) => {
   try {
@@ -41,6 +43,7 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 
 export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
+    if (!req.user.playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
     const filters = parseMatchFilters(req.query);
     const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
