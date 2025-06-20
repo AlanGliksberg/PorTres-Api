@@ -42,7 +42,7 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
 export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);
-    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId!, filters);
+    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
     res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {

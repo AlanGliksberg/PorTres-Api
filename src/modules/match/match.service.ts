@@ -76,7 +76,7 @@ export const getOpenMatches = async (filters: MatchFilters) => {
   ]);
 };
 
-export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
+export const getMyMatches = async (playerId: number | undefined, filters: MatchFilters) => {
   const { page, pageSize, createdBy, isPlayer } = filters;
 
   const or = [];
@@ -98,7 +98,7 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
     }
   };
   if (createdBy) {
-    or.push({ creatorPlayerId: playerId });
+    or.push({ creatorPlayerId: playerId || null });
     include.applications = {
       where: {
         status: ApplicationStatus.PENDING
