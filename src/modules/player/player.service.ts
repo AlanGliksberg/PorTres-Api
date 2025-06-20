@@ -31,7 +31,8 @@ export const getPlayers = async (filters: PlayerFilters) => {
     include: {
       position: true,
       category: true,
-      gender: true
+      gender: true,
+      user: true
     },
     orderBy: {
       firstName: "asc"
