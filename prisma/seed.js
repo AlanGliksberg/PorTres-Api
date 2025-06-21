@@ -28,9 +28,9 @@ async function main() {
       })
     ),
     ...[
-      { code: "R", description: "Revés" },
-      { code: "D", description: "Derecha" },
-      { code: "X", description: "Indistinto" }
+      { code: "R", description: "Revés", order: 1 },
+      { code: "D", description: "Derecha", order: 2 },
+      { code: "X", description: "Indistinto", order: 3 }
     ].map((position) =>
       prisma.playerPosition.upsert({
         where: { code: position.code },
