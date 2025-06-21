@@ -11,7 +11,7 @@ export const createPlayer = async (answers: CreatePlayerBody, user: User) => {
     firstName: user.firstName,
     lastName: user.lastName,
     genderId: answers.genderId,
-    phone: answers.phone
+    phone: answers.phone || user.phoneNumber
   };
 
   return await createPlayerDB(player.firstName, player.lastName, answers, user.id);

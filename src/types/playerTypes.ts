@@ -5,7 +5,7 @@ export type PlayerDTO = {
   firstName: string;
   lastName: string;
   categoryId?: number;
-  phone?: string;
+  phone?: string | null;
   genderId?: number;
   positionId?: number;
 };
