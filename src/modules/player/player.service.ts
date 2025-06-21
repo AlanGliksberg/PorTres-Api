@@ -48,7 +48,11 @@ export const getGenders = async (filterBoth: boolean) => {
 };
 
 export const getPositions = async () => {
-  return await prisma.playerPosition.findMany();
+  return await prisma.playerPosition.findMany({
+    orderBy: {
+      order: "asc"
+    }
+  });
 };
 
 export const getCategories = async (filterBoth: boolean) => {
