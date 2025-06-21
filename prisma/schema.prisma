@@ -144,6 +144,33 @@ model PlayerPosition {
   players Player[]
 }
 
+model Question {
+  id             Int    @id @default(autoincrement())
+  code           String @unique
+  label          String
+  questionTypeId Int
+
+  answers QuestionAnswer[]
+  type    QuestionType     @relation(fields: [questionTypeId], references: [id])
+}
+
+model QuestionAnswer {
+  id         Int    @id @default(autoincrement())
+  code       String @unique
+  label      String
+  points     Int
+  questionId Int
+
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+model QuestionType {
+  id   Int    @id @default(autoincrement())
+  code String @unique
+
+  questions Question[]
+}
+
 enum ApplicationStatus {
   PENDING
   ACCEPTED
