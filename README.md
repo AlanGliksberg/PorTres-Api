@@ -1,131 +1,269 @@
-# PadelCole-Api
+# 🏓 PadelCole API
 
-### Descripción
+API REST para la gestión de partidos de pádel, jugadores y aplicaciones. Desarrollada con Node.js, TypeScript, Express y Prisma.
 
-Esta es la API backend de **PadelCole**, una aplicación que conecta a jugadores de pádel para crear y unirse a partidos. La aplicación permite registrar usuarios, iniciar sesión (con Google o correo y contraseña), crear partidos, aplicar a partidos y ver el historial de partidos.
+## 📋 Tabla de Contenidos
 
-### Funcionalidades:
+- [Características](#-características)
+- [Tecnologías](#-tecnologías)
+- [Instalación](#-instalación)
+- [Configuración](#-configuración)
+- [Uso](#-uso)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [API Endpoints](#-api-endpoints)
+- [Base de Datos](#-base-de-datos)
+- [Autenticación](#-autenticación)
+- [Scripts Disponibles](#-scripts-disponibles)
+- [Contribución](#-contribución)
 
-- **Autenticación**:
-  - Registro de usuarios (con Google o con correo y contraseña).
-  - Login con Google y correo/contraseña.
-  - Sesión persistente con JWT.
-- **Partidos**:
+## ✨ Características
 
-  - Los usuarios pueden **crear partidos** con fecha, hora, lugar y categoría.
-  - Los usuarios pueden **aplicar** para unirse a partidos disponibles.
-  - Los creadores de los partidos pueden **aceptar o rechazar** aplicaciones de jugadores.
+- 🔐 **Autenticación JWT** con soporte para Google OAuth
+- 👥 **Gestión de Jugadores** con perfiles completos
+- 🏆 **Sistema de Categorías** y posiciones de juego
+- 🎾 **Gestión de Partidos** con equipos y sets
+- 📝 **Sistema de Aplicaciones** para unirse a partidos
+- 🏳️ **Soporte para Géneros** (masculino, femenino, mixto)
+- 📊 **Sistema de Puntos** y ranking
+- 🗄️ **Base de Datos PostgreSQL** con Prisma ORM
+- 📝 **Logging** de requests
+- 🔒 **Middleware de Autenticación**
+- 🚀 **TypeScript** para mejor desarrollo
 
-- **Notificaciones**:
-  - Los creadores de partidos reciben notificaciones sobre nuevas aplicaciones a sus partidos.
+## 🛠️ Tecnologías
 
-### Requisitos previos
+- **Backend**: Node.js, Express.js
+- **Lenguaje**: TypeScript
+- **Base de Datos**: PostgreSQL
+- **ORM**: Prisma
+- **Autenticación**: JWT, Google OAuth
+- **Encriptación**: bcrypt
+- **CORS**: Habilitado para desarrollo
+- **Gestión de Paquetes**: pnpm
 
-- **Node.js** >= 18
-- **pnpm** instalado: `npm install -g pnpm`
-- **PostgreSQL** configurado y corriendo en tu máquina.
+## 🚀 Instalación
 
-### Instalación
+### Prerrequisitos
 
-1. Clona el repositorio:
+- Node.js (v16 o superior)
+- PostgreSQL
+- pnpm (recomendado) o npm
+
+### Pasos de Instalación
+
+1. **Clonar el repositorio**
 
    ```bash
-   git clone https://github.com/tu-usuario/PadelCole-Api.git
+   git clone <url-del-repositorio>
    cd PadelCole-Api
    ```
 
-2. Instala las dependencias:
+2. **Instalar dependencias**
 
    ```bash
    pnpm install
    ```
 
-3. Configura las variables de entorno en el archivo `.env`:
-
-   ```env
-   DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/padelcole"
-   JWT_SECRET="your_jwt_secret_here"
-   GOOGLE_CLIENT_ID="your_google_client_id"
-   ```
-
-4. Genera el cliente de Prisma:
+3. **Configurar variables de entorno**
 
    ```bash
-   pnpm prisma generate
+   cp .env.example .env
    ```
 
-5. Realiza las migraciones para crear la base de datos:
+4. **Configurar la base de datos**
 
    ```bash
-   pnpm prisma migrate dev --name init
+   pnpm pgen    # Generar cliente Prisma
+   pnpm pmig    # Ejecutar migraciones
+   pnpm pseed   # Poblar datos iniciales
    ```
 
-6. Levanta el servidor en modo desarrollo:
-
+5. **Iniciar el servidor**
    ```bash
-   pnpm dev
+   pnpm dev     # Desarrollo
+   # o
+   pnpm build   # Compilar
+   pnpm start   # Producción
    ```
 
-7. El servidor estará corriendo en `http://localhost:3000`.
+## ⚙️ Configuración
 
----
+### Variables de Entorno
 
-### Endpoints disponibles
+Crea un archivo `.env` en la raíz del proyecto:
 
-- **POST /api/auth/register**: Registrar un usuario (correo/contraseña o Google).
-- **POST /api/auth/login**: Login de un usuario con correo y contraseña.
-- **POST /api/auth/google**: Login con Google.
-- **POST /api/auth/refresh**: Refrescar el JWT de acceso usando el refresh token.
-- **POST /api/matches**: Crear un nuevo partido.
-- **GET /api/matches**: Obtener todos los partidos.
-- **POST /api/matches/{id}/apply**: Aplicar para unirse a un partido.
+```env
+# Base de Datos
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/padelcole"
 
----
+# JWT
+JWT_SECRET="tu-secreto-jwt-super-seguro"
 
-### Estructura del proyecto
+# Google OAuth
+GOOGLE_CLIENT_ID="tu-google-client-id"
+
+# Servidor
+PORT=3000
+NODE_ENV=development
+```
+
+### Configuración de Base de Datos
+
+1. Crear una base de datos PostgreSQL
+2. Actualizar `DATABASE_URL` en el archivo `.env`
+3. Ejecutar las migraciones: `pnpm pmig`
+
+## 🎯 Uso
+
+### Desarrollo
+
+```bash
+pnpm dev
+```
+
+El servidor se ejecutará en `http://localhost:3000`
+
+### Producción
+
+```bash
+pnpm build
+pnpm start
+```
+
+## 📁 Estructura del Proyecto
 
 ```
 PadelCole-Api/
+├── prisma/                 # Configuración de base de datos
+│   ├── schema.prisma      # Esquema de la base de datos
+│   ├── migrations/        # Migraciones de la base de datos
+│   ├── seed.js           # Datos iniciales
+│   └── clean.js          # Limpieza de datos
 ├── src/
-│   ├── app.ts
-│   ├── server.ts
-│   ├── prisma/
-│   │   └── client.ts
-│   ├── utils/
-│   │   ├── hash.ts
-│   │   └── jwt.ts
-│   └── modules/
-│       ├── auth/
-│       │   ├── auth.controller.ts
-│       │   ├── auth.router.ts
-│       │   └── auth.service.ts
-│       └── match/
-│           ├── match.controller.ts
-│           ├── match.router.ts
-│           └── match.service.ts
-├── prisma/
-│   └── schema.prisma
-├── .env
+│   ├── modules/          # Módulos de la aplicación
+│   │   ├── auth/         # Autenticación
+│   │   ├── player/       # Gestión de jugadores
+│   │   ├── match/        # Gestión de partidos
+│   │   └── application/  # Sistema de aplicaciones
+│   ├── middlewares/      # Middlewares personalizados
+│   ├── types/           # Tipos TypeScript
+│   ├── utils/           # Utilidades
+│   ├── config/          # Configuraciones
+│   ├── constants/       # Constantes
+│   ├── app.ts           # Configuración de Express
+│   └── server.ts        # Punto de entrada
 ├── package.json
-├── tsconfig.json
-└── README.md
+└── tsconfig.json
 ```
 
+## 🔌 API Endpoints
+
+### Autenticación (`/api/auth`)
+
+| Método | Endpoint    | Descripción             |
+| ------ | ----------- | ----------------------- |
+| POST   | `/register` | Registrar nuevo usuario |
+| POST   | `/login`    | Iniciar sesión          |
+| POST   | `/google`   | Login con Google OAuth  |
+
+### Jugadores (`/api/player`)
+
+| Método | Endpoint    | Descripción                     |
+| ------ | ----------- | ------------------------------- |
+| POST   | `/`         | Crear nuevo jugador             |
+| GET    | `/`         | Obtener todos los jugadores     |
+| GET    | `/gender`   | Obtener géneros disponibles     |
+| GET    | `/position` | Obtener posiciones de juego     |
+| GET    | `/category` | Obtener categorías              |
+| GET    | `/question` | Obtener preguntas de evaluación |
+
+### Partidos (`/api/matches`)
+
+| Método | Endpoint       | Descripción                    |
+| ------ | -------------- | ------------------------------ |
+| POST   | `/`            | Crear nuevo partido            |
+| GET    | `/open`        | Obtener partidos abiertos      |
+| GET    | `/me`          | Obtener mis partidos           |
+| GET    | `/details/:id` | Obtener detalles de un partido |
+| DELETE | `/:id`         | Eliminar partido               |
+| POST   | `/player`      | Agregar jugador a partido      |
+
+### Aplicaciones (`/api/application`)
+
+| Método | Endpoint      | Descripción          |
+| ------ | ------------- | -------------------- |
+| POST   | `/`           | Aplicar a un partido |
+| POST   | `/accept/:id` | Aceptar aplicación   |
+
+## 🗄️ Base de Datos
+
+### Modelos Principales
+
+- **User**: Usuarios del sistema
+- **Player**: Jugadores de pádel
+- **Match**: Partidos organizados
+- **Team**: Equipos en partidos
+- **Application**: Aplicaciones a partidos
+- **Category**: Categorías de juego
+- **Gender**: Géneros (masculino, femenino, mixto)
+- **PlayerPosition**: Posiciones de juego
+- **MatchStatus**: Estados de partidos
+
+### Relaciones Principales
+
+- Un usuario puede tener un perfil de jugador
+- Los partidos tienen un creador y múltiples jugadores
+- Los partidos se organizan en equipos
+- Los jugadores pueden aplicar a partidos
+- Las categorías están asociadas a géneros
+
+## 🔐 Autenticación
+
+### JWT Token
+
+La API utiliza JWT para autenticación. Incluye el token en el header:
+
+```
+Authorization: Bearer <tu-token-jwt>
+```
+
+### Google OAuth
+
+Soporte para autenticación con Google. Configura `GOOGLE_CLIENT_ID` en las variables de entorno.
+
+## 📜 Scripts Disponibles
+
+| Comando       | Descripción                              |
+| ------------- | ---------------------------------------- |
+| `pnpm dev`    | Iniciar servidor en modo desarrollo      |
+| `pnpm build`  | Compilar TypeScript a JavaScript         |
+| `pnpm start`  | Iniciar servidor en producción           |
+| `pnpm pgen`   | Generar cliente Prisma                   |
+| `pnpm pmig`   | Ejecutar migraciones de base de datos    |
+| `pnpm pstu`   | Abrir Prisma Studio                      |
+| `pnpm pseed`  | Poblar base de datos con datos iniciales |
+| `pnpm pclean` | Limpiar datos de la base de datos        |
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+### Guías de Contribución
+
+- Usa TypeScript para todo el código nuevo
+- Sigue las convenciones de nomenclatura existentes
+- Añade tests para nuevas funcionalidades
+- Documenta nuevos endpoints
+- Ejecuta `pnpm build` antes de commit
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
 ---
 
-### Mejoras y próximos pasos
-
-- **Manejo de imágenes**: Implementar la carga y almacenamiento de fotos de perfil de los usuarios.
-- **Notificaciones**: Crear el sistema de notificaciones para los usuarios.
-- **Frontend**: Implementar la aplicación móvil usando **React Native**.
-
----
-
-### Notas
-
-- **Autenticación persistente**: El backend maneja la sesión usando **JWTs** para mantener al usuario autenticado de manera persistente, utilizando un sistema de **refresh tokens**.
-- La API está configurada para permitir solicitudes desde **localhost** y la URL de **VSCode Ports**.
-
----
-
-Este es el **README.md** básico para el proyecto. Puedes agregar más detalles conforme vayas avanzando o realizando cambios en la arquitectura del proyecto.
+**Desarrollado con ❤️ para la comunidad de pádel**
