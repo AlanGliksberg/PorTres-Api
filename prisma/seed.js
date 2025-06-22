@@ -95,7 +95,7 @@ async function main() {
   console.log("QuestionType records created!");
 
   [
-    { label: "¿Hace cuánto tiempo juegas al pádel?", code: "Q1", type: { connect: { code: "SELECT" } } },
+    { label: "¿Hace cuánto tiempo jugás al pádel?", code: "Q1", type: { connect: { code: "SELECT" } } },
     {
       label: "¿Jugaste anteriormente deportes con paleta o raqueta?",
       code: "Q2",
@@ -103,7 +103,7 @@ async function main() {
     },
     { label: "¿Cuántos partidos jugás al mes?", code: "Q3", type: { connect: { code: "RADIO" } } },
     { label: "¿Cómo describís tu nivel de drive y revés?", code: "Q4", type: { connect: { code: "RADIO" } } },
-    { label: "¿Cómo usas las paredes en tu juego?", code: "Q5", type: { connect: { code: "RADIO" } } }
+    { label: "¿Cómo usás las paredes en tu juego?", code: "Q5", type: { connect: { code: "RADIO" } } }
   ].map(async (question) => {
     await prisma.question.upsert({
       where: { code: question.code },
