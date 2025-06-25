@@ -20,11 +20,11 @@ export const register = async (data: RegisterDTO) => {
   const user = await creatUser({
     email: data.email,
     passwordHash,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    dni: data.dni || null,
-    photoUrl: data.photoUrl || null,
-    phoneNumber: data.phone || null
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    phoneNumber: data.phone?.trim() || null,
+    dni: data.dni?.trim() || null,
+    photoUrl: data.photoUrl?.trim() || null
   });
 
   return {
