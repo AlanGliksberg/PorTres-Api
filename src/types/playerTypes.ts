@@ -11,15 +11,13 @@ export type PlayerDTO = {
 };
 
 export type CreatePlayerBody = {
-  categoryId: number;
-  phone?: string;
   genderId: number;
-  knowsCategory: boolean;
   positionId: number;
-  answers: PlayerAnswers[];
+  phone?: string;
+  knowsCategory: boolean;
+  categoryId?: number;
+  answers?: number[];
 };
-
-export type PlayerAnswers = {};
 
 export type GetPlayersRequest = {
   name?: string;

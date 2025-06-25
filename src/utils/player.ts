@@ -62,19 +62,19 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
   return Promise.all(playerPromises);
 };
 
-export const createPlayer = async (name: string, lastName: string, answers: CreatePlayerBody, userId: number) => {
-  const category = await calculatePlayerCategory(answers);
+export const createPlayer = async (name: string, lastName: string, data: CreatePlayerBody, userId: number) => {
+  const category = await calculatePlayerCategory(data);
   const rankingPoints = category.initialPoints;
 
   return await prisma.player.create({
     data: {
       firstName: name,
       lastName: lastName,
-      genderId: answers.genderId,
-      phone: answers.phone,
+      genderId: data.genderId,
+      phone: data.phone,
       categoryId: category.id,
       rankingPoints,
-      positionId: answers.positionId,
+      positionId: data.positionId,
       userId
     }
   });
@@ -93,19 +93,37 @@ export const createTemporalPlayer = async (player: PlayerDTO) => {
   });
 };
 
-const calculatePlayerCategory = async (answers: CreatePlayerBody): Promise<Category> => {
+const calculatePlayerCategory = async (data: CreatePlayerBody): Promise<Category> => {
   let where;
-  if (answers.knowsCategory) where = { id: answers.categoryId };
+  if (data.knowsCategory) where = { id: data.categoryId };
   else {
-    let categoryCode = CATEGORY.C5;
-    where = { code: categoryCode }; // TODO - calcular nivel según respuestas
+    let categoryCode;
+    if (data.answers && data.answers.length > 0) {
+      const answers = await prisma.questionAnswer.findMany({
+        where: {
+          id: { in: data.answers }
+        }
+      });
+
+      const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
+      const averagePoints = totalPoints / answers.length;
+
+      if (averagePoints <= 20) {
+        categoryCode = CATEGORY.C9;
+      } else if (averagePoints <= 28) {
+        categoryCode = CATEGORY.C8;
+      } else {
+        categoryCode = CATEGORY.C7;
+      }
+    }
+    where = { code: categoryCode };
   }
 
   const category = await prisma.category.findUnique({
     where
   });
 
-  if (!category) throw new CustomError("Nivel inválido", ErrorCode.CATEGORY_INVALID);
+  if (!category) throw new CustomError("Catergoría no encontrada", ErrorCode.CATEGORY_INVALID);
 
   return category;
 };
@@ -180,7 +198,7 @@ export const validateCreatePlayerBody = (body: CreatePlayerBody) => {
     !Number(body.genderId) ||
     !body.positionId ||
     !Number(body.positionId) ||
-    !((body.knowsCategory && body.categoryId && Number(body.categoryId)) || !(!body.knowsCategory && body.answers))
+    !((body.knowsCategory && body.categoryId && Number(body.categoryId)) || (!body.knowsCategory && body.answers))
   )
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
 };
