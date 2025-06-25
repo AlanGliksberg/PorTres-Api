@@ -56,3 +56,13 @@ export const getCategories = async (req: Request<{ filterBoth: string }>, res: R
     res.status(500).json(new ErrorResponse("Error getting categories", e));
   }
 };
+
+export const getQuestions = async (req: Request, res: Response) => {
+  try {
+    const questions = await playerService.getQuestions();
+    res.status(200).json(new OkResponse({ questions }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting questions", e));
+  }
+};
