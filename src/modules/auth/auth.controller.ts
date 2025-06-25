@@ -2,7 +2,7 @@ import { Response } from "express";
 import * as authService from "./auth.service";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
-import { RegisterDTO } from "../../types/auth";
+import { RefreshTokenDTO, RegisterDTO } from "../../types/auth";
 
 export const register = async (req: Request<RegisterDTO>, res: Response) => {
   try {
@@ -31,5 +31,15 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.log(e);
     res.status(500).json(new ErrorResponse("Google error", e));
+  }
+};
+
+export const refreshToken = async (req: Request<RefreshTokenDTO>, res: Response) => {
+  try {
+    const token = await authService.refreshToken(req.body.token);
+    res.status(200).json(new OkResponse({ token }));
+  } catch (e: any) {
+    console.log(e);
+    res.status(500).json(new ErrorResponse("Refresh error", e));
   }
 };

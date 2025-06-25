@@ -8,3 +8,7 @@ export interface RegisterDTO {
   googleId?: string;
   phone?: string;
 }
+
+export interface RefreshTokenDTO {
+  token: string;
+}

@@ -1,7 +1,7 @@
 import { Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { hashPassword, verifyPassword } from "../../utils/hash";
-import { signToken } from "../../utils/jwt";
+import { signToken, verifyToken } from "../../utils/jwt";
 import { OAuth2Client } from "google-auth-library";
 import { creatUser } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
@@ -59,6 +59,12 @@ export const loginWithGoogle = async (idToken: string) => {
     });
   }
   return getToken(user);
+};
+
+export const refreshToken = async (token: string) => {
+  const user = verifyToken(token) as User;
+  const userDB = await prisma.user.findUnique({ where: { id: user.id }, include: { player: true } });
+  return getToken(userDB!);
 };
 
 const getToken = (
