@@ -69,7 +69,7 @@ async function main() {
   categories.push(
     ...[...Array(9)].map((x, i) => ({
       code: `M${i + 7}`,
-      description: `Mixto +${i + 7}`,
+      description: `Suma ${i + 7}`,
       initialPoints: 0,
       gender: { connect: { code: "X" } }
     }))
