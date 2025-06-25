@@ -3,15 +3,16 @@ import { PrismaClient } from "@prisma/client";
 export async function seedGender(prisma) {
   await Promise.all(
     [
-      { code: "C", name: "Caballero", pluralName: "Caballeros" },
-      { code: "D", name: "Dama", pluralName: "Damas" },
-      { code: "X", name: "Mixto", pluralName: "Mixto" }
+      { code: "C", name: "Caballero", pluralName: "Caballeros", order: 2 },
+      { code: "D", name: "Dama", pluralName: "Damas", order: 1 },
+      { code: "X", name: "Mixto", pluralName: "Mixto", order: 3 }
     ].map((gender) =>
       prisma.gender.upsert({
         where: { code: gender.code },
         update: {
           name: gender.name,
-          pluralName: gender.pluralName
+          pluralName: gender.pluralName,
+          order: gender.order
         },
         create: gender
       })

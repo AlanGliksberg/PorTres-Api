@@ -117,6 +117,7 @@ model Gender {
   code       String @unique
   name       String
   pluralName String
+  order      Int
 
   matches    Match[]
   players    Player[]
