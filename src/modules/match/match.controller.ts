@@ -1,6 +1,12 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
-import { AddPlayerToMatchRequest, GetMatchesRequest, MATCH_STATUS, MatchDto } from "../../types/matchTypes";
+import {
+  AddPlayerToMatchRequest,
+  GetMatchesRequest,
+  MATCH_STATUS,
+  MatchDto,
+  UpdateMatchDto
+} from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
 import { getPlayerByUserId } from "../../utils/player";
@@ -89,5 +95,53 @@ export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, re
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error adding player to match", e));
+  }
+};
+
+export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) => {
+  try {
+    const matchId = Number(req.params.id);
+
+    // Obtener el partido actual para validaciones
+    const currentMatch = await matchService.getMatchById(matchId);
+    if (!currentMatch) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    if (currentMatch.creatorPlayerId !== req.user.playerId) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo el creador puede editar el partido",
+            new CustomError("No autorizado", ErrorCode.UNAUTHORIZED)
+          )
+        );
+      return;
+    }
+
+    // TODO - Validar que el partido esté en estado PENDING para editar equipos
+    // if (req.body.teams && currentMatch.status.name !== MATCH_STATUS.PENDING) {
+    //   res
+    //     .status(400)
+    //     .json(
+    //       new ErrorResponse(
+    //         "Solo se pueden editar equipos en partidos pendientes",
+    //         new CustomError("Estado inválido", ErrorCode.CREATE_MATCH_INCORRECT_BODY)
+    //       )
+    //     );
+    //   return;
+    // }
+
+    // TODO - agregar validaciones de campos (fechas futuras, duración válida, etc.)
+
+    const match = await matchService.updateMatch(matchId, req.body);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error updating match", e));
   }
 };

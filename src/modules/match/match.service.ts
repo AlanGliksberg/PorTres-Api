@@ -1,7 +1,7 @@
 import { ApplicationStatus, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { MatchDto, MatchFilters, MATCH_STATUS, AddPlayerToMatchRequest } from "../../types/matchTypes";
-import { createTeam, getDBFilter } from "../../utils/match";
+import { MatchDto, MatchFilters, MATCH_STATUS, AddPlayerToMatchRequest, UpdateMatchDto } from "../../types/matchTypes";
+import { createTeam, getDBFilter, updateTeams } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
@@ -9,7 +9,7 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
 
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
-    
+
   const team1 = await createTeam(1, teams?.team1, genderId);
   const team2 = await createTeam(2, teams?.team2, genderId);
 
@@ -226,4 +226,85 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
       }
     }
   });
+};
+
+export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
+  const updateData: any = {};
+
+  if (data.location !== undefined) updateData.location = data.location;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.duration !== undefined) updateData.duration = data.duration;
+  if (data.pointsDeviation !== undefined) updateData.pointsDeviation = data.pointsDeviation;
+
+  if (data.date && data.time) {
+    updateData.dateTime = `${data.date}T${data.time}:00.000Z`;
+  }
+
+  if (data.genderId !== undefined) {
+    updateData.gender = { connect: { id: data.genderId } };
+  }
+
+  if (data.categoryId !== undefined) {
+    updateData.category = { connect: { id: data.categoryId } };
+  }
+
+  // Si se van a actualizar los equipos, necesitamos el genderId para validaciones
+  let genderId = data.genderId;
+  if (data.teams && !genderId) {
+    const currentMatch = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { gender: true }
+    });
+    genderId = currentMatch?.genderId;
+  }
+
+  // Actualizar el partido
+  const updatedMatch = await prisma.match.update({
+    where: {
+      id: matchId
+    },
+    data: updateData,
+    include: {
+      teams: {
+        include: {
+          players: true
+        }
+      },
+      sets: true,
+      status: true,
+      applications: {
+        where: {
+          status: ApplicationStatus.PENDING
+        }
+      }
+    }
+  });
+
+  // Si se incluyen equipos, actualizarlos
+  if (data.teams && genderId) {
+    await updateTeams(matchId, data.teams, genderId);
+
+    // Obtener el partido actualizado con los nuevos equipos
+    return await prisma.match.findUnique({
+      where: {
+        id: matchId
+      },
+      include: {
+        teams: {
+          include: {
+            players: true
+          }
+        },
+        sets: true,
+        status: true,
+        applications: {
+          where: {
+            status: ApplicationStatus.PENDING
+          }
+        }
+      }
+    });
+  }
+
+  return updatedMatch;
 };

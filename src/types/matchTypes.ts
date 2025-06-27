@@ -15,6 +15,18 @@ export interface MatchDto {
   creatorPlayerId: number;
 }
 
+export interface UpdateMatchDto {
+  location?: string;
+  description?: string;
+  date?: Date;
+  time?: string;
+  duration?: number;
+  genderId?: number;
+  categoryId?: number;
+  pointsDeviation?: number;
+  teams?: TeamDTO;
+}
+
 export type GetMatchesRequest = {
   gender?: string | string[];
   status?: string | string[];

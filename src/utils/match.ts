@@ -1,6 +1,7 @@
 import { Match, Prisma } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
 import { GENDER, PlayerDTO } from "../types/playerTypes";
+import { TeamDTO } from "../types/team";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { createOrGetPlayers } from "./player";
 import { ApplicationWithRelations } from "../types/application";
@@ -81,6 +82,59 @@ export const validateCreateMatchBody = (body: MatchDto) => {
   // TODO - completar
   if (!body.date || !body.time || !body.location || !body.duration)
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
+};
 
+export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number) => {
+  // Primero desconectamos todos los jugadores actuales
+  await prisma.match.update({
+    where: { id: matchId },
+    data: {
+      players: {
+        set: []
+      }
+    }
+  });
 
-}
+  // Luego conectamos los nuevos jugadores
+  const team1 = await createTeam(1, teams.team1, allowedGenderId);
+  const team2 = await createTeam(2, teams.team2, allowedGenderId);
+
+  return await prisma.match.update({
+    where: { id: matchId },
+    data: {
+      players: {
+        connect: [...team1.players.connect, ...team2.players.connect]
+      },
+      teams: {
+        update: [
+          {
+            where: {
+              matchId_teamNumber: {
+                matchId,
+                teamNumber: 1
+              }
+            },
+            data: {
+              players: {
+                connect: team1.players.connect
+              }
+            }
+          },
+          {
+            where: {
+              matchId_teamNumber: {
+                matchId,
+                teamNumber: 2
+              }
+            },
+            data: {
+              players: {
+                connect: team2.players.connect
+              }
+            }
+          }
+        ]
+      }
+    }
+  });
+};
