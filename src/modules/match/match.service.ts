@@ -9,7 +9,7 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
 
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
-
+    
   const team1 = await createTeam(1, teams?.team1, genderId);
   const team2 = await createTeam(2, teams?.team2, genderId);
 
@@ -184,6 +184,7 @@ export const deleteMatch = async (matchId: number) => {
 export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
   // TODO - validar que el equipo tenga un lugar dispobile
   // no se puede incluir un jugador que ya esta en el partido
+  // validar genero de jugador contra el genero de partido
   return await prisma.match.update({
     where: {
       id: data.matchId

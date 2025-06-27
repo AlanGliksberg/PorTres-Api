@@ -3,16 +3,16 @@ import { GENDER } from "./playerTypes";
 import { TeamDTO } from "./team";
 
 export interface MatchDto {
-  date: Date;
-  time: string;
   location: string;
   description?: string;
+  date: Date;
+  time: string;
+  duration: number;
+  genderId: number;
   categoryId: number;
+  teams?: TeamDTO;
   pointsDeviation: number;
   creatorPlayerId: number;
-  genderId: number;
-  teams?: TeamDTO;
-  duration: number;
 }
 
 export type GetMatchesRequest = {
