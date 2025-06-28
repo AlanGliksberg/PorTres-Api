@@ -85,12 +85,42 @@ export const validateCreateMatchBody = (body: MatchDto) => {
 };
 
 export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number) => {
-  // Primero desconectamos todos los jugadores actuales
+  // Primero desconectamos todos los jugadores actuales del partido y de los equipos
   await prisma.match.update({
     where: { id: matchId },
     data: {
       players: {
         set: []
+      },
+      teams: {
+        update: [
+          {
+            where: {
+              matchId_teamNumber: {
+                matchId,
+                teamNumber: 1
+              }
+            },
+            data: {
+              players: {
+                set: []
+              }
+            }
+          },
+          {
+            where: {
+              matchId_teamNumber: {
+                matchId,
+                teamNumber: 2
+              }
+            },
+            data: {
+              players: {
+                set: []
+              }
+            }
+          }
+        ]
       }
     }
   });
