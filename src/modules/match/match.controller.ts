@@ -74,21 +74,63 @@ export const getMatchDetails = async (req: Request, res: Response) => {
 
 export const deleteMatch = async (req: Request, res: Response) => {
   try {
-    // TODO - solo el creador del partido lo puede eliminar
     const matchId = Number(req.params.id);
+
+    // Obtener el partido actual para validaciones
+    const currentMatch = await matchService.getMatchById(matchId);
+    if (!currentMatch) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    // Solo el creador del partido puede eliminarlo
+    if (currentMatch.creatorPlayerId !== req.user.playerId) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo el creador puede eliminar el partido",
+            new CustomError("No autorizado", ErrorCode.UNAUTHORIZED)
+          )
+        );
+      return;
+    }
+
     const match = await matchService.deleteMatch(matchId);
     // TODO - notificar a jugadores
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
-    res.status(500).json(new ErrorResponse("Error getting match", e));
+    res.status(500).json(new ErrorResponse("Error deleting match", e));
   }
 };
 
 export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, res: Response) => {
   try {
-    // TODO - agregar validaciones de campos
-    // solo el creador del partido puede agregar jugadores
+    // Obtener el partido actual para validaciones
+    const currentMatch = await matchService.getMatchById(req.body.matchId);
+    if (!currentMatch) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    // Solo el creador del partido puede agregar jugadores
+    if (currentMatch.creatorPlayerId !== req.user.playerId) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo el creador puede agregar jugadores al partido",
+            new CustomError("No autorizado", ErrorCode.UNAUTHORIZED)
+          )
+        );
+      return;
+    }
+
     const match = await matchService.addPlayerToMatch(req.body);
     // TODO - notificar jugador
     if (match.players.length === 4) await matchService.changeState(req.body.matchId, MATCH_STATUS.COMPLETED);

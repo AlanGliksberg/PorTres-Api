@@ -54,6 +54,17 @@ export const parseMatches = (matches: Match[]) => {
 };
 
 export const addPlayerToMatchFromApplication = async (application: NonNullable<ApplicationWithRelations>) => {
+  // Verificar que el jugador no esté ya en el partido
+  if (application.match) {
+    const playerInMatch = application.match.teams.some((team) =>
+      team.players.some((player) => player.id === application.playerId)
+    );
+
+    if (playerInMatch) {
+      throw new CustomError("El jugador ya está en el partido", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+    }
+  }
+
   return await prisma.match.update({
     where: { id: application.matchId },
     data: {

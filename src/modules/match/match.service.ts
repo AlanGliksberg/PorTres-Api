@@ -17,6 +17,17 @@ import { getPlayerById } from "../../utils/player";
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
+  // Validar que cada jugador aparezca solo una vez en los equipos
+  if (teams) {
+    const allPlayers = [...(teams.team1 || []), ...(teams.team2 || [])];
+    const playerIds = allPlayers.map((player) => player.id).filter(Boolean);
+    const uniquePlayerIds = [...new Set(playerIds)];
+
+    if (playerIds.length !== uniquePlayerIds.length) {
+      throw new CustomError("No se puede agregar el mismo jugador 2 veces", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+    }
+  }
+
   const matchStatus: MATCH_STATUS =
     (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.CLOSED : MATCH_STATUS.PENDING;
 
@@ -192,9 +203,26 @@ export const deleteMatch = async (matchId: number) => {
 };
 
 export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
-  // TODO - validar que el equipo tenga un lugar dispobile
-  // no se puede incluir un jugador que ya esta en el partido
-  // validar genero de jugador contra el genero de partido
+  // Obtener el partido actual para validaciones
+  const currentMatch = await getMatchById(data.matchId);
+  if (!currentMatch) {
+    throw new CustomError("No existing match with id: " + data.matchId, ErrorCode.NO_MATCH);
+  }
+
+  // Verificar que el jugador no esté ya en el partido
+  const playerInMatch = currentMatch.teams.some((team) => team.players.some((player) => player.id === data.playerId));
+
+  if (playerInMatch) {
+    throw new CustomError("El jugador ya está en el partido", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+  }
+
+  // Verificar que el equipo no esté lleno
+  const targetTeam = currentMatch.teams.find((team) => team.teamNumber === data.teamNumber);
+  if (targetTeam && targetTeam.players.length >= 2) {
+    throw new CustomError("El equipo está lleno", ErrorCode.APPLICATION_TEAM_FULL);
+  }
+
+  // TODO - validar genero de jugador contra el genero de partido
   return await prisma.match.update({
     where: {
       id: data.matchId
@@ -292,6 +320,15 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
 
   // Si se incluyen equipos, actualizarlos
   if (data.teams && genderId) {
+    // Validar que cada jugador aparezca solo una vez en los equipos
+    const allPlayers = [...(data.teams.team1 || []), ...(data.teams.team2 || [])];
+    const playerIds = allPlayers.map((player) => player.id).filter(Boolean);
+    const uniquePlayerIds = [...new Set(playerIds)];
+
+    if (playerIds.length !== uniquePlayerIds.length) {
+      throw new CustomError("No se puede agregar el mismo jugador 2 veces", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+    }
+
     await updateTeams(matchId, data.teams, genderId);
 
     // Obtener el partido actualizado con los nuevos equipos
