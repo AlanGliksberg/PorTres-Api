@@ -6,8 +6,9 @@ router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
 router.get("/me", matchController.getMyMatches);
 router.get("/details/:id", matchController.getMatchDetails);
-router.put("/:id", matchController.updateMatch);
-router.delete("/:id", matchController.deleteMatch);
 router.post("/player", matchController.addPlayerToMatch);
+router.delete("/player", matchController.deletePlayerFromMatch);
+router.delete("/:id", matchController.deleteMatch);
+router.put("/:id", matchController.updateMatch);
 
 export default router;

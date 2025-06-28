@@ -2,6 +2,7 @@ import { Response } from "express";
 import * as matchService from "./match.service";
 import {
   AddPlayerToMatchRequest,
+  DeletePlayerFromMatchRequest,
   GetMatchesRequest,
   MATCH_STATUS,
   MatchDto,
@@ -143,5 +144,36 @@ export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) =
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error updating match", e));
+  }
+};
+
+export const deletePlayerFromMatch = async (req: Request<DeletePlayerFromMatchRequest>, res: Response) => {
+  try {
+    const currentMatch = await matchService.getMatchById(req.body.matchId);
+    if (!currentMatch) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    // Solo puede eliminar el jugador el creador del partido o el jugador mismo
+    if (currentMatch.creatorPlayerId !== req.user.playerId && req.user.playerId !== req.body.playerId) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo el creador puede editar el partido",
+            new CustomError("No autorizado", ErrorCode.UNAUTHORIZED)
+          )
+        );
+      return;
+    }
+
+    const match = await matchService.deletePlayerFromMatch(req.body);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error deleting player from match", e));
   }
 };

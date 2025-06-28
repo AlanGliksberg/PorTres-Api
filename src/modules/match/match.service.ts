@@ -1,8 +1,18 @@
 import { ApplicationStatus, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { MatchDto, MatchFilters, MATCH_STATUS, AddPlayerToMatchRequest, UpdateMatchDto } from "../../types/matchTypes";
+import {
+  MatchDto,
+  MatchFilters,
+  MATCH_STATUS,
+  AddPlayerToMatchRequest,
+  UpdateMatchDto,
+  DeletePlayerFromMatchRequest
+} from "../../types/matchTypes";
 import { createTeam, getDBFilter, updateTeams } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
+import { CustomError } from "../../types/customError";
+import { ErrorCode } from "../../constants/errorCode";
+import { getPlayerById } from "../../utils/player";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -304,6 +314,86 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
         }
       }
     });
+  }
+
+  return updatedMatch;
+};
+
+export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) => {
+  // Obtener el partido actual para validaciones
+  const currentMatch = await getMatchById(data.matchId);
+  if (!currentMatch) {
+    throw new CustomError("No existing match with id: " + data.matchId, ErrorCode.NO_MATCH);
+  }
+
+  // Verificar que el jugador esté en el partido
+  const playerInMatch = currentMatch.teams.some((team) => team.players.some((player) => player.id === data.playerId));
+  if (!playerInMatch) {
+    throw new CustomError("Player is not in the match", ErrorCode.UNAUTHORIZED);
+  }
+
+  // Encontrar en qué equipo está el jugador
+  const teamWithPlayer = currentMatch.teams.find((team) => team.players.some((player) => player.id === data.playerId));
+  if (!teamWithPlayer) {
+    throw new CustomError("Player not found in any team", ErrorCode.UNAUTHORIZED);
+  }
+
+  // Obtener información del jugador para verificar si tiene userId
+  const playerToDelete = await getPlayerById(data.playerId);
+  if (!playerToDelete) {
+    throw new CustomError("Player not found", ErrorCode.NO_PLAYER);
+  }
+
+  // Eliminar el jugador del partido y del equipo
+  const updatedMatch = await prisma.match.update({
+    where: { id: data.matchId },
+    data: {
+      players: {
+        disconnect: { id: data.playerId }
+      },
+      teams: {
+        update: {
+          where: {
+            matchId_teamNumber: {
+              matchId: data.matchId,
+              teamNumber: teamWithPlayer.teamNumber
+            }
+          },
+          data: {
+            players: {
+              disconnect: { id: data.playerId }
+            }
+          }
+        }
+      }
+    },
+    include: {
+      teams: {
+        include: {
+          players: true
+        }
+      },
+      sets: true,
+      status: true,
+      applications: {
+        where: {
+          status: ApplicationStatus.PENDING
+        }
+      }
+    }
+  });
+
+  // Si el jugador no tiene userId, eliminarlo completamente de la base de datos
+  if (!playerToDelete.userId) {
+    await prisma.player.delete({
+      where: { id: data.playerId }
+    });
+  }
+
+  // Si después de eliminar el jugador quedan menos de 4 jugadores, cambiar el estado a PENDING
+  const totalPlayers = updatedMatch.teams.reduce((total, team) => total + team.players.length, 0);
+  if (totalPlayers < 4) {
+    await changeState(data.matchId, MATCH_STATUS.PENDING);
   }
 
   return updatedMatch;

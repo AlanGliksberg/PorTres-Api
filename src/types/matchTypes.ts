@@ -47,6 +47,11 @@ export type AddPlayerToMatchRequest = {
   playerId: number;
 };
 
+export type DeletePlayerFromMatchRequest = {
+  matchId: number;
+  playerId: number;
+};
+
 export enum MATCH_STATUS {
   PENDING = "PENDING",
   CLOSED = "CLOSED",
