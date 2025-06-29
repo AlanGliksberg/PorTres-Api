@@ -99,7 +99,7 @@ model Application {
   id         Int      @id @default(autoincrement())
   matchId    Int
   playerId   Int
-  teamNumber Int
+  teamNumber Int?
   message    String?
   phone      String?
   reason     String?
