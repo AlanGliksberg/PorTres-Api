@@ -123,6 +123,9 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
     include.applications = {
       where: {
         status: ApplicationStatus.PENDING
+      },
+      include: {
+        player: true
       }
     };
   }
