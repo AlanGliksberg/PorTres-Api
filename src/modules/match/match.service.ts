@@ -391,6 +391,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
   }
 
   // Eliminar el jugador del partido y del equipo
+  // TODO - revisar que al eliminar un jugador se pueda volver a agregar al mismo jugador
   const updatedMatch = await prisma.match.update({
     where: { id: data.matchId },
     data: {
@@ -436,9 +437,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
     });
   }
 
-  // Si después de eliminar el jugador quedan menos de 4 jugadores, cambiar el estado a PENDING
-  const totalPlayers = updatedMatch.teams.reduce((total, team) => total + team.players.length, 0);
-  if (totalPlayers < 4) {
+  if (currentMatch.status.name !== MATCH_STATUS.PENDING) {
     await changeState(data.matchId, MATCH_STATUS.PENDING);
   }
 

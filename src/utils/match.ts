@@ -53,8 +53,11 @@ export const parseMatches = (matches: Match[]) => {
   });
 };
 
-export const addPlayerToMatchFromApplication = async (application: NonNullable<ApplicationWithRelations>) => {
-  // Verificar que el jugador no esté ya en el partido
+export const addPlayerToMatchFromApplication = async (
+  application: NonNullable<ApplicationWithRelations>,
+  teamNumber: 1 | 2
+) => {
+  // Verifico que el jugador no esté ya en el partido
   if (application.match) {
     const playerInMatch = application.match.teams.some((team) =>
       team.players.some((player) => player.id === application.playerId)
@@ -73,7 +76,7 @@ export const addPlayerToMatchFromApplication = async (application: NonNullable<A
           where: {
             matchId_teamNumber: {
               matchId: application.matchId,
-              teamNumber: application.teamNumber
+              teamNumber: teamNumber
             }
           },
           data: {
