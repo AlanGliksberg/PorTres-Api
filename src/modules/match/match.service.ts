@@ -125,7 +125,13 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
         status: ApplicationStatus.PENDING
       },
       include: {
-        player: true
+        player: {
+          include: {
+            gender: true,
+            category: true,
+            position: true
+          }
+        }
       }
     };
   }

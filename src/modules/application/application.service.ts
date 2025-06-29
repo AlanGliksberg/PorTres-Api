@@ -24,6 +24,7 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
 
   // TODO - ver si se puede postular a cualquiera de los dos equipos
   // TODO - no se pueden postular el creador del partido y jugadores ya en el partido
+  // TODO - validar generos
   const team = match.teams.find((m) => m.teamNumber === teamNumber);
   if (team?.players && team?.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
