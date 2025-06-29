@@ -40,9 +40,9 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
           id: playerId
         }
       },
-      teamNumber: data.teamNumber,
-      message: data.message,
-      phone: data.phone
+      teamNumber,
+      message,
+      phone
     }
   });
 };
