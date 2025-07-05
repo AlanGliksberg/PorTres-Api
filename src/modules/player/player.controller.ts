@@ -4,6 +4,8 @@ import { ErrorResponse, OkResponse } from "../../types/response";
 import * as playerService from "./player.service";
 import { Request } from "../../types/common";
 import { validateCreatePlayerBody, validateUpdatePlayerBody, parsePlayerFilters } from "../../utils/player";
+import { CustomError } from "../../types/customError";
+import { ErrorCode } from "../../constants/errorCode";
 
 export const createPlayer = async (req: Request<CreatePlayerBody>, res: Response) => {
   try {
@@ -24,6 +26,22 @@ export const updatePlayer = async (req: Request<UpdatePlayerBody>, res: Response
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error actualizando jugador", e));
+  }
+};
+
+export const getCurrentPlayer = async (req: Request, res: Response) => {
+  try {
+    const player = await playerService.getCurrentPlayer(req.user);
+
+    if (!player) {
+      const error = new CustomError("Jugador no encontrado", ErrorCode.NO_PLAYER);
+      res.status(404).json(new ErrorResponse("Jugador no encontrado", error));
+    } else {
+      res.status(200).json(new OkResponse({ player }));
+    }
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error obteniendo jugador", e));
   }
 };
 

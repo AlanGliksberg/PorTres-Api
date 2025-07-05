@@ -29,6 +29,14 @@ export const updatePlayer = async (data: UpdatePlayerBody, user: User) => {
   });
 };
 
+export const getCurrentPlayer = async (user: User) => {
+  return await getPlayerByUserId(user.id, {
+    position: true,
+    category: true,
+    gender: true
+  });
+};
+
 export const getPlayers = async (filters: PlayerFilters) => {
   const { page, pageSize } = filters;
   const where = getDBFilter(filters);
