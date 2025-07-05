@@ -443,3 +443,26 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
 
   return updatedMatch;
 };
+
+export const getPlayerMatchesCount = async (playerId: number) => {
+  const matchesCount = await prisma.match.count({
+    where: {
+      AND: [
+        {
+          players: {
+            some: {
+              id: playerId
+            }
+          }
+        },
+        {
+          status: {
+            name: MATCH_STATUS.COMPLETED
+          }
+        }
+      ]
+    }
+  });
+
+  return matchesCount;
+};

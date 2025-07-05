@@ -219,3 +219,17 @@ export const deletePlayerFromMatch = async (req: Request<DeletePlayerFromMatchRe
     res.status(500).json(new ErrorResponse("Error deleting player from match", e));
   }
 };
+
+export const getPlayerMatchesCount = async (req: Request, res: Response) => {
+  try {
+    if (!req.user.playerId) {
+      throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    }
+
+    const count = await matchService.getPlayerMatchesCount(req.user.playerId);
+    res.status(200).json(new OkResponse({ count }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting player matches count", e));
+  }
+};
