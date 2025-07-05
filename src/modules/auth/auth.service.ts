@@ -6,7 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 import { creatUser } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
-import { RegisterDTO } from "../../types/auth";
+import { RegisterDTO, ChangePasswordDTO } from "../../types/auth";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -15,13 +15,14 @@ export const register = async (data: RegisterDTO) => {
   //TODO - validar contraseña
   // 8 chars min
   // 1 may 1 min
+  // 1 numero
   passwordHash = await hashPassword(data.password!);
 
   const user = await creatUser({
     email: data.email,
     passwordHash,
-    firstName: data.firstName.trim(),
-    lastName: data.lastName.trim(),
+    firstName: data.firstName.trim().replace(/\b\w/g, (char) => char.toUpperCase()),
+    lastName: data.lastName.trim().replace(/\b\w/g, (char) => char.toUpperCase()),
     phoneNumber: data.phone?.trim() || null,
     dni: data.dni?.trim() || null,
     photoUrl: data.photoUrl?.trim() || null
@@ -65,6 +66,46 @@ export const refreshToken = async (token: string) => {
   const user = verifyToken(token) as User;
   const userDB = await prisma.user.findUnique({ where: { id: user.id }, include: { player: true } });
   return getToken(userDB!);
+};
+
+export const changePassword = async (userId: number, data: ChangePasswordDTO) => {
+  // Buscar el usuario
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.passwordHash) {
+    throw new CustomError("Usuario no encontrado o sin contraseña", ErrorCode.INVALID_CREDENTIALS);
+  }
+
+  // Verificar la contraseña actual
+  const isCurrentPasswordValid = await verifyPassword(data.currentPassword, user.passwordHash);
+  if (!isCurrentPasswordValid) {
+    throw new CustomError("Contraseña actual incorrecta", ErrorCode.INVALID_CREDENTIALS);
+  }
+
+  // Validar que la nueva contraseña sea diferente a la actual
+  const isNewPasswordSame = await verifyPassword(data.newPassword, user.passwordHash);
+  if (isNewPasswordSame) {
+    throw new CustomError("La nueva contraseña debe ser diferente a la actual", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
+  }
+
+  // TODO - Validar contraseña nueva
+  // 8 chars min
+  // 1 may 1 min
+  // 1 numero
+  if (data.newPassword.length < 8) {
+    throw new CustomError(
+      "La nueva contraseña debe tener al menos 8 caracteres",
+      ErrorCode.CREATE_PLAYER_INCORRECT_BODY
+    );
+  }
+
+  // Hashear la nueva contraseña
+  const newPasswordHash = await hashPassword(data.newPassword);
+
+  // Actualizar la contraseña en la base de datos
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: newPasswordHash }
+  });
 };
 
 const getToken = (

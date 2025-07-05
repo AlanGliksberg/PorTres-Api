@@ -12,3 +12,8 @@ export interface RegisterDTO {
 export interface RefreshTokenDTO {
   token: string;
 }
+
+export interface ChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
