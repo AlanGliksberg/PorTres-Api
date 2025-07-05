@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { CreatePlayerBody, GENDER, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
+import { CreatePlayerBody, UpdatePlayerBody, GENDER, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getDBFilter, getPlayerByUserId } from "../../utils/player";
 import prisma from "../../prisma/client";
 
@@ -8,6 +8,25 @@ export const createPlayer = async (data: CreatePlayerBody, user: User) => {
   if (existingPlayer) return existingPlayer;
 
   return await createPlayerDB(user.firstName, user.lastName, data, user.id);
+};
+
+export const updatePlayer = async (data: UpdatePlayerBody, user: User) => {
+  const updateData: {
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    positionId: number;
+  } = {
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    phone: data.phone?.trim() || null,
+    positionId: data.positionId
+  };
+
+  return await prisma.player.update({
+    where: { userId: user.id },
+    data: updateData
+  });
 };
 
 export const getPlayers = async (filters: PlayerFilters) => {

@@ -6,6 +6,7 @@ import {
   PlayerDTO,
   PlayerFilters,
   CreatePlayerBody,
+  UpdatePlayerBody,
   POSITION
 } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
@@ -201,4 +202,18 @@ export const validateCreatePlayerBody = (body: CreatePlayerBody) => {
     !((body.knowsCategory && body.categoryId && Number(body.categoryId)) || (!body.knowsCategory && body.answers))
   )
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
+};
+
+export const validateUpdatePlayerBody = (body: UpdatePlayerBody) => {
+  if (!body.firstName || body.firstName.trim().length === 0)
+    throw new CustomError("El nombre es requerido y no puede estar vacío", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
+
+  if (!body.lastName || body.lastName.trim().length === 0)
+    throw new CustomError("El apellido es requerido y no puede estar vacío", ErrorCode.CREATE_PLAYER_INCORRECT_BODY);
+
+  if (!body.positionId || !Number(body.positionId))
+    throw new CustomError(
+      "El ID de posición es requerido y debe ser un número válido",
+      ErrorCode.CREATE_PLAYER_INCORRECT_BODY
+    );
 };

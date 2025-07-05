@@ -1,9 +1,9 @@
 import { Response } from "express";
-import { CreatePlayerBody, GetPlayersRequest } from "../../types/playerTypes";
+import { CreatePlayerBody, UpdatePlayerBody, GetPlayersRequest } from "../../types/playerTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import * as playerService from "./player.service";
 import { Request } from "../../types/common";
-import { validateCreatePlayerBody, parsePlayerFilters } from "../../utils/player";
+import { validateCreatePlayerBody, validateUpdatePlayerBody, parsePlayerFilters } from "../../utils/player";
 
 export const createPlayer = async (req: Request<CreatePlayerBody>, res: Response) => {
   try {
@@ -13,6 +13,17 @@ export const createPlayer = async (req: Request<CreatePlayerBody>, res: Response
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error creating player", e));
+  }
+};
+
+export const updatePlayer = async (req: Request<UpdatePlayerBody>, res: Response) => {
+  try {
+    validateUpdatePlayerBody(req.body);
+    const player = await playerService.updatePlayer(req.body, req.user);
+    res.status(200).json(new OkResponse({ player }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error actualizando jugador", e));
   }
 };
 

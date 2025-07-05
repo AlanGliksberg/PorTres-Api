@@ -3,6 +3,7 @@ import * as playerController from "./player.controller";
 
 const router = Router();
 router.post("/", playerController.createPlayer);
+router.put("/", playerController.updatePlayer);
 router.get("/", playerController.getPlayers);
 router.get("/gender", playerController.getGenders);
 router.get("/position", playerController.getPositions);

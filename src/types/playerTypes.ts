@@ -19,6 +19,13 @@ export type CreatePlayerBody = {
   answers?: number[];
 };
 
+export type UpdatePlayerBody = {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  positionId: number;
+};
+
 export type GetPlayersRequest = {
   name?: string;
   gender?: string | string[];
