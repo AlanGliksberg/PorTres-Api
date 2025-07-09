@@ -8,7 +8,7 @@ import {
   UpdateMatchDto,
   DeletePlayerFromMatchRequest
 } from "../../types/matchTypes";
-import { createTeam, getDBFilter, updateTeams } from "../../utils/match";
+import { createTeam, executeGetMatch, getCommonMatchInlcude, getDBFilter, updateTeams } from "../../utils/match";
 import { getUserSelect } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
@@ -97,90 +97,71 @@ export const getOpenMatches = async (filters: MatchFilters) => {
   ]);
 };
 
-export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
-  const { page, pageSize, createdBy, isPlayer } = filters;
+export const getCreatedMatches = async (playerId: number, filters: MatchFilters) => {
+  const { page, pageSize } = filters;
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
 
-  const or = [];
-  const include: Prisma.MatchInclude = {
-    status: true,
-    gender: true,
-    category: true,
-    teams: {
-      include: {
-        players: {
-          include: {
-            gender: true,
-            category: true,
-            position: true,
-            user: getUserSelect()
-          }
+  include.applications = {
+    where: {
+      status: ApplicationStatus.PENDING
+    },
+    include: {
+      player: {
+        include: {
+          gender: true,
+          category: true,
+          position: true
         }
       }
     }
   };
 
-  const status: MATCH_STATUS[] = [];
-
-  if (createdBy) {
-    or.push({ creatorPlayerId: playerId });
-    include.applications = {
-      where: {
-        status: ApplicationStatus.PENDING
-      },
-      include: {
-        player: {
-          include: {
-            gender: true,
-            category: true,
-            position: true
-          }
-        }
-      }
-    };
-    status.push(MATCH_STATUS.PENDING);
-  }
-
-  if (isPlayer) {
-    or.push({
-      players: {
-        some: {
-          id: playerId
-        }
-      }
-    });
-    status.push(MATCH_STATUS.COMPLETED);
-  }
-
   const where = {
     AND: [
-      {
-        OR: or
-      },
+      { creatorPlayerId: playerId },
       getDBFilter(filters),
       {
         status: {
-          name: {
-            in: status
-          }
+          name: MATCH_STATUS.PENDING
         }
       }
     ]
   };
 
-  return await prisma.$transaction([
-    prisma.match.findMany({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      where,
-      include,
-      orderBy: {
-        createdAt: "desc"
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    createdAt: "desc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
+};
+
+export const getPlayedMatches = async (playerId: number, filters: MatchFilters) => {
+  const { page, pageSize } = filters;
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+
+  const where = {
+    AND: [
+      {
+        players: {
+          some: {
+            id: playerId
+          }
+        }
+      },
+      getDBFilter(filters),
+      {
+        status: {
+          name: MATCH_STATUS.COMPLETED
+        }
       }
-    }),
-    prisma.match.count({
-      where
-    })
-  ]);
+    ]
+  };
+
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    createdAt: "desc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
 };
 
 export const getMatchById = async (matchId: number) => {

@@ -48,11 +48,24 @@ export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Respo
   }
 };
 
-export const getMyMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
+export const getCreatedMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     if (!req.user.playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
     const filters = parseMatchFilters(req.query);
-    const [matches, totalMatches] = await matchService.getMyMatches(req.user.playerId, filters);
+    const [matches, totalMatches] = await matchService.getCreatedMatches(req.user.playerId, filters);
+    const parsedMatches = parseMatches(matches);
+    res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting matches", e));
+  }
+};
+
+export const getPlayedMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
+  try {
+    if (!req.user.playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    const filters = parseMatchFilters(req.query);
+    const [matches, totalMatches] = await matchService.getPlayedMatches(req.user.playerId, filters);
     const parsedMatches = parseMatches(matches);
     res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {

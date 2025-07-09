@@ -8,6 +8,7 @@ import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
+import { getUserSelect } from "./auth";
 
 export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   return {
@@ -17,18 +18,14 @@ export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undef
 };
 
 export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
-  const { page, pageSize, gender, status, createdBy: createdByParam, isPlayer: isPlayerParam } = filters;
+  const { page, pageSize, gender, status } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
   let matchGenders = convertStringIntoArray<GENDER>(gender);
   let matchStatus = convertStringIntoArray<MATCH_STATUS>(status);
-  let createdBy = createdByParam === undefined ? undefined : createdByParam === "true";
-  let isPlayer = isPlayerParam === undefined ? undefined : isPlayerParam === "true";
 
   return {
     genders: matchGenders,
     status: matchStatus,
-    createdBy,
-    isPlayer,
     page: pageNumber,
     pageSize: pageSizeNumber
   };
@@ -181,4 +178,45 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
       }
     }
   });
+};
+
+export const getCommonMatchInlcude = () => {
+  return {
+    status: true,
+    gender: true,
+    category: true,
+    teams: {
+      include: {
+        players: {
+          include: {
+            gender: true,
+            category: true,
+            position: true,
+            user: getUserSelect()
+          }
+        }
+      }
+    }
+  };
+};
+
+export const executeGetMatch = async (
+  page: number,
+  pageSize: number,
+  where: Prisma.MatchWhereInput,
+  include: Prisma.MatchInclude,
+  orderBy: Prisma.MatchOrderByWithRelationInput
+) => {
+  return await prisma.$transaction([
+    prisma.match.findMany({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      where,
+      include,
+      orderBy
+    }),
+    prisma.match.count({
+      where
+    })
+  ]);
 };

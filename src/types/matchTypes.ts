@@ -30,15 +30,11 @@ export interface UpdateMatchDto {
 export type GetMatchesRequest = {
   gender?: string | string[];
   status?: string | string[];
-  createdBy?: string;
-  isPlayer?: string;
 } & PageFilterString;
 
 export type MatchFilters = {
   genders?: GENDER[];
   status?: MATCH_STATUS[];
-  createdBy?: boolean;
-  isPlayer?: boolean;
 } & PageFilterNumber;
 
 export type AddPlayerToMatchRequest = {
