@@ -118,6 +118,9 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       }
     }
   };
+
+  const status: MATCH_STATUS[] = [];
+
   if (createdBy) {
     or.push({ creatorPlayerId: playerId });
     include.applications = {
@@ -134,8 +137,10 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
         }
       }
     };
+    status.push(MATCH_STATUS.PENDING);
   }
-  if (isPlayer)
+
+  if (isPlayer) {
     or.push({
       players: {
         some: {
@@ -143,6 +148,8 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
         }
       }
     });
+    status.push(MATCH_STATUS.COMPLETED);
+  }
 
   const where = {
     AND: [
@@ -152,7 +159,9 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       getDBFilter(filters),
       {
         status: {
-          name: MATCH_STATUS.PENDING
+          name: {
+            in: status
+          }
         }
       }
     ]
@@ -444,7 +453,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
   return updatedMatch;
 };
 
-export const getPlayerMatchesCount = async (playerId: number) => {
+export const getPlayedMatchesCount = async (playerId: number) => {
   const matchesCount = await prisma.match.count({
     where: {
       AND: [

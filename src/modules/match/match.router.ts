@@ -5,7 +5,7 @@ const router = Router();
 router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
 router.get("/me", matchController.getMyMatches);
-router.get("/count", matchController.getPlayerMatchesCount);
+router.get("/count", matchController.getPlayedMatchesCount);
 router.get("/details/:id", matchController.getMatchDetails);
 router.post("/player", matchController.addPlayerToMatch);
 router.delete("/player", matchController.deletePlayerFromMatch);

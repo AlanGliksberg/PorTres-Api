@@ -9,6 +9,7 @@ import { ErrorCode } from "../../constants/errorCode";
 
 export const createPlayer = async (req: Request<CreatePlayerBody>, res: Response) => {
   try {
+    // TODO - agregar apodo
     validateCreatePlayerBody(req.body);
     const player = await playerService.createPlayer(req.body, req.user);
     res.status(200).json(new OkResponse({ player }));
