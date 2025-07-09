@@ -23,7 +23,7 @@ export async function seedQuestionAnswer(prisma) {
       async (answer) =>
         await prisma.questionAnswer.upsert({
           where: { code: answer.code },
-          update: { label: answer.label, points: answer.points, question: answer.question },
+          update: answer,
           create: answer
         })
     )

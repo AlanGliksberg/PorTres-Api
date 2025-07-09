@@ -193,7 +193,7 @@ export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) =
     }
 
     // TODO - Validar que el partido esté en estado PENDING para editar equipos
-    // if (req.body.teams && currentMatch.status.name !== MATCH_STATUS.PENDING) {
+    // if (req.body.teams && currentMatch.status.code !== MATCH_STATUS.PENDING) {
     //   res
     //     .status(400)
     //     .json(

@@ -9,11 +9,7 @@ export async function seedGender(prisma) {
     ].map((gender) =>
       prisma.gender.upsert({
         where: { code: gender.code },
-        update: {
-          name: gender.name,
-          pluralName: gender.pluralName,
-          order: gender.order
-        },
+        update: gender,
         create: gender
       })
     )

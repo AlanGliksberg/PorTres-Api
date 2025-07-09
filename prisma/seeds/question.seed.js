@@ -15,7 +15,7 @@ export async function seedQuestion(prisma) {
     ].map(async (question) => {
       await prisma.question.upsert({
         where: { code: question.code },
-        update: { label: question.label, type: question.type },
+        update: question,
         create: question
       });
     })

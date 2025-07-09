@@ -35,7 +35,7 @@ export const getDBFilter = (filters: MatchFilters) => {
   const where: Prisma.MatchWhereInput = {};
   const { genders, status } = filters;
   if (genders && genders.length > 0) where.gender = { code: { in: genders } };
-  if (status && status.length > 0) where.status = { name: { in: status } };
+  if (status && status.length > 0) where.status = { code: { in: status } };
   return where;
 };
 

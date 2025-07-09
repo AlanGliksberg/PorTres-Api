@@ -9,10 +9,7 @@ export async function seedPlayerPosition(prisma) {
     ].map((position) =>
       prisma.playerPosition.upsert({
         where: { code: position.code },
-        update: {
-          description: position.description,
-          order: position.order
-        },
+        update: position,
         create: position
       })
     )

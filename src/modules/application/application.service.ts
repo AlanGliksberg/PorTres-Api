@@ -75,7 +75,7 @@ export const acceptApplication = async (playerId: number, applicationId: number,
     throw new CustomError("Solo el creador puede rechazar la postulación", ErrorCode.UNAUTHORIZED);
   if (application.status !== ApplicationStatus.PENDING)
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
-  if (application.match?.status.name !== MATCH_STATUS.PENDING)
+  if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
   if (application.match.teams.find((t) => t.teamNumber === application.teamNumber)!.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
@@ -103,7 +103,7 @@ export const rejectApplication = async (playerId: number, applicationId: number)
     throw new CustomError("Solo el creador puede rechazar la postulación", ErrorCode.UNAUTHORIZED);
   if (application.status !== ApplicationStatus.PENDING)
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
-  if (application.match?.status.name !== MATCH_STATUS.PENDING)
+  if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
 
   return await changeApplicationStatus(applicationId, ApplicationStatus.REJECTED);

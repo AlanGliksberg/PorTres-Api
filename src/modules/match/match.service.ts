@@ -52,7 +52,7 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
         }
       },
       creator: { connect: { id: playerId } },
-      status: { connect: { name: matchStatus } },
+      status: { connect: { code: matchStatus } },
       players: { connect: [...team1.players.connect, ...team2.players.connect] },
       teams: {
         create: [team1, team2]
@@ -71,7 +71,7 @@ export const getOpenMatches = async (filters: MatchFilters) => {
     AND: [
       {
         status: {
-          name: MATCH_STATUS.PENDING
+          code: MATCH_STATUS.PENDING
         }
       },
       getDBFilter(filters)
@@ -123,7 +123,7 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
       getDBFilter(filters),
       {
         status: {
-          name: MATCH_STATUS.PENDING
+          code: MATCH_STATUS.PENDING
         }
       }
     ]
@@ -152,7 +152,7 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
       getDBFilter(filters),
       {
         status: {
-          name: MATCH_STATUS.COMPLETED
+          code: MATCH_STATUS.COMPLETED
         }
       }
     ]
@@ -231,7 +231,7 @@ export const deleteMatch = async (matchId: number) => {
     data: {
       status: {
         connect: {
-          name: MATCH_STATUS.CANCELLED
+          code: MATCH_STATUS.CANCELLED
         }
       }
     }
@@ -295,7 +295,7 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
     data: {
       status: {
         connect: {
-          name: status
+          code: status
         }
       }
     }
@@ -464,7 +464,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
     });
   }
 
-  if (currentMatch.status.name !== MATCH_STATUS.PENDING) {
+  if (currentMatch.status.code !== MATCH_STATUS.PENDING) {
     await changeState(data.matchId, MATCH_STATUS.PENDING);
   }
 
@@ -484,7 +484,7 @@ export const getPlayedMatchesCount = async (playerId: number) => {
         },
         {
           status: {
-            name: MATCH_STATUS.COMPLETED
+            code: MATCH_STATUS.COMPLETED
           }
         }
       ]

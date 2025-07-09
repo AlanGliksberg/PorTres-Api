@@ -3,14 +3,14 @@ import { PrismaClient } from "@prisma/client";
 export async function seedMatchStatus(prisma) {
   await Promise.all(
     [
-      { name: "PENDING", description: "Pendiente" },
-      { name: "CLOSED", description: "Cerrado" },
-      { name: "COMPLETED", description: "Confirmado" },
-      { name: "CANCELLED", description: "Cancelado" }
+      { code: "PENDING", label: "Pendiente", description: "Pendiente" },
+      { code: "CLOSED", label: "Cerrado", description: "Cerrado" },
+      { code: "COMPLETED", label: "Confirmado", description: "Confirmado" },
+      { code: "CANCELLED", label: "Cancelado", description: "Cancelado" }
     ].map((status) =>
       prisma.matchStatus.upsert({
-        where: { name: status.name },
-        update: { description: status.description },
+        where: { code: status.code },
+        update: status,
         create: status
       })
     )

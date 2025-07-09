@@ -78,9 +78,10 @@ model Team {
 }
 
 model MatchStatus {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  description String
+  id          Int     @id @default(autoincrement())
+  code        String? @unique
+  label       String?
+  description String?
 
   matches Match[]
 }
