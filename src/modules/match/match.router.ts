@@ -6,6 +6,7 @@ router.post("/", matchController.createMatch);
 router.get("/open", matchController.getOpenMatches);
 router.get("/created", matchController.getCreatedMatches);
 router.get("/played", matchController.getPlayedMatches);
+router.get("/applied", matchController.getAppliedMatches);
 router.get("/count", matchController.getPlayedMatchesCount);
 router.get("/details/:id", matchController.getMatchDetails);
 router.post("/player", matchController.addPlayerToMatch);

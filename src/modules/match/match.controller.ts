@@ -74,6 +74,19 @@ export const getPlayedMatches = async (req: Request<GetMatchesRequest>, res: Res
   }
 };
 
+export const getAppliedMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
+  try {
+    if (!req.user.playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    const filters = parseMatchFilters(req.query);
+    const [matches, totalMatches] = await matchService.getAppliedMatches(req.user.playerId, filters);
+    const parsedMatches = parseMatches(matches);
+    res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting matches", e));
+  }
+};
+
 export const getMatchDetails = async (req: Request, res: Response) => {
   try {
     const matchId = Number(req.params.id);

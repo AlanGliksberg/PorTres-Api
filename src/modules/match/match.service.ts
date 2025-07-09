@@ -13,6 +13,7 @@ import { getUserSelect } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { getPlayerById } from "../../utils/player";
+import { application } from "express";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -154,6 +155,42 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
           name: MATCH_STATUS.COMPLETED
         }
       }
+    ]
+  };
+
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    createdAt: "desc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
+};
+
+export const getAppliedMatches = async (playerId: number, filters: MatchFilters) => {
+  const { page, pageSize } = filters;
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+
+  include.applications = {
+    include: {
+      player: {
+        include: {
+          gender: true,
+          category: true,
+          position: true
+        }
+      }
+    }
+  };
+
+  const where = {
+    AND: [
+      {
+        applications: {
+          some: {
+            playerId
+          }
+        }
+      },
+      getDBFilter(filters)
     ]
   };
 
