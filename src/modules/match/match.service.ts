@@ -181,7 +181,8 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
           category: true,
           position: true
         }
-      }
+      },
+      status: true
     }
   };
 
