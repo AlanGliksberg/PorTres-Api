@@ -171,6 +171,9 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
   const include: Prisma.MatchInclude = getCommonMatchInlcude();
 
   include.applications = {
+    where: {
+      playerId
+    },
     include: {
       player: {
         include: {
