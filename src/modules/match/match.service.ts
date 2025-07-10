@@ -9,11 +9,10 @@ import {
   DeletePlayerFromMatchRequest
 } from "../../types/matchTypes";
 import { createTeam, executeGetMatch, getCommonMatchInlcude, getDBFilter, updateTeams } from "../../utils/match";
-import { getUserSelect } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { getPlayerById } from "../../utils/player";
-import { application } from "express";
+import { APPLICATION_STATUS } from "../../types/application";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -104,7 +103,9 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
 
   include.applications = {
     where: {
-      status: ApplicationStatus.PENDING
+      status: {
+        code: APPLICATION_STATUS.PENDING
+      }
     },
     include: {
       player: {
@@ -216,7 +217,9 @@ export const getMatchById = async (matchId: number) => {
       status: true,
       applications: {
         where: {
-          status: ApplicationStatus.PENDING
+          status: {
+            code: APPLICATION_STATUS.PENDING
+          }
         }
       }
     }
@@ -348,7 +351,9 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
       status: true,
       applications: {
         where: {
-          status: ApplicationStatus.PENDING
+          status: {
+            code: APPLICATION_STATUS.PENDING
+          }
         }
       }
     }
@@ -382,7 +387,9 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
         status: true,
         applications: {
           where: {
-            status: ApplicationStatus.PENDING
+            status: {
+              code: APPLICATION_STATUS.PENDING
+            }
           }
         }
       }
@@ -451,7 +458,9 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
       status: true,
       applications: {
         where: {
-          status: ApplicationStatus.PENDING
+          status: {
+            code: APPLICATION_STATUS.PENDING
+          }
         }
       }
     }

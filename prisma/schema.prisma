@@ -79,8 +79,8 @@ model Team {
 
 model MatchStatus {
   id          Int     @id @default(autoincrement())
-  code        String? @unique
-  label       String?
+  code        String  @unique
+  label       String
   description String?
 
   matches Match[]
@@ -105,12 +105,22 @@ model Application {
   phone      String?
   reason     String?
   createdAt  DateTime @default(now())
+  statusId   Int
 
-  status ApplicationStatus @default(PENDING)
+  status ApplicationStatus @relation(fields: [statusId], references: [id])
   match  Match             @relation(fields: [matchId], references: [id])
   player Player            @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
+}
+
+model ApplicationStatus {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  label       String
+  description String?
+
+  applications Application[]
 }
 
 model Gender {
@@ -171,10 +181,4 @@ model QuestionType {
   code String @unique
 
   questions Question[]
-}
-
-enum ApplicationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
 }

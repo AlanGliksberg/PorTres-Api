@@ -2,7 +2,7 @@ import { ApplicationStatus, Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
-import { CreateApplicationBody } from "../../types/application";
+import { APPLICATION_STATUS, CreateApplicationBody } from "../../types/application";
 import { changeApplicationStatus, getApplicationById } from "../../utils/application";
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
@@ -48,6 +48,11 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
           id: playerId
         }
       },
+      status: {
+        connect: {
+          code: APPLICATION_STATUS.PENDING
+        }
+      },
       teamNumber,
       message,
       phone
@@ -73,7 +78,7 @@ export const acceptApplication = async (playerId: number, applicationId: number,
   if (!application) throw new CustomError("Invalid application", ErrorCode.APPLICATION_NO_EXIST);
   if (application.match?.creatorPlayerId !== playerId)
     throw new CustomError("Solo el creador puede rechazar la postulación", ErrorCode.UNAUTHORIZED);
-  if (application.status !== ApplicationStatus.PENDING)
+  if (application.status?.code !== APPLICATION_STATUS.PENDING)
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
@@ -81,11 +86,12 @@ export const acceptApplication = async (playerId: number, applicationId: number,
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
   await addPlayerToMatchFromApplication(application, teamNumber);
-  return await changeApplicationStatus(applicationId, ApplicationStatus.ACCEPTED);
+  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
 };
 
 export const rejectApplication = async (playerId: number, applicationId: number) => {
   const include: Prisma.ApplicationInclude = {
+    status: true,
     match: {
       include: {
         teams: {
@@ -101,10 +107,10 @@ export const rejectApplication = async (playerId: number, applicationId: number)
   if (!application) throw new CustomError("Invalid application", ErrorCode.APPLICATION_NO_EXIST);
   if (application.match?.creatorPlayerId !== playerId)
     throw new CustomError("Solo el creador puede rechazar la postulación", ErrorCode.UNAUTHORIZED);
-  if (application.status !== ApplicationStatus.PENDING)
+  if (application.status?.code !== APPLICATION_STATUS.PENDING)
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
 
-  return await changeApplicationStatus(applicationId, ApplicationStatus.REJECTED);
+  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
 };

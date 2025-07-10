@@ -1,6 +1,6 @@
-import { ApplicationStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../prisma/client";
-import { ApplicationWithRelations } from "../types/application";
+import { APPLICATION_STATUS, ApplicationWithRelations } from "../types/application";
 
 export const getApplicationById = async (
   applicationId: number,
@@ -14,13 +14,15 @@ export const getApplicationById = async (
   });
 };
 
-export const changeApplicationStatus = async (applicationId: number, newStatus: ApplicationStatus) => {
+export const changeApplicationStatus = async (applicationId: number, newStatus: APPLICATION_STATUS) => {
   return await prisma.application.update({
     where: {
       id: applicationId
     },
     data: {
-      status: newStatus
+      status: {
+        connect: { code: newStatus }
+      }
     }
   });
 };
