@@ -25,11 +25,11 @@ export const applyToMatch = async (req: Request<CreateApplicationBody>, res: Res
 
 export const acceptApplication = async (req: Request<AcceptApplicationBody>, res: Response) => {
   try {
-    const applicationId = req.params.id as string;
+    const applicationId = req.params.id as number;
     // TODO - validar que sea un numero
     const application = await applicationService.acceptApplication(
       req.user.playerId!,
-      Number(applicationId),
+      applicationId,
       req.body.teamNumber
     );
     res.status(200).json(new OkResponse({ application }));
