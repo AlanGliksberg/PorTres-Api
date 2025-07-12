@@ -2,6 +2,7 @@ import { User } from "@prisma/client";
 import { CreatePlayerBody, UpdatePlayerBody, GENDER, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getDBFilter, getPlayerByUserId } from "../../utils/player";
 import prisma from "../../prisma/client";
+import { getUserSelect } from "../../utils/auth";
 
 export const createPlayer = async (data: CreatePlayerBody, user: User) => {
   let existingPlayer = await getPlayerByUserId(user.id);
@@ -33,7 +34,8 @@ export const getCurrentPlayer = async (user: User) => {
   return await getPlayerByUserId(user.id, {
     position: true,
     category: true,
-    gender: true
+    gender: true,
+    user: getUserSelect()
   });
 };
 
