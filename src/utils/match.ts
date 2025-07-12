@@ -185,6 +185,7 @@ export const getCommonMatchInlcude = () => {
     status: true,
     gender: true,
     category: true,
+    players: true,
     teams: {
       include: {
         players: {
