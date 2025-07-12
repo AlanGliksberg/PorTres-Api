@@ -118,7 +118,7 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
     }
   };
 
-  const where = {
+  const where: Prisma.MatchWhereInput = {
     AND: [
       { creatorPlayerId: playerId },
       getDBFilter(filters),
@@ -141,7 +141,7 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
   const { page, pageSize } = filters;
   const include: Prisma.MatchInclude = getCommonMatchInlcude();
 
-  const where = {
+  const where: Prisma.MatchWhereInput = {
     AND: [
       {
         players: {
