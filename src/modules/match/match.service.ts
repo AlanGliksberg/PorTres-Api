@@ -186,13 +186,18 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
     }
   };
 
-  const where = {
+  const where: Prisma.MatchWhereInput = {
     AND: [
       {
         applications: {
           some: {
             playerId
           }
+        }
+      },
+      {
+        status: {
+          code: MATCH_STATUS.PENDING
         }
       },
       {
