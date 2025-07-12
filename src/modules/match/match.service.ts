@@ -11,8 +11,9 @@ import {
 import { createTeam, executeGetMatch, getCommonMatchInlcude, getDBFilter, updateTeams } from "../../utils/match";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
-import { getPlayerById } from "../../utils/player";
+import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/player";
 import { APPLICATION_STATUS } from "../../types/application";
+import { PlayerDTO } from "../../types/playerTypes";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -275,6 +276,18 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
     throw new CustomError("El equipo está lleno", ErrorCode.APPLICATION_TEAM_FULL);
   }
 
+  const player: PlayerDTO = {
+    id: data.playerId,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    genderId: data.genderId,
+    categoryId: data.categoryId,
+    phone: data.phone,
+    positionId: data.positionId
+  };
+
+  const playerConnect = await createOrGetPlayer(player, currentMatch.genderId);
+
   // TODO - validar genero de jugador contra el genero de partido
   return await prisma.match.update({
     where: {
@@ -282,7 +295,7 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
     },
     data: {
       players: {
-        connect: { id: data.playerId }
+        connect: playerConnect
       },
       teams: {
         update: {
@@ -294,13 +307,15 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
           },
           data: {
             players: {
-              connect: { id: data.playerId }
+              connect: playerConnect
             }
           }
         }
       }
     },
-    include: { players: true }
+    include: {
+      players: true
+    }
   });
 };
 
@@ -347,6 +362,19 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
       include: { gender: true }
     });
     genderId = currentMatch?.genderId;
+  }
+
+  if (data.teams) {
+    if (data.teams.team1) {
+      for (const player of data.teams.team1) {
+        await verifyGenderById(genderId!, player.genderId);
+      }
+    }
+    if (data.teams.team2) {
+      for (const player of data.teams.team2) {
+        await verifyGenderById(genderId!, player.genderId);
+      }
+    }
   }
 
   // Actualizar el partido

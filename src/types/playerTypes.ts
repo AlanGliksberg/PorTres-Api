@@ -2,8 +2,8 @@ import { PageFilterNumber, PageFilterString } from "./common";
 
 export type PlayerDTO = {
   id?: number;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   categoryId?: number;
   phone?: string | null;
   genderId?: number;

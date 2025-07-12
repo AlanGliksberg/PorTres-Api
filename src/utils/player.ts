@@ -45,22 +45,25 @@ export const createOrGetPlayers = async (players: PlayerDTO[] | undefined, allow
   }
 
   const playerPromises = players.map(async (player: PlayerDTO) => {
-    if (player.id) {
-      const existingPlayer: Prisma.PlayerGetPayload<{
-        include: { gender: true };
-      }> | null = await getPlayerById(player.id, { gender: true });
-      if (!existingPlayer) throw new CustomError("No player exists with id: " + player.id, ErrorCode.NO_PLAYER);
-      await verifyGender(allowedGenderId, existingPlayer.gender?.code as GENDER);
-      return { id: player.id };
-    }
-
-    //TODO - agregar validaciones de campos
-    // firstName - lastName - category
-    const createdPlayer = await createTemporalPlayer(player);
-    return { id: createdPlayer.id };
+    return await createOrGetPlayer(player, allowedGenderId);
   });
 
   return Promise.all(playerPromises);
+};
+
+export const createOrGetPlayer = async (player: PlayerDTO, allowedGenderId: number) => {
+  if (player.id) {
+    const existingPlayer: Prisma.PlayerGetPayload<{
+      include: { gender: true };
+    }> | null = await getPlayerById(player.id, { gender: true });
+    if (!existingPlayer) throw new CustomError("No player exists with id: " + player.id, ErrorCode.NO_PLAYER);
+    await verifyGender(allowedGenderId, existingPlayer.gender?.code as GENDER);
+    return { id: player.id };
+  }
+
+  await verifyGenderById(allowedGenderId, player.genderId);
+  const createdPlayer = await createTemporalPlayer(player);
+  return { id: createdPlayer.id };
 };
 
 export const createPlayer = async (name: string, lastName: string, data: CreatePlayerBody, userId: number) => {
@@ -129,7 +132,7 @@ const calculatePlayerCategory = async (data: CreatePlayerBody): Promise<Category
   return category;
 };
 
-const verifyGender = async (allowedGenderId: number, playerGender: GENDER | undefined) => {
+export const verifyGender = async (allowedGenderId: number, playerGender: GENDER | undefined) => {
   const allowedGender = await getGenderById(allowedGenderId);
   if (allowedGender?.code === GENDER.MIXTO || !playerGender) return;
 
@@ -138,6 +141,12 @@ const verifyGender = async (allowedGenderId: number, playerGender: GENDER | unde
       `Invalid gender | Allowed gender: ${allowedGender?.name} | Gender: ${playerGender}`,
       ErrorCode.INVALID_GENDER
     );
+};
+
+export const verifyGenderById = async (allowedGenderId: number, playerGenderId: number | undefined) => {
+  if (!playerGenderId) return;
+  const gender = await getGenderById(playerGenderId);
+  await verifyGender(allowedGenderId, gender!.code as GENDER);
 };
 
 export const parsePlayerFilters = (filters: GetPlayersRequest): PlayerFilters => {

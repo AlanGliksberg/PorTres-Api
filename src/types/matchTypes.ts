@@ -40,7 +40,13 @@ export type MatchFilters = {
 export type AddPlayerToMatchRequest = {
   matchId: number;
   teamNumber: number;
-  playerId: number;
+  playerId?: number;
+  firstName?: string;
+  lastName?: string;
+  genderId?: number;
+  categoryId?: number;
+  phone?: string;
+  positionId?: number;
 };
 
 export type DeletePlayerFromMatchRequest = {
