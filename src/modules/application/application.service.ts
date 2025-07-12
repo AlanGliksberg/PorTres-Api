@@ -6,6 +6,7 @@ import { APPLICATION_STATUS, CreateApplicationBody } from "../../types/applicati
 import { changeApplicationStatus, getApplicationById } from "../../utils/application";
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
+import { changeState } from "../match/match.service";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
@@ -86,7 +87,9 @@ export const acceptApplication = async (playerId: number, applicationId: number,
   if (application.match.teams.find((t) => t.teamNumber === application.teamNumber)!.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
-  await addPlayerToMatchFromApplication(application, teamNumber);
+  const match = await addPlayerToMatchFromApplication(application, teamNumber);
+  console.log({ players: match.players });
+  if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.CLOSED);
   return await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
 };
 

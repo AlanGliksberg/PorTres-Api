@@ -84,7 +84,15 @@ export const addPlayerToMatchFromApplication = async (
             }
           }
         }
+      },
+      players: {
+        connect: {
+          id: application.playerId
+        }
       }
+    },
+    include: {
+      players: true
     }
   });
 };

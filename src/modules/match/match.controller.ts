@@ -159,7 +159,7 @@ export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, re
 
     const match = await matchService.addPlayerToMatch(req.body);
     // TODO - notificar jugador
-    if (match.players.length === 4) await matchService.changeState(req.body.matchId, MATCH_STATUS.COMPLETED);
+    if (match.players.length === 4) await matchService.changeState(req.body.matchId, MATCH_STATUS.CLOSED);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
