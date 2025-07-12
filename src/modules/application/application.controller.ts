@@ -25,7 +25,7 @@ export const applyToMatch = async (req: Request<CreateApplicationBody>, res: Res
 
 export const acceptApplication = async (req: Request<AcceptApplicationBody>, res: Response) => {
   try {
-    const applicationId = req.params.id as number;
+    const applicationId = Number(req.params.id);
     // TODO - validar que sea un numero
     const application = await applicationService.acceptApplication(
       req.user.playerId!,
