@@ -10,8 +10,40 @@ export const convertStringIntoArray = <P = string>(data: string | string[] | und
   return [data as P];
 };
 
+export const convertStringIntoNumberArray = (data: string | string[] | undefined): number[] => {
+  if (!data) return [];
+
+  if (Array.isArray(data)) return data.map((item) => Number(item));
+
+  if (data.includes(",")) {
+    return (data as string).split(",").map((g) => Number(g));
+  }
+
+  return [Number(data)];
+};
+
 export const parsePagesFilters = (page: string, pageSize: string): [number, number] => {
   const pageNumber = parseInt(page, 10) || 1;
   const pageSizeNumber = parseInt(pageSize, 10) || 10;
   return [pageNumber, pageSizeNumber];
+};
+
+export const getDateFromString = (dateString: string | undefined | null): Date | undefined => {
+  if (!dateString) return undefined;
+
+  const [day, month, year] = dateString.split("/").map(Number);
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return undefined;
+
+  return new Date(year, month - 1, day);
+};
+
+export const getTimeFromString = (timeString: string | undefined | null): Date | undefined => {
+  if (!timeString) return undefined;
+
+  const [hours, minutes] = timeString.split(":").map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return undefined;
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
 };

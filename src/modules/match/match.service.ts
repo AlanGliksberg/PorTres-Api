@@ -74,7 +74,12 @@ export const getOpenMatches = async (filters: MatchFilters) => {
           code: MATCH_STATUS.PENDING
         }
       },
-      getDBFilter(filters)
+      getDBFilter(filters),
+      {
+        dateTime: {
+          gte: new Date()
+        }
+      }
     ]
   };
 
@@ -85,11 +90,16 @@ export const getOpenMatches = async (filters: MatchFilters) => {
       where,
       include: {
         status: true,
+        category: true,
+        gender: true,
         teams: {
           include: {
             players: true
           }
         }
+      },
+      orderBy: {
+        dateTime: "asc"
       }
     }),
     prisma.match.count({

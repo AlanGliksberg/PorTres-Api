@@ -1,8 +1,8 @@
 import { Match, Prisma } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
-import { GENDER, PlayerDTO } from "../types/playerTypes";
+import { PlayerDTO } from "../types/playerTypes";
 import { TeamDTO } from "../types/team";
-import { convertStringIntoArray, parsePagesFilters } from "./common";
+import { convertStringIntoNumberArray, getDateFromString, getTimeFromString, parsePagesFilters } from "./common";
 import { createOrGetPlayers } from "./player";
 import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
@@ -18,14 +18,28 @@ export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undef
 };
 
 export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
-  const { page, pageSize, gender, status } = filters;
+  const { page, pageSize, description, dateFrom, dateTo, timeFrom, timeTo, gender, category, status, duration } =
+    filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
-  let matchGenders = convertStringIntoArray<GENDER>(gender);
-  let matchStatus = convertStringIntoArray<MATCH_STATUS>(status);
+  const matchGenders = convertStringIntoNumberArray(gender);
+  const matchStatus = convertStringIntoNumberArray(status);
+  const matchDateFrom = getDateFromString(dateFrom);
+  const matchDateTo = getDateFromString(dateTo);
+  const matchTimeFrom = getTimeFromString(timeFrom);
+  const matchTimeTo = getTimeFromString(timeTo);
+  const matchesCategories = convertStringIntoNumberArray(category);
+  const matchDuration = convertStringIntoNumberArray(duration);
 
   return {
+    description,
+    dateFrom: matchDateFrom,
+    dateTo: matchDateTo,
+    timeFrom: matchTimeFrom,
+    timeTo: matchTimeTo,
     genders: matchGenders,
+    categories: matchesCategories,
     status: matchStatus,
+    duration: matchDuration,
     page: pageNumber,
     pageSize: pageSizeNumber
   };
@@ -33,9 +47,48 @@ export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
 
 export const getDBFilter = (filters: MatchFilters) => {
   const where: Prisma.MatchWhereInput = {};
-  const { genders, status } = filters;
-  if (genders && genders.length > 0) where.gender = { code: { in: genders } };
-  if (status && status.length > 0) where.status = { code: { in: status } };
+  const { description, dateFrom, dateTo, timeFrom, timeTo, genders, categories, status, duration } = filters;
+  console.log("filters", filters);
+  if (description)
+    where.OR = [
+      { location: { contains: description, mode: "insensitive" } },
+      { description: { contains: description, mode: "insensitive" } }
+    ];
+  if (dateFrom && dateTo) {
+    const dateFromOnly = new Date(dateFrom);
+    dateFromOnly.setHours(0, 0, 0, 0);
+    const dateToOnly = new Date(dateTo);
+    dateToOnly.setHours(24, 0, 0, 0);
+    where.dateTime = { gte: dateFromOnly, lte: dateToOnly };
+  } else if (dateFrom) {
+    const dateOnly = new Date(dateFrom);
+    dateOnly.setHours(0, 0, 0, 0);
+    where.dateTime = { gte: dateOnly };
+  } else if (dateTo) {
+    const dateOnly = new Date(dateTo);
+    dateOnly.setHours(24, 0, 0, 0);
+    where.dateTime = { lte: dateOnly };
+  }
+  // if (timeFrom && timeTo) {
+  //   where.dateTime = {
+  //     gte: new Date(`${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`),
+  //     lte: new Date(`${dateTo ? dateTo : "2600-12-31"}T${timeTo}`)
+  //   };
+  // } else if (timeFrom) {
+  //   console.log("timeFrom", timeFrom);
+  //   console.log("timeFrom validar", `${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`);
+  //   where.dateTime = {
+  //     gte: new Date(`${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`)
+  //   };
+  // } else if (timeTo) {
+  //   where.dateTime = {
+  //     lte: new Date(`${dateTo ? dateTo : "2600-12-31"}T${timeTo}`)
+  //   };
+  // }
+  if (genders && genders.length > 0) where.gender = { id: { in: genders } };
+  if (categories && categories.length > 0) where.category = { id: { in: categories } };
+  if (status && status.length > 0) where.status = { id: { in: status } };
+  if (duration && duration.length > 0) where.duration = { in: duration };
   return where;
 };
 

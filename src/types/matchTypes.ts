@@ -28,13 +28,27 @@ export interface UpdateMatchDto {
 }
 
 export type GetMatchesRequest = {
+  description?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  timeFrom?: string;
+  timeTo?: string;
   gender?: string | string[];
+  category?: string | string[];
   status?: string | string[];
+  duration?: string | string[];
 } & PageFilterString;
 
 export type MatchFilters = {
-  genders?: GENDER[];
-  status?: MATCH_STATUS[];
+  description?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  timeFrom?: Date;
+  timeTo?: Date;
+  genders?: number[];
+  categories?: number[];
+  status?: number[];
+  duration?: number[];
 } & PageFilterNumber;
 
 export type AddPlayerToMatchRequest = {

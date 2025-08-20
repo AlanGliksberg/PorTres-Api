@@ -10,10 +10,7 @@ import {
 } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
-import { getPlayerByUserId } from "../../utils/player";
-import { GENDER } from "../../types/playerTypes";
 import { parseMatches, parseMatchFilters, validateCreateMatchBody } from "../../utils/match";
-import { Prisma } from "@prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 
@@ -28,16 +25,9 @@ export const createMatch = async (req: Request<MatchDto>, res: Response) => {
   }
 };
 
-export const getOpenMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
+export const getMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);
-    if (!req.query.gender) {
-      const user = req.user;
-      const player: Prisma.PlayerGetPayload<{
-        include: { gender: true };
-      }> | null = await getPlayerByUserId(user.id, { gender: true });
-      filters.genders = [player?.gender?.code as GENDER, GENDER.MIXTO];
-    }
 
     const [matches, totalMatches] = await matchService.getOpenMatches(filters);
     const parsedMatches = parseMatches(matches);
