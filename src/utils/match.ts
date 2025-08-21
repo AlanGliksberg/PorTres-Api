@@ -81,8 +81,6 @@ export const getDBFilter = (filters: MatchFilters) => {
       lte: getLocalMinFromDate(timeTo)
     };
   } else if (timeFrom) {
-    console.log("timeFrom", timeFrom);
-    console.log("timeFrom validar", getLocalMinFromDate(timeFrom));
     where.localMin = {
       gte: getLocalMinFromDate(timeFrom)
     };
