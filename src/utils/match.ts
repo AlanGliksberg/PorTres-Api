@@ -54,7 +54,7 @@ export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
 export const getDBFilter = (filters: MatchFilters) => {
   const where: Prisma.MatchWhereInput = {};
   const { description, dateFrom, dateTo, timeFrom, timeTo, genders, categories, status, duration } = filters;
-  console.log("filters", filters);
+
   if (description)
     where.OR = [
       { location: { contains: description, mode: "insensitive" } },

@@ -92,6 +92,7 @@ export const getOpenMatches = async (filters: MatchFilters) => {
         status: true,
         category: true,
         gender: true,
+        players: true,
         teams: {
           include: {
             players: true
