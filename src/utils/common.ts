@@ -47,3 +47,19 @@ export const getTimeFromString = (timeString: string | undefined | null): Date |
   date.setHours(hours, minutes, 0, 0);
   return date;
 };
+
+export const getLocalMinFromDate = (date: Date): number => {
+  // epoch en segundos (UTC)
+  const epochSeconds = Math.floor(date.getTime() / 1000);
+
+  // Pasamos a minutos UTC
+  const minutesUtc = Math.floor(epochSeconds / 60);
+
+  // Offset fijo AR = -180 minutos (UTC-3)
+  const minutesLocal = minutesUtc - 180;
+
+  // Normalizamos a rango 0..1439
+  const localMin = ((minutesLocal % 1440) + 1440) % 1440;
+
+  return localMin;
+};

@@ -2,7 +2,13 @@ import { Match, Prisma } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
 import { PlayerDTO } from "../types/playerTypes";
 import { TeamDTO } from "../types/team";
-import { convertStringIntoNumberArray, getDateFromString, getTimeFromString, parsePagesFilters } from "./common";
+import {
+  convertStringIntoNumberArray,
+  getDateFromString,
+  getLocalMinFromDate,
+  getTimeFromString,
+  parsePagesFilters
+} from "./common";
 import { createOrGetPlayers } from "./player";
 import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
@@ -69,22 +75,22 @@ export const getDBFilter = (filters: MatchFilters) => {
     dateOnly.setHours(24, 0, 0, 0);
     where.dateTime = { lte: dateOnly };
   }
-  // if (timeFrom && timeTo) {
-  //   where.dateTime = {
-  //     gte: new Date(`${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`),
-  //     lte: new Date(`${dateTo ? dateTo : "2600-12-31"}T${timeTo}`)
-  //   };
-  // } else if (timeFrom) {
-  //   console.log("timeFrom", timeFrom);
-  //   console.log("timeFrom validar", `${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`);
-  //   where.dateTime = {
-  //     gte: new Date(`${dateFrom ? dateFrom : "1970-01-01"}T${timeFrom}`)
-  //   };
-  // } else if (timeTo) {
-  //   where.dateTime = {
-  //     lte: new Date(`${dateTo ? dateTo : "2600-12-31"}T${timeTo}`)
-  //   };
-  // }
+  if (timeFrom && timeTo) {
+    where.localMin = {
+      gte: getLocalMinFromDate(timeFrom),
+      lte: getLocalMinFromDate(timeTo)
+    };
+  } else if (timeFrom) {
+    console.log("timeFrom", timeFrom);
+    console.log("timeFrom validar", getLocalMinFromDate(timeFrom));
+    where.localMin = {
+      gte: getLocalMinFromDate(timeFrom)
+    };
+  } else if (timeTo) {
+    where.localMin = {
+      lte: getLocalMinFromDate(timeTo)
+    };
+  }
   if (genders && genders.length > 0) where.gender = { id: { in: genders } };
   if (categories && categories.length > 0) where.category = { id: { in: categories } };
   if (status && status.length > 0) where.status = { id: { in: status } };

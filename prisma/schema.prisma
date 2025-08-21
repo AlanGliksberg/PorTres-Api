@@ -34,6 +34,7 @@ model Match {
   creatorPlayerId Int
   genderId        Int
   duration        Int
+  localMin        Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
 
   creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
   gender       Gender        @relation(fields: [genderId], references: [id])
@@ -43,6 +44,8 @@ model Match {
   sets         Set[]
   applications Application[]
   category     Category      @relation(fields: [categoryId], references: [id])
+
+  @@index([localMin], map: "idx_match_local_min")
 }
 
 model Player {
