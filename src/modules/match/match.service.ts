@@ -83,42 +83,35 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
     ]
   };
 
-  return await prisma.$transaction([
-    prisma.match.findMany({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      where,
+  const include = {
+    status: true,
+    category: true,
+    gender: true,
+    players: true,
+    teams: {
       include: {
-        status: true,
-        category: true,
-        gender: true,
-        players: true,
-        teams: {
+        players: {
           include: {
-            players: {
-              include: {
-                user: true
-              }
-            }
-          }
-        },
-        applications: {
-          where: {
-            playerId
-          },
-          include: {
-            status: true
+            user: true
           }
         }
-      },
-      orderBy: {
-        dateTime: "asc"
       }
-    }),
-    prisma.match.count({
-      where
-    })
-  ]);
+    },
+    applications: {
+      where: {
+        playerId
+      },
+      include: {
+        status: true
+      }
+    }
+  };
+
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    dateTime: "asc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
 };
 
 export const getCreatedMatches = async (playerId: number, filters: MatchFilters) => {
@@ -184,7 +177,7 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
   };
 
   const orderBy: Prisma.MatchOrderByWithRelationInput = {
-    createdAt: "desc"
+    dateTime: "desc"
   };
 
   return await executeGetMatch(page, pageSize, where, include, orderBy);
