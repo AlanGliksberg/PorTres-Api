@@ -65,7 +65,7 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
   return match;
 };
 
-export const getOpenMatches = async (filters: MatchFilters) => {
+export const getOpenMatches = async (filters: MatchFilters, playerId: number | undefined) => {
   const { page, pageSize } = filters;
   const where = {
     AND: [
@@ -95,7 +95,19 @@ export const getOpenMatches = async (filters: MatchFilters) => {
         players: true,
         teams: {
           include: {
-            players: true
+            players: {
+              include: {
+                user: true
+              }
+            }
+          }
+        },
+        applications: {
+          where: {
+            playerId
+          },
+          include: {
+            status: true
           }
         }
       },

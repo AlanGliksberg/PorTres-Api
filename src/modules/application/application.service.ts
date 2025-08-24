@@ -88,7 +88,6 @@ export const acceptApplication = async (playerId: number, applicationId: number,
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
   const match = await addPlayerToMatchFromApplication(application, teamNumber);
-  console.log({ players: match.players });
   if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.CLOSED);
   return await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
 };
