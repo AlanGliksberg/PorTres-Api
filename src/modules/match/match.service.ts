@@ -234,7 +234,7 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
   };
 
   const orderBy: Prisma.MatchOrderByWithRelationInput = {
-    createdAt: "desc"
+    dateTime: "desc"
   };
 
   return await executeGetMatch(page, pageSize, where, include, orderBy);
