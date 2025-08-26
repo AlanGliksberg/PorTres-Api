@@ -140,15 +140,15 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
       { creatorPlayerId: playerId },
       getDBFilter(filters),
       {
-        status: {
-          code: MATCH_STATUS.PENDING
+        dateTime: {
+          gte: new Date()
         }
       }
     ]
   };
 
   const orderBy: Prisma.MatchOrderByWithRelationInput = {
-    createdAt: "desc"
+    dateTime: "asc"
   };
 
   return await executeGetMatch(page, pageSize, where, include, orderBy);
