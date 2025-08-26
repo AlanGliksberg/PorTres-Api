@@ -49,3 +49,13 @@ export const rejectApplication = async (req: Request, res: Response) => {
     res.status(500).json(new ErrorResponse("Error rejecting application", e));
   }
 };
+
+export const getApplicationStatus = async (req: Request, res: Response) => {
+  try {
+    const status = await applicationService.getApplicationStatus();
+    res.status(200).json(new OkResponse({ status }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting application status", e));
+  }
+};

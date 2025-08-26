@@ -117,3 +117,7 @@ export const rejectApplication = async (playerId: number, applicationId: number)
 
   return await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
 };
+
+export const getApplicationStatus = async () => {
+  return await prisma.applicationStatus.findMany();
+};
