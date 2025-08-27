@@ -14,6 +14,7 @@ import { ErrorCode } from "../../constants/errorCode";
 import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/player";
 import { APPLICATION_STATUS } from "../../types/application";
 import { PlayerDTO } from "../../types/playerTypes";
+import { getUserSelect } from "../../utils/auth";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -92,7 +93,7 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
       include: {
         players: {
           include: {
-            user: true
+            user: getUserSelect()
           }
         }
       }
@@ -129,7 +130,8 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
         include: {
           gender: true,
           category: true,
-          position: true
+          position: true,
+          user: getUserSelect()
         }
       }
     }
@@ -255,7 +257,7 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
   };
 
   const orderBy: Prisma.MatchOrderByWithRelationInput = {
-    dateTime: "desc"
+    dateTime: "asc"
   };
 
   return await executeGetMatch(page, pageSize, where, include, orderBy);
