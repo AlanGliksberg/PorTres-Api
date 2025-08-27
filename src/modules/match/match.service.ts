@@ -233,6 +233,34 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
   return await executeGetMatch(page, pageSize, where, include, orderBy);
 };
 
+export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
+  const { page, pageSize } = filters;
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+
+  const where: Prisma.MatchWhereInput = {
+    AND: [
+      {
+        players: {
+          some: {
+            id: playerId
+          }
+        }
+      },
+      {
+        status: {
+          code: MATCH_STATUS.PENDING
+        }
+      }
+    ]
+  };
+
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    dateTime: "desc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
+};
+
 export const getMatchById = async (matchId: number) => {
   return await prisma.match.findUnique({
     where: {
