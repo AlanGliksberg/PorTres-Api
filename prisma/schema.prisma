@@ -35,6 +35,7 @@ model Match {
   genderId        Int
   duration        Int
   localMin        Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
+  winnerTeamId    Int?
 
   creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
   gender       Gender        @relation(fields: [genderId], references: [id])
@@ -46,6 +47,7 @@ model Match {
   category     Category      @relation(fields: [categoryId], references: [id])
 
   @@index([localMin], map: "idx_match_local_min")
+  @@index([categoryId, genderId, dateTime])
 }
 
 model Player {
@@ -97,6 +99,8 @@ model Set {
   team2Score Int
 
   match Match @relation(fields: [matchId], references: [id])
+
+  @@unique([matchId, setNumber])
 }
 
 model Application {
