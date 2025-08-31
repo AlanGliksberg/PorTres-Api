@@ -174,6 +174,11 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
         status: {
           code: MATCH_STATUS.COMPLETED
         }
+      },
+      {
+        winnerTeamId: {
+          not: null
+        }
       }
     ]
   };
@@ -252,6 +257,42 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
         status: {
           code: MATCH_STATUS.PENDING
         }
+      }
+    ]
+  };
+
+  const orderBy: Prisma.MatchOrderByWithRelationInput = {
+    dateTime: "asc"
+  };
+
+  return await executeGetMatch(page, pageSize, where, include, orderBy);
+};
+
+export const getMyPendingResults = async (playerId: number, filters: MatchFilters) => {
+  const { page, pageSize } = filters;
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.sets = {
+    orderBy: {
+      setNumber: "asc"
+    }
+  };
+
+  const where: Prisma.MatchWhereInput = {
+    AND: [
+      {
+        players: {
+          some: {
+            id: playerId
+          }
+        }
+      },
+      {
+        status: {
+          code: MATCH_STATUS.COMPLETED
+        }
+      },
+      {
+        winnerTeamId: null
       }
     ]
   };
@@ -569,24 +610,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
 };
 
 export const getPlayedMatchesCount = async (playerId: number) => {
-  const matchesCount = await prisma.match.count({
-    where: {
-      AND: [
-        {
-          players: {
-            some: {
-              id: playerId
-            }
-          }
-        },
-        {
-          status: {
-            code: MATCH_STATUS.COMPLETED
-          }
-        }
-      ]
-    }
-  });
+  const matches = await getPlayedMatches(playerId, { page: 1, pageSize: 1 });
 
-  return matchesCount;
+  return matches[1];
 };
