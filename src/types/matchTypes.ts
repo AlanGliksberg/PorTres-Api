@@ -70,7 +70,7 @@ export type DeletePlayerFromMatchRequest = {
 
 export enum MATCH_STATUS {
   PENDING = "PENDING",
-  CLOSED = "CLOSED",
   COMPLETED = "COMPLETED",
+  CLOSED = "CLOSED",
   CANCELLED = "CANCELLED"
 }
