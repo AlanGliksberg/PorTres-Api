@@ -23,19 +23,20 @@ model User {
 }
 
 model Match {
-  id              Int      @id @default(autoincrement())
-  dateTime        DateTime
-  location        String
-  description     String?
-  categoryId      Int
-  pointsDeviation Int?
-  statusId        Int
-  createdAt       DateTime @default(now())
-  creatorPlayerId Int
-  genderId        Int
-  duration        Int
-  localMin        Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
-  winnerTeamId    Int?
+  id                 Int      @id @default(autoincrement())
+  dateTime           DateTime
+  location           String
+  description        String?
+  categoryId         Int
+  pointsDeviation    Int?
+  statusId           Int
+  createdAt          DateTime @default(now())
+  creatorPlayerId    Int
+  genderId           Int
+  duration           Int
+  localMin           Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
+  winnerTeamId       Int?
+  resultLoadedByTeam Int?
 
   creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
   gender       Gender        @relation(fields: [genderId], references: [id])

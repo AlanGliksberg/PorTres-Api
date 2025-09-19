@@ -50,6 +50,7 @@ export const loginWithGoogle = async (idToken: string) => {
   if (!payload || !payload.email || !payload.sub)
     throw new CustomError("Invalid Google token", ErrorCode.INVALID_GOOGLE_TOKEN);
   let user = await prisma.user.findUnique({ where: { googleId: payload.sub }, include: { player: true } });
+  // TODO - actualizar datos del usuario en cada login
   if (!user) {
     user = await creatUser({
       email: payload.email,

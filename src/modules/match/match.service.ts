@@ -68,6 +68,9 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
 
 export const getOpenMatches = async (filters: MatchFilters, playerId: number | undefined) => {
   const { page, pageSize } = filters;
+  const now = new Date();
+  const currentTimeWithoutOffset = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+
   const where = {
     AND: [
       {
@@ -78,7 +81,7 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
       getDBFilter(filters),
       {
         dateTime: {
-          gte: new Date()
+          gte: currentTimeWithoutOffset
         }
       }
     ]
@@ -142,8 +145,15 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
       { creatorPlayerId: playerId },
       getDBFilter(filters),
       {
+        status: {
+          code: {
+            not: MATCH_STATUS.CLOSED
+          }
+        }
+      },
+      {
         dateTime: {
-          gte: new Date()
+          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
         }
       }
     ]
@@ -226,7 +236,7 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
       },
       {
         dateTime: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0))
+          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
         }
       },
       getDBFilter(filters)
@@ -283,6 +293,20 @@ export const getMyPendingResults = async (playerId: number, filters: MatchFilter
         players: {
           some: {
             id: playerId
+          }
+        }
+      },
+      // Al menos un jugador de cada equipo tenga la aplicación
+      {
+        teams: {
+          every: {
+            players: {
+              some: {
+                userId: {
+                  not: null
+                }
+              }
+            }
           }
         }
       },

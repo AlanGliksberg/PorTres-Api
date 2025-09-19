@@ -6,7 +6,8 @@ import {
   GetMatchesRequest,
   MATCH_STATUS,
   MatchDto,
-  UpdateMatchDto
+  UpdateMatchDto,
+  UpdateMatchResultDto
 } from "../../types/matchTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
@@ -273,5 +274,43 @@ export const getPlayedMatchesCount = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting player matches count", e));
+  }
+};
+
+export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Response) => {
+  try {
+    if (!req.user.playerId) {
+      throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    }
+
+    const matchId = req.body.matchId;
+    const match = await matchService.getMatchById(matchId);
+
+    if (!match) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    const isMatchPlayer = match.teams.some((team) => team.players.some((player) => player.id === req.user.playerId));
+
+    if (!isMatchPlayer) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo los jugadores del partido pueden modificar el resultado",
+            new CustomError("No autorizado", ErrorCode.USER_NOT_PLAYER)
+          )
+        );
+      return;
+    }
+
+    // si es la primera carga, agregar resultado y disparar notificaciones a jugadores contrarios
+    // si ya existe una carga, actualizar el resultado y mandar notificaciones a jugadores contrarios
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error updating match result", e));
   }
 };

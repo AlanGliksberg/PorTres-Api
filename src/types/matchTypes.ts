@@ -27,6 +27,16 @@ export interface UpdateMatchDto {
   teams?: TeamDTO;
 }
 
+export interface UpdateMatchResultDto {
+  matchId: number;
+  team1Set1?: number;
+  team1Set2?: number;
+  team1Set3?: number;
+  team2Set1?: number;
+  team2Set2?: number;
+  team2Set3?: number;
+}
+
 export type GetMatchesRequest = {
   description?: string;
   dateFrom?: string;
