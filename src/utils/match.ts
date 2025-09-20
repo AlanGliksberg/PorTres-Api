@@ -161,6 +161,8 @@ export const validateCreateMatchBody = (body: MatchDto) => {
 };
 
 export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number) => {
+  // TODO - actualizar el estado del partido en base a la cantidad de jugadores
+  
   // Primero desconectamos todos los jugadores actuales del partido y de los equipos
   await prisma.match.update({
     where: { id: matchId },

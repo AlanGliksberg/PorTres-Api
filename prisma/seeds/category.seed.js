@@ -6,7 +6,7 @@ export async function seedCategory(prisma) {
     ...[...Array(9)].map((x, i) => ({
       code: `C${i + 1}`,
       description: `C${i + 1}`,
-      initialPoints: 1000 - (i + 1) * 100,
+      initialPoints: 950 - (i + 1) * 100,
       gender: { connect: { code: "C" } }
     }))
   );
@@ -14,7 +14,7 @@ export async function seedCategory(prisma) {
     ...[...Array(9)].map((x, i) => ({
       code: `D${i + 1}`,
       description: `D${i + 1}`,
-      initialPoints: 1000 - (i + 1) * 100,
+      initialPoints: 950 - (i + 1) * 100,
       gender: { connect: { code: "D" } }
     }))
   );

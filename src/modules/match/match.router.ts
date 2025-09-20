@@ -14,7 +14,8 @@ router.get("/details/:id", matchController.getMatchDetails);
 router.post("/player", matchController.addPlayerToMatch);
 router.delete("/player", matchController.deletePlayerFromMatch);
 router.delete("/:id", matchController.deleteMatch);
+router.put("/results", matchController.updateResult);
+router.post("/results", matchController.acceptResult);
 router.put("/:id", matchController.updateMatch);
-router.put("/:id", matchController.updateResult);
 
 export default router;

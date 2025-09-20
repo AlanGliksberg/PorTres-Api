@@ -1,4 +1,4 @@
-import { ApplicationStatus, Prisma, User } from "@prisma/client";
+import { ApplicationStatus, Match, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import {
   MatchDto,
@@ -6,7 +6,8 @@ import {
   MATCH_STATUS,
   AddPlayerToMatchRequest,
   UpdateMatchDto,
-  DeletePlayerFromMatchRequest
+  DeletePlayerFromMatchRequest,
+  UpdateMatchResultDto
 } from "../../types/matchTypes";
 import { createTeam, executeGetMatch, getCommonMatchInlcude, getDBFilter, updateTeams } from "../../utils/match";
 import { CustomError } from "../../types/customError";
@@ -265,7 +266,9 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       },
       {
         status: {
-          code: MATCH_STATUS.PENDING
+          code: {
+            in: [MATCH_STATUS.PENDING, MATCH_STATUS.COMPLETED]
+          }
         }
       }
     ]
@@ -488,6 +491,7 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
     }
   }
 
+  // TODO - si hay 4 jugadores, el partido esta confirmed
   // Actualizar el partido
   const updatedMatch = await prisma.match.update({
     where: {
@@ -628,6 +632,7 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
 
   if (currentMatch.status.code !== MATCH_STATUS.PENDING) {
     await changeState(data.matchId, MATCH_STATUS.PENDING);
+    // TODO - notificar
   }
 
   return updatedMatch;
@@ -637,4 +642,57 @@ export const getPlayedMatchesCount = async (playerId: number) => {
   const matches = await getPlayedMatches(playerId, { page: 1, pageSize: 1 });
 
   return matches[1];
+};
+
+export const updateMatchResult = async (match: Match, body: UpdateMatchResultDto, resultLoadedByTeam: number) => {
+  if (!match.resultLoadedByTeam) {
+    await prisma.set.createMany({
+      data: body.sets.map((set, index) => ({
+        matchId: match.id,
+        setNumber: index + 1,
+        team1Score: set[0],
+        team2Score: set[1]
+      }))
+    });
+  } else {
+    // Para cada set en body.sets, actualiza el set existente o créalo si no existe
+    for (let i = 0; i < body.sets.length; i++) {
+      const setNumber = i + 1;
+      const [team1Score, team2Score] = body.sets[i];
+
+      // Buscar si el set ya existe
+      const existingSet = await prisma.set.findFirst({
+        where: {
+          matchId: match.id,
+          setNumber: setNumber
+        }
+      });
+
+      if (existingSet) {
+        // Actualizar el set existente
+        await prisma.set.update({
+          where: { id: existingSet.id },
+          data: {
+            team1Score,
+            team2Score
+          }
+        });
+      } else {
+        // Crear el set si no existe
+        await prisma.set.create({
+          data: {
+            matchId: match.id,
+            setNumber,
+            team1Score,
+            team2Score
+          }
+        });
+      }
+    }
+  }
+
+  await prisma.match.update({
+    where: { id: match.id },
+    data: { resultLoadedByTeam }
+  });
 };

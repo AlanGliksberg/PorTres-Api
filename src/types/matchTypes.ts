@@ -29,12 +29,11 @@ export interface UpdateMatchDto {
 
 export interface UpdateMatchResultDto {
   matchId: number;
-  team1Set1?: number;
-  team1Set2?: number;
-  team1Set3?: number;
-  team2Set1?: number;
-  team2Set2?: number;
-  team2Set3?: number;
+  sets: [number, number][];
+}
+
+export interface AcceptResultDto {
+  matchId: number;
 }
 
 export type GetMatchesRequest = {

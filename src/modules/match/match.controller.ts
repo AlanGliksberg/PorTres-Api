@@ -1,6 +1,7 @@
 import { Response } from "express";
 import * as matchService from "./match.service";
 import {
+  AcceptResultDto,
   AddPlayerToMatchRequest,
   DeletePlayerFromMatchRequest,
   GetMatchesRequest,
@@ -209,7 +210,7 @@ export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) =
       return;
     }
 
-    // TODO - Validar que el partido esté en estado PENDING para editar equipos
+    // TODO - Validar que el partido esté en estado PENDING o COMPLETED para editar equipos
     // if (req.body.teams && currentMatch.status.code !== MATCH_STATUS.PENDING) {
     //   res
     //     .status(400)
@@ -282,7 +283,6 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
     if (!req.user.playerId) {
       throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
     }
-
     const matchId = req.body.matchId;
     const match = await matchService.getMatchById(matchId);
 
@@ -293,7 +293,7 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
       return;
     }
 
-    const isMatchPlayer = match.teams.some((team) => team.players.some((player) => player.id === req.user.playerId));
+    const isMatchPlayer = match.teams.find((team) => team.players.some((player) => player.id === req.user.playerId));
 
     if (!isMatchPlayer) {
       res
@@ -307,10 +307,24 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
       return;
     }
 
-    // si es la primera carga, agregar resultado y disparar notificaciones a jugadores contrarios
-    // si ya existe una carga, actualizar el resultado y mandar notificaciones a jugadores contrarios
+    // TODO - validar que el resultado sea válido
+
+    await matchService.updateMatchResult(match, req.body, isMatchPlayer.teamNumber);
+    res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error updating match result", e));
+  }
+};
+
+export const acceptResult = async (req: Request<AcceptResultDto>, res: Response) => {
+  try {
+    // TODO - calcular el equipo ganador
+    // - guardar el equipo ganador
+    // - actualizar rankings
+    // - notificar?
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error accepting match result", e));
   }
 };
