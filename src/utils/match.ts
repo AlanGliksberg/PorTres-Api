@@ -1,5 +1,5 @@
 import { Match, Player, Prisma, Set } from "@prisma/client";
-import { MatchDto, GetMatchesRequest, MatchFilters } from "../types/matchTypes";
+import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails } from "../types/matchTypes";
 import { PlayerDTO } from "../types/playerTypes";
 import { TeamDTO, TeamWithPlayers } from "../types/team";
 import {
@@ -289,7 +289,10 @@ export const executeGetMatch = async (
   ]);
 };
 
-export const updateRankings = async (teams: TeamWithPlayers[], winnerTeam: number) => {
+export const updateRankings = async (match: MatchWithFullDetails, winnerTeam: number) => {
+  const matchId = match.id;
+
+  const teams = match.teams;
   const team1 = teams.find((t) => t.teamNumber === 1)!;
   const team2 = teams.find((t) => t.teamNumber === 2)!;
 
@@ -300,19 +303,19 @@ export const updateRankings = async (teams: TeamWithPlayers[], winnerTeam: numbe
     const expectedResult = getExpectedResult(weightedElo1, weightedElo2);
     const baseChange = getBaseChange(expectedResult);
     team1.players.forEach(async (player) => {
-      await updatePlayersElo(player, baseChange);
+      await updatePlayersElo(matchId, player, baseChange, true);
     });
     team2.players.forEach(async (player) => {
-      await updatePlayersElo(player, -baseChange);
+      await updatePlayersElo(matchId, player, -baseChange, false);
     });
   } else {
     const expectedResult = getExpectedResult(weightedElo2, weightedElo1);
     const baseChange = getBaseChange(expectedResult);
     team1.players.forEach(async (player) => {
-      await updatePlayersElo(player, -baseChange);
+      await updatePlayersElo(matchId, player, -baseChange, true);
     });
     team2.players.forEach(async (player) => {
-      await updatePlayersElo(player, baseChange);
+      await updatePlayersElo(matchId, player, baseChange, false);
     });
   }
 };
@@ -350,21 +353,32 @@ export const saveWinnerTeam = async (matchId: number, winnerTeam: number) => {
   });
 };
 
-export const updatePlayersElo = async (player: Player, baseChange: number) => {
+export const updatePlayersElo = async (matchId: number, player: Player, baseChange: number, isWinner: boolean) => {
   if (!player.userId) return;
   const adjustmentFactor = 2 - player.confidence;
-  let newElo = player.rankingPoints + baseChange * adjustmentFactor;
+  const deltaPoints = Math.round(baseChange * adjustmentFactor);
+  let newElo = player.rankingPoints + deltaPoints;
   if (newElo < 0) newElo = 0;
-  
+
+  // TODO - ver si hay que cambiar de categoria
   await prisma.player.update({
     where: { id: player.id },
-    data: { rankingPoints: Math.round(newElo) }
+    data: { rankingPoints: newElo }
   });
-  
-    // TODO - ver si hay que cambiar de categoria
+
+  await prisma.playerRankingChange.create({
+    data: {
+      matchId,
+      playerId: player.id,
+      oldPoints: player.rankingPoints,
+      deltaPoints,
+      newPoints: newElo,
+      isWinner
+    }
+  });
 };
 
-export const getWinnerTeam = (sets: Set[]) => {
+export const getWinnerTeamNumber = (sets: Omit<Set, "id">[]) => {
   if (!sets || sets.length === 0) {
     return 0;
   }

@@ -16,7 +16,7 @@ import {
   executeGetMatch,
   getCommonMatchInlcude,
   getDBFilter,
-  getWinnerTeam,
+  getWinnerTeamNumber,
   saveWinnerTeam,
   updateRankings,
   updateTeams
@@ -181,6 +181,8 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
 export const getPlayedMatches = async (playerId: number, filters: MatchFilters) => {
   const { page, pageSize } = filters;
   const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.playerRankingChange = true;
+  include.sets = true;
 
   const where: Prisma.MatchWhereInput = {
     AND: [
@@ -196,12 +198,12 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
         status: {
           code: MATCH_STATUS.CLOSED
         }
-      },
-      {
-        winnerTeamNumber: {
-          not: null
-        }
       }
+      // {
+      //   winnerTeamNumber: {
+      //     not: null
+      //   }
+      // }
     ]
   };
 
@@ -311,19 +313,19 @@ export const getMyPendingResults = async (playerId: number, filters: MatchFilter
         }
       },
       // Al menos un jugador de cada equipo tenga la aplicación
-      {
-        teams: {
-          every: {
-            players: {
-              some: {
-                userId: {
-                  not: null
-                }
-              }
-            }
-          }
-        }
-      },
+      // {
+      //   teams: {
+      //     every: {
+      //       players: {
+      //         some: {
+      //           userId: {
+      //             not: null
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // },
       {
         status: {
           code: MATCH_STATUS.CLOSED
@@ -656,15 +658,28 @@ export const getPlayedMatchesCount = async (playerId: number) => {
   return matches[1];
 };
 
-export const updateMatchResult = async (match: Match, body: UpdateMatchResultDto, resultLoadedByTeam: number) => {
+export const updateMatchResult = async (
+  match: MatchWithFullDetails,
+  body: UpdateMatchResultDto,
+  resultLoadedByTeam: number
+) => {
+  // TODO - si en el otro equipo no hay un jugador que tenga la app, ya hay que marcar al equipo ganador
+  const sets = body.sets.map((set, index) => ({
+    matchId: match.id,
+    setNumber: index + 1,
+    team1Score: set[0],
+    team2Score: set[1]
+  }));
+  let winnerTeamNumber = null;
+  const otherTeam = match.teams.find((team) => team.teamNumber !== resultLoadedByTeam);
+  const otherTeamHasPlayerWithApp = otherTeam?.players.some((player) => player.userId);
+  if (!otherTeamHasPlayerWithApp) {
+    winnerTeamNumber = getWinnerTeamNumber(sets);
+  }
+
   if (!match.resultLoadedByTeam) {
     await prisma.set.createMany({
-      data: body.sets.map((set, index) => ({
-        matchId: match.id,
-        setNumber: index + 1,
-        team1Score: set[0],
-        team2Score: set[1]
-      }))
+      data: sets
     });
   } else {
     // Para cada set en body.sets, actualiza el set existente o créalo si no existe
@@ -705,15 +720,15 @@ export const updateMatchResult = async (match: Match, body: UpdateMatchResultDto
 
   await prisma.match.update({
     where: { id: match.id },
-    data: { resultLoadedByTeam }
+    data: { resultLoadedByTeam, winnerTeamNumber }
   });
 };
 
 export const acceptMatchResult = async (match: MatchWithFullDetails) => {
-  const winnerTeam = getWinnerTeam(match.sets);
+  const winnerTeam = getWinnerTeamNumber(match.sets);
   await saveWinnerTeam(match.id, winnerTeam);
   if (winnerTeam === 0) return;
-  if (match.gender.code !== GENDER.MIXTO) await updateRankings(match.teams, winnerTeam);
+  if (match.gender.code !== GENDER.MIXTO) await updateRankings(match, winnerTeam);
   match.teams.forEach((t) => t.players.forEach(async (p) => await addConfidenceToPlayer(p)));
   // TODO - notificar?
 };
