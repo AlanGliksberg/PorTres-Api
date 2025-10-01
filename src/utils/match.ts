@@ -1,7 +1,7 @@
-import { Match, Prisma } from "@prisma/client";
-import { MatchDto, GetMatchesRequest, MATCH_STATUS, MatchFilters } from "../types/matchTypes";
+import { Match, Player, Prisma, Set } from "@prisma/client";
+import { MatchDto, GetMatchesRequest, MatchFilters } from "../types/matchTypes";
 import { PlayerDTO } from "../types/playerTypes";
-import { TeamDTO } from "../types/team";
+import { TeamDTO, TeamWithPlayers } from "../types/team";
 import {
   convertStringIntoNumberArray,
   getDateFromString,
@@ -162,7 +162,7 @@ export const validateCreateMatchBody = (body: MatchDto) => {
 
 export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number) => {
   // TODO - actualizar el estado del partido en base a la cantidad de jugadores
-  
+
   // Primero desconectamos todos los jugadores actuales del partido y de los equipos
   await prisma.match.update({
     where: { id: matchId },
@@ -287,4 +287,107 @@ export const executeGetMatch = async (
       where
     })
   ]);
+};
+
+export const updateRankings = async (teams: TeamWithPlayers[], winnerTeam: number) => {
+  const team1 = teams.find((t) => t.teamNumber === 1)!;
+  const team2 = teams.find((t) => t.teamNumber === 2)!;
+
+  const weightedElo1 = getWeightedElo(team1);
+  const weightedElo2 = getWeightedElo(team2);
+
+  if (winnerTeam === 1) {
+    const expectedResult = getExpectedResult(weightedElo1, weightedElo2);
+    const baseChange = getBaseChange(expectedResult);
+    team1.players.forEach(async (player) => {
+      await updatePlayersElo(player, baseChange);
+    });
+    team2.players.forEach(async (player) => {
+      await updatePlayersElo(player, -baseChange);
+    });
+  } else {
+    const expectedResult = getExpectedResult(weightedElo2, weightedElo1);
+    const baseChange = getBaseChange(expectedResult);
+    team1.players.forEach(async (player) => {
+      await updatePlayersElo(player, -baseChange);
+    });
+    team2.players.forEach(async (player) => {
+      await updatePlayersElo(player, baseChange);
+    });
+  }
+};
+
+const getWeightedElo = (team: TeamWithPlayers) => {
+  // Calcula el ELO ponderado de un equipo usando rankingPoints y confidence de cada jugador
+  // Fórmula: (sum(rankingPoints * confidence)) / (sum(confidence))
+  const rankingPoints = team.players.map((p) => p.rankingPoints ?? 0);
+  const confidences = team.players.map((p) => p.confidence ?? 0.1);
+
+  const numerador = rankingPoints.reduce((acc, rp, idx) => acc + rp * confidences[idx], 0);
+  const denominador = confidences.reduce((acc, c) => acc + c, 0);
+
+  if (denominador === 0) return 0;
+
+  return numerador / denominador;
+};
+
+const getExpectedResult = (myElo: number, otherElo: number) => {
+  // Calcula el resultado esperado usando la fórmula de ELO:
+  // Resultado esperado = 1 / (1 + 10^((otherElo - myElo) / 400))
+  const diferencia = otherElo - myElo;
+  const resultadoEsperado = 1 / (1 + Math.pow(10, diferencia / 400));
+  return resultadoEsperado;
+};
+
+const getBaseChange = (expectedResult: number) => {
+  return 10 * (1 - expectedResult);
+};
+
+export const saveWinnerTeam = async (matchId: number, winnerTeam: number) => {
+  await prisma.match.update({
+    where: { id: matchId },
+    data: { winnerTeamNumber: winnerTeam }
+  });
+};
+
+export const updatePlayersElo = async (player: Player, baseChange: number) => {
+  if (!player.userId) return;
+  const adjustmentFactor = 2 - player.confidence;
+  let newElo = player.rankingPoints + baseChange * adjustmentFactor;
+  if (newElo < 0) newElo = 0;
+  
+  await prisma.player.update({
+    where: { id: player.id },
+    data: { rankingPoints: Math.round(newElo) }
+  });
+  
+    // TODO - ver si hay que cambiar de categoria
+};
+
+export const getWinnerTeam = (sets: Set[]) => {
+  if (!sets || sets.length === 0) {
+    return 0;
+  }
+
+  let setsGanadosEquipo1 = 0;
+  let setsGanadosEquipo2 = 0;
+
+  for (const set of sets) {
+    if (set.team1Score > set.team2Score) {
+      setsGanadosEquipo1++;
+    } else if (set.team2Score > set.team1Score) {
+      setsGanadosEquipo2++;
+    }
+  }
+
+  return setsGanadosEquipo1 > setsGanadosEquipo2 ? 1 : setsGanadosEquipo2 > setsGanadosEquipo1 ? 2 : 0;
+};
+
+export const addConfidenceToPlayer = async (player: Player) => {
+  if (!player.userId) return;
+  const newConfidence = Math.min((player.confidence ?? 0) + 0.1, 1);
+  await prisma.player.update({
+    where: { id: player.id },
+    data: { confidence: newConfidence }
+  });
 };

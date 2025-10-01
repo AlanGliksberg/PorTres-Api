@@ -319,10 +319,35 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
 
 export const acceptResult = async (req: Request<AcceptResultDto>, res: Response) => {
   try {
-    // TODO - calcular el equipo ganador
-    // - guardar el equipo ganador
-    // - actualizar rankings
-    // - notificar?
+    if (!req.user.playerId) {
+      throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    }
+    const matchId = req.body.matchId;
+    const match = await matchService.getMatchById(matchId);
+
+    if (!match) {
+      res
+        .status(404)
+        .json(new ErrorResponse("Partido no encontrado", new CustomError("Partido no encontrado", ErrorCode.NO_MATCH)));
+      return;
+    }
+
+    const isMatchPlayer = match.teams.find((team) => team.players.some((player) => player.id === req.user.playerId));
+
+    if (!isMatchPlayer) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo los jugadores del partido pueden modificar el resultado",
+            new CustomError("No autorizado", ErrorCode.USER_NOT_PLAYER)
+          )
+        );
+      return;
+    }
+    
+    await matchService.acceptMatchResult(match);
+    res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error accepting match result", e));

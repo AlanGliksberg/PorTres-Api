@@ -35,7 +35,7 @@ model Match {
   genderId           Int
   duration           Int
   localMin           Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
-  winnerTeamId       Int?
+  winnerTeamNumber   Int?
   resultLoadedByTeam Int?
 
   creator      Player        @relation("creatorMatch", fields: [creatorPlayerId], references: [id])
@@ -56,11 +56,12 @@ model Player {
   firstName     String?
   lastName      String?
   categoryId    Int?
-  rankingPoints Int?
+  rankingPoints Int     @default(0)
   phone         String?
   userId        Int?    @unique
   genderId      Int?
   positionId    Int?
+  confidence    Float   @default(0.1)
 
   position       PlayerPosition? @relation(fields: [positionId], references: [id])
   teams          Team[]

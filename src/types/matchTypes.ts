@@ -1,6 +1,7 @@
 import { PageFilterNumber, PageFilterString } from "./common";
 import { GENDER } from "./playerTypes";
 import { TeamDTO } from "./team";
+import { Match, Team, Player, Set, MatchStatus, Application, Gender } from "@prisma/client";
 
 export interface MatchDto {
   location: string;
@@ -83,3 +84,13 @@ export enum MATCH_STATUS {
   CLOSED = "CLOSED",
   CANCELLED = "CANCELLED"
 }
+
+export type MatchWithFullDetails = Match & {
+  teams: (Team & {
+    players: Player[];
+  })[];
+  sets: Set[];
+  status: MatchStatus;
+  applications: Application[];
+  gender: Gender;
+};

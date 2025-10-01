@@ -85,11 +85,16 @@ export const createPlayer = async (name: string, lastName: string, data: CreateP
 };
 
 export const createTemporalPlayer = async (player: PlayerDTO) => {
+  const category = await prisma.category.findUnique({
+    where: { id: player.categoryId }
+  });
+
   return await prisma.player.create({
     data: {
       firstName: player.firstName,
       lastName: player.lastName,
       categoryId: player.categoryId,
+      rankingPoints: category?.initialPoints,
       genderId: player.genderId,
       phone: player.phone,
       positionId: player.positionId

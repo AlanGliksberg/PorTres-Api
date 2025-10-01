@@ -1,4 +1,4 @@
-import { ApplicationStatus, Match, Prisma, User } from "@prisma/client";
+import { Match, Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import {
   MatchDto,
@@ -7,14 +7,25 @@ import {
   AddPlayerToMatchRequest,
   UpdateMatchDto,
   DeletePlayerFromMatchRequest,
-  UpdateMatchResultDto
+  UpdateMatchResultDto,
+  MatchWithFullDetails
 } from "../../types/matchTypes";
-import { createTeam, executeGetMatch, getCommonMatchInlcude, getDBFilter, updateTeams } from "../../utils/match";
+import {
+  addConfidenceToPlayer,
+  createTeam,
+  executeGetMatch,
+  getCommonMatchInlcude,
+  getDBFilter,
+  getWinnerTeam,
+  saveWinnerTeam,
+  updateRankings,
+  updateTeams
+} from "../../utils/match";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/player";
 import { APPLICATION_STATUS } from "../../types/application";
-import { PlayerDTO } from "../../types/playerTypes";
+import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
 
 export const createMatch = async (playerId: number, data: MatchDto) => {
@@ -183,11 +194,11 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
       getDBFilter(filters),
       {
         status: {
-          code: MATCH_STATUS.COMPLETED
+          code: MATCH_STATUS.CLOSED
         }
       },
       {
-        winnerTeamId: {
+        winnerTeamNumber: {
           not: null
         }
       }
@@ -319,7 +330,7 @@ export const getMyPendingResults = async (playerId: number, filters: MatchFilter
         }
       },
       {
-        winnerTeamId: null
+        winnerTeamNumber: null
       }
     ]
   };
@@ -344,6 +355,7 @@ export const getMatchById = async (matchId: number) => {
       },
       sets: true,
       status: true,
+      gender: true,
       applications: {
         where: {
           status: {
@@ -695,4 +707,13 @@ export const updateMatchResult = async (match: Match, body: UpdateMatchResultDto
     where: { id: match.id },
     data: { resultLoadedByTeam }
   });
+};
+
+export const acceptMatchResult = async (match: MatchWithFullDetails) => {
+  const winnerTeam = getWinnerTeam(match.sets);
+  await saveWinnerTeam(match.id, winnerTeam);
+  if (winnerTeam === 0) return;
+  if (match.gender.code !== GENDER.MIXTO) await updateRankings(match.teams, winnerTeam);
+  match.teams.forEach((t) => t.players.forEach(async (p) => await addConfidenceToPlayer(p)));
+  // TODO - notificar?
 };
