@@ -283,6 +283,11 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
             in: [MATCH_STATUS.PENDING, MATCH_STATUS.COMPLETED]
           }
         }
+      },
+      {
+        dateTime: {
+          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
+        }
       }
     ]
   };
@@ -730,5 +735,5 @@ export const acceptMatchResult = async (match: MatchWithFullDetails) => {
   if (winnerTeam === 0) return;
   if (match.gender.code !== GENDER.MIXTO) await updateRankings(match, winnerTeam);
   match.teams.forEach((t) => t.players.forEach(async (p) => await addConfidenceToPlayer(p)));
-  // TODO - notificar?
+  // TODO - notificar carga de puntos de partido?
 };

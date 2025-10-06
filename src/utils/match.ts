@@ -1,4 +1,4 @@
-import { Match, Player, Prisma, Set } from "@prisma/client";
+import { Category, Match, Player, Prisma, Set } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails } from "../types/matchTypes";
 import { PlayerDTO } from "../types/playerTypes";
 import { TeamDTO, TeamWithPlayers } from "../types/team";
@@ -9,7 +9,7 @@ import {
   getTimeFromString,
   parsePagesFilters
 } from "./common";
-import { createOrGetPlayers } from "./player";
+import { createOrGetPlayers, getCategoryById, getOneCategoryDown, getOneCategoryUp } from "./player";
 import { ApplicationWithRelations } from "../types/application";
 import prisma from "../prisma/client";
 import { CustomError } from "../types/customError";
@@ -375,6 +375,34 @@ export const updatePlayersElo = async (matchId: number, player: Player, baseChan
       newPoints: newElo,
       isWinner
     }
+  });
+
+  await checkAscenseOrDescense(player, newElo);
+};
+
+const checkAscenseOrDescense = async (player: Player, newElo: number) => {
+  const category = await getCategoryById(player.categoryId!);
+  if (newElo > category.maxPoints) await ascendPlayer(player, category);
+  // Le dejo 15 puntos (15%) de tolerancia para el descenso
+  else if (newElo < category.minPoints - 15) await descendPlayer(player, category);
+};
+
+const ascendPlayer = async (player: Player, category: Category) => {
+  const newCategory = await getOneCategoryUp(category);
+  await changePlayerCategory(player.id, newCategory.id);
+  // TODO - notificar ascenso
+};
+
+const descendPlayer = async (player: Player, category: Category) => {
+  const newCategory = await getOneCategoryDown(category);
+  await changePlayerCategory(player.id, newCategory.id);
+  // TODO - notificar descenso
+};
+
+const changePlayerCategory = async (playerId: number, categoryId: number) => {
+  await prisma.player.update({
+    where: { id: playerId },
+    data: { categoryId }
   });
 };
 

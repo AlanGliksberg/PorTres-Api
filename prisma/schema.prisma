@@ -152,6 +152,9 @@ model Category {
   description   String
   genderId      Int
   initialPoints Int
+  minPoints     Int    @default(0)
+  maxPoints     Int    @default(0)
+  order         Int    @default(0)
 
   gender  Gender   @relation(fields: [genderId], references: [id])
   players Player[]

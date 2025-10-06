@@ -92,9 +92,7 @@ export const getCategories = async (filterBoth: boolean) => {
     : {};
   return await prisma.category.findMany({
     where,
-    orderBy: {
-      code: "asc"
-    }
+    orderBy: [{ order: "asc" }, { code: "asc" }]
   });
 };
 

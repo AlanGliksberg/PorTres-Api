@@ -231,3 +231,25 @@ export const validateUpdatePlayerBody = (body: UpdatePlayerBody) => {
       ErrorCode.CREATE_PLAYER_INCORRECT_BODY
     );
 };
+
+export const getCategoryById = async (id: number): Promise<Category> => {
+  return (await prisma.category.findUnique({ where: { id } })) as Category;
+};
+
+export const getOneCategoryUp = async (category: Category) => {
+  return (await prisma.category.findFirst({
+    where: {
+      genderId: category.genderId,
+      order: category.order - 1
+    }
+  })) as Category;
+};
+
+export const getOneCategoryDown = async (category: Category) => {
+  return (await prisma.category.findFirst({
+    where: {
+      genderId: category.genderId,
+      order: category.order + 1
+    }
+  })) as Category;
+};
