@@ -80,6 +80,9 @@ export const createPlayer = async (name: string, lastName: string, data: CreateP
       rankingPoints,
       positionId: data.positionId,
       userId
+    },
+    include: {
+      category: true
     }
   });
 };
