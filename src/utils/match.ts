@@ -1,5 +1,5 @@
 import { Category, Match, Player, Prisma, Set } from "@prisma/client";
-import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails } from "../types/matchTypes";
+import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails, MATCH_STATUS } from "../types/matchTypes";
 import { PlayerDTO } from "../types/playerTypes";
 import { TeamDTO, TeamWithPlayers } from "../types/team";
 import {
@@ -207,11 +207,17 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
   const team1 = await createTeam(1, teams.team1, allowedGenderId);
   const team2 = await createTeam(2, teams.team2, allowedGenderId);
 
+  const players = [...team1.players.connect, ...team2.players.connect];
+  const status = await getMatchStatusByCode(players.length === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
+
   return await prisma.match.update({
     where: { id: matchId },
     data: {
+      status: {
+        connect: { id: status!.id }
+      },
       players: {
-        connect: [...team1.players.connect, ...team2.players.connect]
+        connect: players
       },
       teams: {
         update: [
@@ -431,5 +437,13 @@ export const addConfidenceToPlayer = async (player: Player) => {
   await prisma.player.update({
     where: { id: player.id },
     data: { confidence: newConfidence }
+  });
+};
+
+export const getMatchStatusByCode = async (code: MATCH_STATUS) => {
+  return await prisma.matchStatus.findUnique({
+    where: {
+      code
+    }
   });
 };
