@@ -27,7 +27,7 @@ export async function seedCategory(prisma) {
         initialPoints: 950 - (i + 1) * 100,
         minPoints: 900 - (i + 1) * 100,
         maxPoints: maxPoints,
-        order: i + 1,
+        order: i + 11,
         gender: { connect: { code: "D" } }
       };
     })
@@ -39,7 +39,7 @@ export async function seedCategory(prisma) {
       initialPoints: 0,
       minPoints: 0,
       maxPoints: 0,
-      order: i + 1,
+      order: i + 21,
       gender: { connect: { code: "X" } }
     }))
   );
