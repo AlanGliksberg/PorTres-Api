@@ -8,7 +8,8 @@ import {
   UpdateMatchDto,
   DeletePlayerFromMatchRequest,
   UpdateMatchResultDto,
-  MatchWithFullDetails
+  MatchWithFullDetails,
+  CreateMatchWithResultDto
 } from "../../types/matchTypes";
 import {
   addConfidenceToPlayer,
@@ -28,7 +29,7 @@ import { APPLICATION_STATUS } from "../../types/application";
 import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
 
-export const createMatch = async (playerId: number, data: MatchDto) => {
+export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
   // Validar que cada jugador aparezca solo una vez en los equipos
@@ -43,7 +44,8 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
   }
 
   const matchStatus: MATCH_STATUS =
-    (teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING;
+    status ||
+    ((teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
 
   const team1 = await createTeam(1, teams?.team1, genderId);
   const team2 = await createTeam(2, teams?.team2, genderId);
@@ -71,6 +73,13 @@ export const createMatch = async (playerId: number, data: MatchDto) => {
         create: [team1, team2]
       },
       duration
+    },
+    include: {
+      teams: {
+        include: {
+          players: true
+        }
+      }
     }
   });
   // TODO - notificar jugadores (en el caso que haya)
@@ -199,11 +208,6 @@ export const getPlayedMatches = async (playerId: number, filters: MatchFilters) 
           code: MATCH_STATUS.CLOSED
         }
       }
-      // {
-      //   winnerTeamNumber: {
-      //     not: null
-      //   }
-      // }
     ]
   };
 
@@ -736,4 +740,29 @@ export const acceptMatchResult = async (match: MatchWithFullDetails) => {
   if (match.gender.code !== GENDER.MIXTO) await updateRankings(match, winnerTeam);
   match.teams.forEach((t) => t.players.forEach(async (p) => await addConfidenceToPlayer(p)));
   // TODO - notificar carga de puntos de partido?
+};
+
+export const createMatchWithResult = async (
+  playerId: number,
+  data: CreateMatchWithResultDto,
+  resultLoadedByTeam: number
+) => {
+  const { location, date, time, gender, category, teams, sets } = data;
+  const createMatchBody = {
+    location,
+    date,
+    time,
+    genderId: gender,
+    categoryId: category,
+    teams
+  };
+  const match = await createMatch(playerId, createMatchBody, false, MATCH_STATUS.CLOSED);
+
+  const createResultBody = {
+    matchId: match.id,
+    sets
+  };
+  await updateMatchResult(match as MatchWithFullDetails, createResultBody, resultLoadedByTeam);
+
+  return match;
 };

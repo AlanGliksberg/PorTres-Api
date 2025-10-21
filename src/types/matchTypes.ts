@@ -1,19 +1,18 @@
 import { PageFilterNumber, PageFilterString } from "./common";
-import { GENDER } from "./playerTypes";
 import { TeamDTO } from "./team";
 import { Match, Team, Player, Set, MatchStatus, Application, Gender } from "@prisma/client";
 
 export interface MatchDto {
   location: string;
   description?: string;
-  date: Date;
+  date: string;
   time: string;
-  duration: number;
+  duration?: number;
   genderId: number;
   categoryId: number;
   teams?: TeamDTO;
-  pointsDeviation: number;
-  creatorPlayerId: number;
+  pointsDeviation?: number;
+  creatorPlayerId?: number;
 }
 
 export interface UpdateMatchDto {
@@ -35,6 +34,16 @@ export interface UpdateMatchResultDto {
 
 export interface AcceptResultDto {
   matchId: number;
+}
+
+export interface CreateMatchWithResultDto {
+  location: string;
+  date: string;
+  time: string;
+  gender: number;
+  category: number;
+  teams: TeamDTO;
+  sets: [number, number][];
 }
 
 export type GetMatchesRequest = {

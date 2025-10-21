@@ -3,6 +3,7 @@ import * as matchService from "./match.service";
 import {
   AcceptResultDto,
   AddPlayerToMatchRequest,
+  CreateMatchWithResultDto,
   DeletePlayerFromMatchRequest,
   GetMatchesRequest,
   MATCH_STATUS,
@@ -345,11 +346,38 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
         );
       return;
     }
-    
+
     await matchService.acceptMatchResult(match);
     res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error accepting match result", e));
+  }
+};
+
+export const createMatchWithResult = async (req: Request<CreateMatchWithResultDto>, res: Response) => {
+  try {
+    // TODO - validar datos de entrada
+    const teams = [req.body.teams.team1!, req.body.teams.team2!];
+    let playerTeamNumber = 0;
+    if (req.body.teams.team1!.some((p) => p.id === req.user.playerId)) playerTeamNumber = 1;
+    else if (req.body.teams.team2!.some((p) => p.id === req.user.playerId)) playerTeamNumber = 2;
+
+    if (!playerTeamNumber) {
+      res
+        .status(403)
+        .json(
+          new ErrorResponse(
+            "Solo los jugadores del partido pueden modificar el resultado",
+            new CustomError("No autorizado", ErrorCode.USER_NOT_PLAYER)
+          )
+        );
+      return;
+    }
+    const match = await matchService.createMatchWithResult(req.user.playerId!, req.body, playerTeamNumber);
+    res.status(200).json(new OkResponse({ match }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error creating match with result", e));
   }
 };

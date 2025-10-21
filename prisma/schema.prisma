@@ -33,7 +33,7 @@ model Match {
   createdAt          DateTime @default(now())
   creatorPlayerId    Int
   genderId           Int
-  duration           Int
+  duration           Int?
   localMin           Int      @default(dbgenerated()) @map("local_min") @db.SmallInt
   winnerTeamNumber   Int?
   resultLoadedByTeam Int?
