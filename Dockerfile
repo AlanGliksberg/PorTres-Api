@@ -15,7 +15,7 @@ RUN pnpm install --frozen-lockfile
 # ------------ Build ------------
 FROM deps AS build
 COPY . .
-RUN pnpm exec prisma generate --log-level debug
+RUN pnpm exec prisma generate --schema=./prisma/schema.prisma --log-level debug
 RUN pnpm build
 
 # ------------ Prune (solo deps prod) ------------
