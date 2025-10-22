@@ -17,6 +17,10 @@ export const register = async (data: RegisterDTO) => {
   // 1 may 1 min
   // 1 numero
   passwordHash = await hashPassword(data.password!);
+  const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+  if (existingUser) {
+    throw new CustomError("User already exists", ErrorCode.USER_ALREADY_EXISTS);
+  }
 
   const user = await creatUser({
     email: data.email,
