@@ -2,8 +2,6 @@
 FROM node:20-slim AS base
 ENV NODE_ENV=production
 WORKDIR /app
-RUN corepack enable
-
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # ------------ Deps ------------
