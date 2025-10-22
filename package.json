@@ -2,18 +2,20 @@
   "name": "padelcole-api",
   "version": "1.0.0",
   "main": "build/server.js",
+  "packageManager": "pnpm@9",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node build/server.js",
     "pgen": "prisma generate",
     "pmig": "prisma migrate dev",
+    "pmigp": "prisma migrate deploy",
     "pstu": "prisma studio",
     "pseed": "tsx prisma/seed.js",
     "pclean": "tsx prisma/clean.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "^6.18.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
@@ -28,7 +30,7 @@
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
     "prettier": "^3.5.3",
-    "prisma": "^5.0.0",
+    "prisma": "^6.18.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.0"
   }
