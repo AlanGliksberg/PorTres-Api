@@ -1,0 +1,23 @@
+# VCS / tooling
+.git
+.gitignore
+.vscode
+.idea
+
+# Dependencias
+node_modules
+
+# Artefactos de build / test
+dist
+build/*.map
+coverage
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Docker
+Dockerfile
+
+# Entorno
+.env
+.env.*
