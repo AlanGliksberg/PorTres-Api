@@ -4,6 +4,8 @@ ENV NODE_ENV=production
 WORKDIR /app
 RUN corepack enable
 
+RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
+
 # ------------ Deps ------------
 FROM base AS deps
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates openssl \
