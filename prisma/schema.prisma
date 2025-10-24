@@ -73,6 +73,7 @@ model Player {
   applications        Application[]
   category            Category?             @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
+  expoPushTokens      ExpoPushToken[]
 }
 
 model Team {
@@ -211,4 +212,16 @@ model PlayerRankingChange {
   player Player @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
+}
+
+model ExpoPushToken {
+  id         Int      @id @default(autoincrement())
+  playerId   Int
+  token      String   @unique
+  deviceType String?
+  lastSeenAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@index([playerId])
 }

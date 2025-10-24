@@ -1,8 +1,16 @@
 import { User } from "@prisma/client";
-import { CreatePlayerBody, UpdatePlayerBody, GENDER, PlayerDTO, PlayerFilters } from "../../types/playerTypes";
+import {
+  CreatePlayerBody,
+  UpdatePlayerBody,
+  GENDER,
+  PlayerFilters,
+  SaveExpoPushTokenBody
+} from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getDBFilter, getPlayerByUserId } from "../../utils/player";
 import prisma from "../../prisma/client";
 import { getUserSelect } from "../../utils/auth";
+import { CustomError } from "../../types/customError";
+import { ErrorCode } from "../../constants/errorCode";
 
 export const createPlayer = async (data: CreatePlayerBody, user: User) => {
   let existingPlayer = await getPlayerByUserId(user.id);
@@ -108,6 +116,30 @@ export const getQuestions = async () => {
         }
       },
       type: true
+    }
+  });
+};
+
+export const saveExpoPushToken = async (data: SaveExpoPushTokenBody, user: User) => {
+  const player = await getPlayerByUserId(user.id);
+  if (!player) {
+    throw new CustomError("Jugador no encontrado", ErrorCode.NO_PLAYER);
+  }
+
+  const token = data.token.trim();
+  const deviceType = data.deviceType?.trim() || null;
+
+  return await prisma.expoPushToken.upsert({
+    where: { token },
+    update: {
+      playerId: player.id,
+      deviceType,
+      lastSeenAt: new Date()
+    },
+    create: {
+      playerId: player.id,
+      token,
+      deviceType
     }
   });
 };

@@ -7,13 +7,16 @@ import {
   PlayerFilters,
   CreatePlayerBody,
   UpdatePlayerBody,
-  POSITION
+  POSITION,
+  SaveExpoPushTokenBody
 } from "../types/playerTypes";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { Category, Prisma } from "@prisma/client";
 import { getGenderById } from "./gender";
+
+const expoPushTokenRegex = /^Expo(nent)?PushToken\[[A-Za-z0-9\-_]{1,}\]$/;
 
 export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
   userId: number,
@@ -233,6 +236,16 @@ export const validateUpdatePlayerBody = (body: UpdatePlayerBody) => {
       "El ID de posición es requerido y debe ser un número válido",
       ErrorCode.CREATE_PLAYER_INCORRECT_BODY
     );
+};
+
+export const validateExpoPushTokenBody = (body: SaveExpoPushTokenBody) => {
+  if (!body.token || !expoPushTokenRegex.test(body.token)) {
+    throw new CustomError("Token push invalido", ErrorCode.INVALID_PUSH_TOKEN);
+  }
+
+  if (body.deviceType && body.deviceType.trim().length === 0) {
+    throw new CustomError("Tipo de dispositivo invalido", ErrorCode.INVALID_PUSH_TOKEN);
+  }
 };
 
 export const getCategoryById = async (id: number): Promise<Category> => {
