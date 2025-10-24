@@ -8,5 +8,6 @@ router.post("/login", authController.login);
 router.post("/google", authController.loginWithGoogle);
 router.post("/refresh", authController.refreshToken);
 router.post("/change-password", authenticate as any, authController.changePassword);
+router.post("/logout", authenticate as any, authController.logout);
 
 export default router;

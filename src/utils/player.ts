@@ -16,7 +16,8 @@ import { convertStringIntoArray, parsePagesFilters } from "./common";
 import { Category, Prisma } from "@prisma/client";
 import { getGenderById } from "./gender";
 
-const expoPushTokenRegex = /^Expo(nent)?PushToken\[[A-Za-z0-9\-_]{1,}\]$/;
+export const expoPushTokenRegex = /^Expo(nent)?PushToken\[[A-Za-z0-9\-_]{1,}\]$/;
+export const isValidExpoPushToken = (token: string) => expoPushTokenRegex.test(token);
 
 export const getPlayerByUserId = async <T extends Prisma.PlayerInclude>(
   userId: number,
@@ -239,7 +240,7 @@ export const validateUpdatePlayerBody = (body: UpdatePlayerBody) => {
 };
 
 export const validateExpoPushTokenBody = (body: SaveExpoPushTokenBody) => {
-  if (!body.token || !expoPushTokenRegex.test(body.token)) {
+  if (!body.token || !isValidExpoPushToken(body.token)) {
     throw new CustomError("Token push invalido", ErrorCode.INVALID_PUSH_TOKEN);
   }
 

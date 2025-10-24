@@ -17,3 +17,7 @@ export interface ChangePasswordDTO {
   currentPassword: string;
   newPassword: string;
 }
+
+export interface LogoutDTO {
+  expoPushToken?: string;
+}
