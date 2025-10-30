@@ -28,7 +28,7 @@ import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/
 import { APPLICATION_STATUS } from "../../types/application";
 import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
-import { publishPlayerAddedToMatch } from "../../workers/publisher";
+import { publishMatchCancelled, publishPlayerAddedToMatch } from "../../workers/publisher";
 
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -387,8 +387,8 @@ export const getMatchById = async (matchId: number) => {
   });
 };
 
-export const deleteMatch = async (matchId: number) => {
-  return await prisma.match.update({
+export const deleteMatch = async (matchId: number, playerId: number) => {
+  const match = await prisma.match.update({
     where: {
       id: matchId
     },
@@ -398,8 +398,17 @@ export const deleteMatch = async (matchId: number) => {
           code: MATCH_STATUS.CANCELLED
         }
       }
+    },
+    include: {
+      players: true
     }
   });
+
+  match.players.forEach(async (player) => {
+    if (player.id !== playerId) await publishMatchCancelled(matchId, player.id);
+  });
+
+  return match;
 };
 
 export const addPlayerToMatch = async (data: AddPlayerToMatchRequest, addedByPlayerId: number) => {

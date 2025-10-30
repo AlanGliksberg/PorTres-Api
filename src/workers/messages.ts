@@ -38,6 +38,15 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
           reason: "player-applied"
         }
       };
+    case NotificationIntentType.MATCH_CANCELLED:
+      return {
+        title: "Partido cancelado",
+        body: `El partido en ${location} del día ${formattedDate} no se va a jugar. Te avisamos si se reprograma`,
+        data: {
+          matchId: intent.matchId,
+          reason: "match-cancelled"
+        }
+      };
     // case NotificationIntentType.MATCH_REMINDER_1H:
     //   return {
     //     title: "Tu partido comienza en 1 hora",

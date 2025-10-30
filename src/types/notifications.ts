@@ -14,6 +14,12 @@ export type PlayerAppliedToMatchEvent = {
   createdAt: string;
 };
 
+export type MatchCancelledEvent = {
+  matchId: number;
+  playerId: number;
+  createdAt: string;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };

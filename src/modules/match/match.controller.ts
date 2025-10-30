@@ -143,7 +143,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
       return;
     }
 
-    const match = await matchService.deleteMatch(matchId);
+    const match = await matchService.deleteMatch(matchId, req.user.playerId);
     // TODO - notificar a jugadores
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {

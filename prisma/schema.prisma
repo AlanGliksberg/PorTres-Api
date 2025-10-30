@@ -253,6 +253,7 @@ model NotificationIntent {
 enum NotificationIntentType {
   PLAYER_ADDED
   PLAYER_APPLIED
+  MATCH_CANCELLED
   MATCH_REMINDER_1H
   MATCH_POST_1H
 }
