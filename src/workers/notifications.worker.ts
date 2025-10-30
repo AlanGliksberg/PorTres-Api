@@ -10,10 +10,16 @@ import {
 } from "../modules/notifications/intent.service";
 import { NotificationIntentStatus } from "@prisma/client";
 import { preparePlayerTokens, pruneInvalidTokens, sendExpoMessages } from "../modules/notifications/expo.service";
-import { PlayerAddedToMatchEvent, ProcessNotificationIntentJobData, NotificationJobData } from "../types/notifications";
+import {
+  PlayerAddedToMatchEvent,
+  ProcessNotificationIntentJobData,
+  NotificationJobData,
+  PlayerAppliedToMatchEvent
+} from "../types/notifications";
 import { DispatchResult, NotificationIntentWithRelations, NotificationJobType } from "../types/notificationTypes";
 import { buildIntentCopy } from "./messages";
 import { handlePlayerAddedToMatch } from "./events/playerAddedToMatch";
+import { handlePlayerAppliedToMatch } from "./events/playerAppliedToMatch";
 
 const dispatchIntent = async (intent: NotificationIntentWithRelations): Promise<DispatchResult> => {
   if (!intent.player) {
@@ -29,7 +35,7 @@ const dispatchIntent = async (intent: NotificationIntentWithRelations): Promise<
     return { delivered: 0, failed: 0, warning };
   }
 
-  const { title, body, data } = buildIntentCopy(intent);
+  const { title, body, data } = await buildIntentCopy(intent);
   const messages = preparedTokens.map(({ token }) => ({
     to: token,
     sound: "default" as const,
@@ -119,6 +125,9 @@ const worker = new Worker<NotificationJobData, any, NotificationJobType>(
     switch (job.name) {
       case NotificationJobType.PLAYER_ADDED_TO_MATCH_JOB:
         await handlePlayerAddedToMatch(job as Job<PlayerAddedToMatchEvent>);
+        break;
+      case NotificationJobType.PLAYER_APPLIED_TO_MATCH_JOB:
+        await handlePlayerAppliedToMatch(job as Job<PlayerAppliedToMatchEvent>);
         break;
       case NotificationJobType.PROCESS_NOTIFICATION_INTENT_JOB:
         await handleNotificationIntentJob(job as Job<ProcessNotificationIntentJobData>);

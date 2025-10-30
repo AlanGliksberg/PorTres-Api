@@ -7,7 +7,7 @@ import { changeApplicationStatus, getApplicationById } from "../../utils/applica
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
-import { publishPlayerAddedToMatch } from "../../workers/publisher";
+import { publishPlayerAddedToMatch, publishPlayerAppliedToMatch } from "../../workers/publisher";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
@@ -38,7 +38,7 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
       throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
   }
 
-  return await prisma.application.create({
+  const application = await prisma.application.create({
     data: {
       match: {
         connect: {
@@ -60,6 +60,10 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
       phone
     }
   });
+
+  await publishPlayerAppliedToMatch(matchId, playerId, match.creatorPlayerId, teamNumber);
+
+  return application;
 };
 
 export const acceptApplication = async (playerId: number, applicationId: number, teamNumber: 1 | 2) => {

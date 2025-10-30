@@ -6,8 +6,16 @@ export type PlayerAddedToMatchEvent = {
   createdAt: string;
 };
 
+export type PlayerAppliedToMatchEvent = {
+  matchId: number;
+  playerAppliedId: number;
+  playerOwnerId: number;
+  teamNumber?: number;
+  createdAt: string;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };
 
-export type NotificationJobData = PlayerAddedToMatchEvent | ProcessNotificationIntentJobData;
+export type NotificationJobData = any;

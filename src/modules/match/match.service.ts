@@ -458,9 +458,7 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest, addedByPla
     }
   });
 
-  if (playerId) {
-    await publishPlayerAddedToMatch(data.matchId, playerId, addedByPlayerId, data.teamNumber);
-  }
+  await publishPlayerAddedToMatch(data.matchId, playerId, addedByPlayerId, data.teamNumber);
 
   return updatedMatch;
 };

@@ -1,15 +1,18 @@
 import { NotificationIntentType } from "@prisma/client";
 import { NotificationIntentWithRelations } from "../types/notificationTypes";
+import { PlayerAppliedToMatchEvent } from "../types/notifications";
+import { getPlayerById } from "../utils/player";
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "short",
   timeStyle: "short"
 });
 
-export const buildIntentCopy = (intent: NotificationIntentWithRelations) => {
-  const matchDate = intent.match?.dateTime ? new Date(intent.match.dateTime) : undefined;
+export const buildIntentCopy = async (intent: NotificationIntentWithRelations) => {
+  const match = intent.match;
+  const matchDate = match?.dateTime ? new Date(match.dateTime) : undefined;
   const formattedDate = matchDate ? dateFormatter.format(matchDate) : undefined;
-  const location = intent.match?.location ? intent.match.location : undefined;
+  const location = match?.location ? match.location : undefined;
 
   switch (intent.type) {
     case NotificationIntentType.PLAYER_ADDED:
@@ -23,26 +26,37 @@ export const buildIntentCopy = (intent: NotificationIntentWithRelations) => {
           reason: "player-added"
         }
       };
-    case NotificationIntentType.MATCH_REMINDER_1H:
+    case NotificationIntentType.PLAYER_APPLIED:
+      const data = intent.payload as PlayerAppliedToMatchEvent;
+      const player = await getPlayerById(data.playerAppliedId);
       return {
-        title: "Tu partido comienza en 1 hora",
-        body: location
-          ? `Nos vemos en ${location}. Recordá estar a tiempo.`
-          : "Recordatorio: tu partido empieza en 1 hora.",
+        title: "¡Se postularon a tu partido!",
+        body: `${player?.firstName} quiere sumarse a tu partido en ${location} del día ${formattedDate} ¡Revisá su perfil!`,
         data: {
           matchId: intent.matchId,
-          reason: "match-reminder-1h"
+          reason: "player-applied"
         }
       };
-    case NotificationIntentType.MATCH_POST_1H:
-      return {
-        title: "¿Cómo te fue en el partido?",
-        body: "Contanos cómo resultó el encuentro y mantené tu perfil actualizado.",
-        data: {
-          matchId: intent.matchId,
-          reason: "match-post-1h"
-        }
-      };
+    // case NotificationIntentType.MATCH_REMINDER_1H:
+    //   return {
+    //     title: "Tu partido comienza en 1 hora",
+    //     body: location
+    //       ? `Nos vemos en ${location}. Recordá estar a tiempo.`
+    //       : "Recordatorio: tu partido empieza en 1 hora.",
+    //     data: {
+    //       matchId: intent.matchId,
+    //       reason: "match-reminder-1h"
+    //     }
+    //   };
+    // case NotificationIntentType.MATCH_POST_1H:
+    //   return {
+    //     title: "¿Cómo te fue en el partido?",
+    //     body: "Contanos cómo resultó el encuentro y mantené tu perfil actualizado.",
+    //     data: {
+    //       matchId: intent.matchId,
+    //       reason: "match-post-1h"
+    //     }
+    //   };
     default:
       return {
         title: "PorTres",
