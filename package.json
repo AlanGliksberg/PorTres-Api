@@ -12,7 +12,8 @@
     "pmigp": "prisma migrate deploy",
     "pstu": "prisma studio",
     "pseed": "tsx prisma/seed.js",
-    "pclean": "tsx prisma/clean.js"
+    "pclean": "tsx prisma/clean.js",
+    "notifications": "tsx src/workers/notifications.worker.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
@@ -22,7 +23,10 @@
     "express": "^4.18.0",
     "google-auth-library": "^8.7.0",
     "jsonwebtoken": "^9.0.0",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "bullmq": "^5.33.2",
+    "ioredis": "^5.4.2",
+    "expo-server-sdk": "^3.13.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

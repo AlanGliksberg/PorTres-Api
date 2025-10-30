@@ -47,6 +47,7 @@ model Match {
   applications        Application[]
   category            Category              @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
+  notificationIntents NotificationIntent[]
 
   @@index([localMin], map: "idx_match_local_min")
   @@index([categoryId, genderId, dateTime])
@@ -74,6 +75,7 @@ model Player {
   category            Category?             @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
   expoPushTokens      ExpoPushToken[]
+  notificationIntents NotificationIntent[]
 }
 
 model Team {
@@ -224,4 +226,41 @@ model ExpoPushToken {
   player Player @relation(fields: [playerId], references: [id])
 
   @@index([playerId])
+}
+
+model NotificationIntent {
+  id          Int                      @id @default(autoincrement())
+  type        NotificationIntentType
+  status      NotificationIntentStatus @default(PENDING)
+  scheduledAt DateTime
+  executedAt  DateTime?
+  matchId     Int
+  playerId    Int?
+  payload     Json?
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  dedupeKey   String?                  @unique
+
+  match  Match  @relation(fields: [matchId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+
+  @@index([scheduledAt, status])
+  @@index([matchId])
+  @@index([playerId])
+}
+
+enum NotificationIntentType {
+  PLAYER_ADDED
+  MATCH_REMINDER_1H
+  MATCH_POST_1H
+}
+
+enum NotificationIntentStatus {
+  PENDING
+  SCHEDULED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

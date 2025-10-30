@@ -1,4 +1,4 @@
-import { Match, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import {
   MatchDto,
@@ -28,7 +28,8 @@ import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/
 import { APPLICATION_STATUS } from "../../types/application";
 import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
-
+import { publishPlayerAddedToMatch } from "../../workers/publisher";
+import { PlayerAddedToMatchEvent } from "../../types/notifications";
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
@@ -79,7 +80,8 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
         include: {
           players: true
         }
-      }
+      },
+      players: true
     }
   });
   // TODO - notificar jugadores (en el caso que haya)
@@ -393,7 +395,7 @@ export const deleteMatch = async (matchId: number) => {
   });
 };
 
-export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
+export const addPlayerToMatch = async (data: AddPlayerToMatchRequest, addedByPlayerId: number) => {
   // Obtener el partido actual para validaciones
   const currentMatch = await getMatchById(data.matchId);
   if (!currentMatch) {
@@ -424,9 +426,10 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
   };
 
   const playerConnect = await createOrGetPlayer(player, currentMatch.genderId);
+  const playerId = playerConnect.id;
 
   // TODO - validar genero de jugador contra el genero de partido
-  return await prisma.match.update({
+  const updatedMatch = await prisma.match.update({
     where: {
       id: data.matchId
     },
@@ -454,10 +457,16 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest) => {
       players: true
     }
   });
+
+  if (playerId) {
+    await publishPlayerAddedToMatch(data.matchId, playerId, addedByPlayerId, data.teamNumber);
+  }
+
+  return updatedMatch;
 };
 
 export const changeState = async (matchId: number, status: MATCH_STATUS) => {
-  return await prisma.match.update({
+  const match = await prisma.match.update({
     where: {
       id: matchId
     },
@@ -467,8 +476,15 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
           code: status
         }
       }
+    },
+    include: {
+      players: true
     }
   });
+
+  // TODO - si se cambia a COMPLETED, notificar a jugadores, guardar evento de cambio a CLOSED, guardar recordatorio de carga de resultado
+
+  return match;
 };
 
 export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {

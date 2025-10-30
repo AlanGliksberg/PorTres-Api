@@ -1,4 +1,4 @@
-import { ApplicationStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
@@ -7,6 +7,7 @@ import { changeApplicationStatus, getApplicationById } from "../../utils/applica
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
+import { publishPlayerAddedToMatch } from "../../workers/publisher";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
@@ -89,7 +90,11 @@ export const acceptApplication = async (playerId: number, applicationId: number,
 
   const match = await addPlayerToMatchFromApplication(application, teamNumber);
   if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.COMPLETED);
-  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
+  const appStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
+
+  publishPlayerAddedToMatch(match.id, application.playerId, playerId, teamNumber);
+
+  return appStatus;
 };
 
 export const rejectApplication = async (playerId: number, applicationId: number) => {
