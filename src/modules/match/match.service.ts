@@ -28,7 +28,11 @@ import { createOrGetPlayer, getPlayerById, verifyGenderById } from "../../utils/
 import { APPLICATION_STATUS } from "../../types/application";
 import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
-import { publishMatchCancelled, publishPlayerAddedToMatch } from "../../workers/publisher";
+import {
+  publishMatchCancelled,
+  publishPlayerAddedToMatch,
+  publishPlayerRemovedFromMatch
+} from "../../workers/publisher";
 
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
@@ -373,6 +377,7 @@ export const getMatchById = async (matchId: number) => {
           players: true
         }
       },
+      players: true,
       sets: true,
       status: true,
       gender: true,
@@ -502,7 +507,7 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
   return match;
 };
 
-export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
+export const updateMatch = async (matchId: number, data: UpdateMatchDto, playerId: number) => {
   const updateData: any = {};
 
   if (data.location !== undefined) updateData.location = data.location;
@@ -581,7 +586,7 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
       throw new CustomError("No se puede agregar el mismo jugador 2 veces", ErrorCode.PLAYER_ALREADY_IN_MATCH);
     }
 
-    await updateTeams(matchId, data.teams, genderId);
+    await updateTeams(matchId, data.teams, genderId, playerId);
 
     // Obtener el partido actualizado con los nuevos equipos
     return await prisma.match.findUnique({
@@ -610,7 +615,7 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto) => {
   return updatedMatch;
 };
 
-export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) => {
+export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, playerId: number) => {
   // Obtener el partido actual para validaciones
   const currentMatch = await getMatchById(data.matchId);
   if (!currentMatch) {
@@ -682,11 +687,13 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest) 
     await prisma.player.delete({
       where: { id: data.playerId }
     });
+  } else if (playerToDelete.id !== playerId) {
+    //notificar que fue eliminado (solo si no es quien está eliminando)
+    await publishPlayerRemovedFromMatch(data.matchId, playerToDelete.id);
   }
 
   if (currentMatch.status.code !== MATCH_STATUS.PENDING) {
     await changeState(data.matchId, MATCH_STATUS.PENDING);
-    // TODO - notificar
   }
 
   return updatedMatch;

@@ -15,6 +15,8 @@ import prisma from "../prisma/client";
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { getUserSelect } from "./auth";
+import { getMatchById } from "../modules/match/match.service";
+import { publishPlayerAddedToMatch, publishPlayerRemovedFromMatch } from "../workers/publisher";
 
 export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   return {
@@ -160,8 +162,9 @@ export const validateCreateMatchBody = (body: MatchDto) => {
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
 };
 
-export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number) => {
-  // TODO - actualizar el estado del partido en base a la cantidad de jugadores
+export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number, playerId: number) => {
+  const match = await getMatchById(matchId);
+  const actualPlayers = match!.players;
 
   // Primero desconectamos todos los jugadores actuales del partido y de los equipos
   await prisma.match.update({
@@ -207,17 +210,17 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
   const team1 = await createTeam(1, teams.team1, allowedGenderId);
   const team2 = await createTeam(2, teams.team2, allowedGenderId);
 
-  const players = [...team1.players.connect, ...team2.players.connect];
-  const status = await getMatchStatusByCode(players.length === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
+  const newPlayers = [...team1.players.connect, ...team2.players.connect];
+  const status = await getMatchStatusByCode(newPlayers.length === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
 
-  return await prisma.match.update({
+  const updatedMatch = await prisma.match.update({
     where: { id: matchId },
     data: {
       status: {
         connect: { id: status!.id }
       },
       players: {
-        connect: players
+        connect: newPlayers
       },
       teams: {
         update: [
@@ -251,6 +254,33 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
       }
     }
   });
+
+  const removedPlayers = actualPlayers.filter((actualPlayer) => {
+    return !newPlayers.some((newPlayer) => newPlayer.id === actualPlayer.id);
+  });
+
+  const addedPlayers = newPlayers.filter((newPlayer) => {
+    return !actualPlayers.some((actualPlayer) => newPlayer.id === actualPlayer.id);
+  });
+
+  removedPlayers.forEach(async (player) => {
+    if (player.userId && player.id !== playerId) {
+      await publishPlayerRemovedFromMatch(matchId, player.id);
+    }
+  });
+
+  addedPlayers.forEach(async (player) => {
+    if (player.id !== playerId) {
+      await publishPlayerAddedToMatch(
+        matchId,
+        player.id,
+        playerId,
+        team1.players.connect.some((p) => p.id === player.id) ? 1 : 2
+      );
+    }
+  });
+
+  return updatedMatch;
 };
 
 export const getCommonMatchInlcude = () => {

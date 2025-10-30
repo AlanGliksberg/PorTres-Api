@@ -20,6 +20,12 @@ export type MatchCancelledEvent = {
   createdAt: string;
 };
 
+export type PlayerRemovedFromMatchEvent = {
+  matchId: number;
+  playerId: number;
+  createdAt: string;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };

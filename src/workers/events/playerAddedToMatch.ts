@@ -29,7 +29,7 @@ export const handlePlayerAddedToMatch = async (job: Job<PlayerAddedToMatchEvent>
     playerId: data.playerId,
     scheduledAt: new Date(),
     payload: data,
-    dedupeKey: `PLAYER_ADDED:${data.matchId}:${data.playerId}`
+    dedupeKey: `PLAYER_ADDED:${data.matchId}:${data.playerId}:${data.teamNumber}`
   });
 
   //   const reminderAt = new Date(new Date(match.dateTime).getTime() - HOUR_IN_MS);

@@ -47,6 +47,15 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
           reason: "match-cancelled"
         }
       };
+    case NotificationIntentType.PLAYER_REMOVED:
+      return {
+        title: "Te eliminaron del partido",
+        body: `El organizador canceló tu participación en el partido en ${location} del día ${formattedDate}.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "player-removed"
+        }
+      };
     // case NotificationIntentType.MATCH_REMINDER_1H:
     //   return {
     //     title: "Tu partido comienza en 1 hora",

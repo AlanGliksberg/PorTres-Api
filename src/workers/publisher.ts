@@ -3,7 +3,8 @@ import {
   MatchCancelledEvent,
   NotificationJobData,
   PlayerAddedToMatchEvent,
-  PlayerAppliedToMatchEvent
+  PlayerAppliedToMatchEvent,
+  PlayerRemovedFromMatchEvent
 } from "../types/notifications";
 import { NotificationJobType } from "../types/notificationTypes";
 
@@ -67,4 +68,14 @@ export const publishMatchCancelled = async (matchId: number, playerId: number) =
   };
   const jobId = getJobId(NotificationJobType.MATCH_CANCELLED_JOB, matchId, playerId, event.createdAt);
   await publishEvent(NotificationJobType.MATCH_CANCELLED_JOB, event, jobId);
+};
+
+export const publishPlayerRemovedFromMatch = async (matchId: number, playerId: number) => {
+  const event: PlayerRemovedFromMatchEvent = {
+    matchId,
+    playerId,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB, matchId, playerId, event.createdAt);
+  await publishEvent(NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB, event, jobId);
 };
