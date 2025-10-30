@@ -96,7 +96,7 @@ export const acceptApplication = async (playerId: number, applicationId: number,
   if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.COMPLETED);
   const appStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
 
-  publishPlayerAddedToMatch(match.id, application.playerId, playerId, teamNumber);
+  //publishPlayerAddedToMatch(match.id, application.playerId, playerId, teamNumber);
 
   return appStatus;
 };

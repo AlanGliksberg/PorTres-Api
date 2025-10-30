@@ -29,7 +29,7 @@ import { APPLICATION_STATUS } from "../../types/application";
 import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
 import { publishPlayerAddedToMatch } from "../../workers/publisher";
-import { PlayerAddedToMatchEvent } from "../../types/notifications";
+
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
   const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
 
@@ -84,7 +84,14 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
       players: true
     }
   });
-  // TODO - notificar jugadores (en el caso que haya)
+  if (teams) {
+    (teams.team1 || []).forEach(async (player) => {
+      if (player.id && player.id !== playerId) await publishPlayerAddedToMatch(match.id, player.id, playerId, 1);
+    });
+    (teams.team2 || []).forEach(async (player) => {
+      if (player.id && player.id !== playerId) await publishPlayerAddedToMatch(match.id, player.id, playerId, 2);
+    });
+  }
 
   return match;
 };
@@ -458,7 +465,8 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest, addedByPla
     }
   });
 
-  await publishPlayerAddedToMatch(data.matchId, playerId, addedByPlayerId, data.teamNumber);
+  if (player.id && playerId !== addedByPlayerId)
+    await publishPlayerAddedToMatch(data.matchId, playerId, addedByPlayerId, data.teamNumber);
 
   return updatedMatch;
 };

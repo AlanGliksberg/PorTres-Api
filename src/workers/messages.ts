@@ -1,11 +1,12 @@
 import { NotificationIntentType } from "@prisma/client";
 import { NotificationIntentWithRelations } from "../types/notificationTypes";
-import { PlayerAppliedToMatchEvent } from "../types/notifications";
+import { PlayerAddedToMatchEvent, PlayerAppliedToMatchEvent } from "../types/notifications";
 import { getPlayerById } from "../utils/player";
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "short",
-  timeStyle: "short"
+  timeStyle: "short",
+  timeZone: "UTC"
 });
 
 export const buildIntentCopy = async (intent: NotificationIntentWithRelations) => {
@@ -16,22 +17,22 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
 
   switch (intent.type) {
     case NotificationIntentType.PLAYER_ADDED:
+      const playerAddedData = intent.payload as PlayerAddedToMatchEvent;
+      const player1 = await getPlayerById(playerAddedData.addedByPlayerId);
       return {
         title: "¡Te agregaron a un partido!",
-        body: formattedDate
-          ? `El partido es el ${formattedDate}${location ? ` en ${location}` : ""}. Preparate!`
-          : "Revisá tus partidos, te sumaron a un nuevo encuentro.",
+        body: `${player1?.firstName} creó un partido en ${location} para el día ${formattedDate} y te agregó.`,
         data: {
           matchId: intent.matchId,
           reason: "player-added"
         }
       };
     case NotificationIntentType.PLAYER_APPLIED:
-      const data = intent.payload as PlayerAppliedToMatchEvent;
-      const player = await getPlayerById(data.playerAppliedId);
+      const playerAppliedData = intent.payload as PlayerAppliedToMatchEvent;
+      const player2 = await getPlayerById(playerAppliedData.playerAppliedId);
       return {
         title: "¡Se postularon a tu partido!",
-        body: `${player?.firstName} quiere sumarse a tu partido en ${location} del día ${formattedDate} ¡Revisá su perfil!`,
+        body: `${player2?.firstName} quiere sumarse a tu partido en ${location} del día ${formattedDate} ¡Revisá su perfil!`,
         data: {
           matchId: intent.matchId,
           reason: "player-applied"
