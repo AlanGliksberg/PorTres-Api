@@ -6,6 +6,7 @@ export enum NotificationJobType {
   PLAYER_APPLIED_TO_MATCH_JOB = "player-applied-to-match",
   MATCH_CANCELLED_JOB = "match-cancelled",
   PLAYER_REMOVED_FROM_MATCH_JOB = "player-removed-from-match",
+  APPLICATION_REJECTED_JOB = "application-rejected",
   PROCESS_NOTIFICATION_INTENT_JOB = "process-notification-intent"
 }
 

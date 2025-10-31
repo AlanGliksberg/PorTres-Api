@@ -16,7 +16,8 @@ import {
   NotificationJobData,
   PlayerAppliedToMatchEvent,
   MatchCancelledEvent,
-  PlayerRemovedFromMatchEvent
+  PlayerRemovedFromMatchEvent,
+  ApplicationRejectedEvent
 } from "../types/notifications";
 import { DispatchResult, NotificationIntentWithRelations, NotificationJobType } from "../types/notificationTypes";
 import { buildIntentCopy } from "./messages";
@@ -24,6 +25,7 @@ import { handlePlayerAddedToMatch } from "./events/playerAddedToMatch";
 import { handlePlayerAppliedToMatch } from "./events/playerAppliedToMatch";
 import { handleMatchCancelled } from "./events/matchCancelled";
 import { handlePlayerRemovedFromMatch } from "./events/playerRemovedFromMatch";
+import { handleApplicationRejected } from "./events/applicationRejected";
 
 const dispatchIntent = async (intent: NotificationIntentWithRelations): Promise<DispatchResult> => {
   if (!intent.player) {
@@ -138,6 +140,9 @@ const worker = new Worker<NotificationJobData, any, NotificationJobType>(
         break;
       case NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB:
         await handlePlayerRemovedFromMatch(job as Job<PlayerRemovedFromMatchEvent>);
+        break;
+      case NotificationJobType.APPLICATION_REJECTED_JOB:
+        await handleApplicationRejected(job as Job<ApplicationRejectedEvent>);
         break;
       case NotificationJobType.PROCESS_NOTIFICATION_INTENT_JOB:
         await handleNotificationIntentJob(job as Job<ProcessNotificationIntentJobData>);

@@ -50,10 +50,19 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
     case NotificationIntentType.PLAYER_REMOVED:
       return {
         title: "Te eliminaron del partido",
-        body: `El organizador canceló tu participación en el partido en ${location} del día ${formattedDate}.`,
+        body: `El organizador canceló tu participación en el partido en ${location} del día ${formattedDate}`,
         data: {
           matchId: intent.matchId,
           reason: "player-removed"
+        }
+      };
+    case NotificationIntentType.APPLICATION_REJECTED:
+      return {
+        title: "Solicitud rechazada",
+        body: `Rechazaron tu solicitud para el partido en ${location} del día ${formattedDate} Hay más partidos esperando por vos.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "application-rejected"
         }
       };
     // case NotificationIntentType.MATCH_REMINDER_1H:

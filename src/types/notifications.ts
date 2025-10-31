@@ -26,6 +26,12 @@ export type PlayerRemovedFromMatchEvent = {
   createdAt: string;
 };
 
+export type ApplicationRejectedEvent = {
+  matchId: number;
+  playerId: number;
+  createdAt: string;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };

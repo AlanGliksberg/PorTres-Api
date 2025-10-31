@@ -7,7 +7,12 @@ import { changeApplicationStatus, getApplicationById } from "../../utils/applica
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
-import { publishPlayerAddedToMatch, publishPlayerAppliedToMatch } from "../../workers/publisher";
+import {
+  publishApplicationRejected,
+  publishPlayerAddedToMatch,
+  publishPlayerAppliedToMatch
+} from "../../workers/publisher";
+import app from "../../app";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
@@ -124,7 +129,11 @@ export const rejectApplication = async (playerId: number, applicationId: number)
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
 
-  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
+  const applicationStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
+
+  await publishApplicationRejected(application.matchId, application.playerId);
+
+  return applicationStatus;
 };
 
 export const getApplicationStatus = async () => {
