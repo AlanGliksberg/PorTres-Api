@@ -260,6 +260,9 @@ enum NotificationIntentType {
   MATCH_CONFIRMED
   MATCH_REMINDER_1H
   MATCH_LOAD_RESULT
+  RESULT_CREATED
+  RESULT_ACCEPTED
+  RESULT_REJECTED
 }
 
 enum NotificationIntentStatus {

@@ -7,7 +7,10 @@ import {
   NotificationJobData,
   PlayerAddedToMatchEvent,
   PlayerAppliedToMatchEvent,
-  PlayerRemovedFromMatchEvent
+  PlayerRemovedFromMatchEvent,
+  ResultAcceptedEvent,
+  ResultCreatedEvent,
+  ResultRejectedEvent
 } from "../types/notifications";
 import { NotificationJobType } from "../types/notificationTypes";
 
@@ -124,4 +127,34 @@ export const publishMatchConfirmed = async (
   };
   const jobId = getJobId(NotificationJobType.MATCH_CONFIRMED_JOB, matchId, playerIds, event.createdAt);
   await publishEvent(NotificationJobType.MATCH_CONFIRMED_JOB, event, jobId);
+};
+
+export const publishResultCreated = async (matchId: number, playerIds: number[], resultLoadedByTeam: number) => {
+  const event: ResultCreatedEvent = {
+    matchId,
+    playerIds,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.RESULT_CREATED_JOB, matchId, playerIds, event.createdAt);
+  await publishEvent(NotificationJobType.RESULT_CREATED_JOB, event, jobId);
+};
+
+export const publishResultRejected = async (matchId: number, playerIds: number[], resultLoadedByTeam: number) => {
+  const event: ResultRejectedEvent = {
+    matchId,
+    playerIds,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.RESULT_REJECTED_JOB, matchId, playerIds, event.createdAt);
+  await publishEvent(NotificationJobType.RESULT_REJECTED_JOB, event, jobId);
+};
+
+export const publishResultAccepted = async (matchId: number, playerIds: number[], resultLoadedByTeam: number) => {
+  const event: ResultAcceptedEvent = {
+    matchId,
+    playerIds,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.RESULT_ACCEPTED_JOB, matchId, playerIds, event.createdAt);
+  await publishEvent(NotificationJobType.RESULT_ACCEPTED_JOB, event, jobId);
 };

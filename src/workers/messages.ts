@@ -105,6 +105,33 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
           reason: "match-reminder-1h"
         }
       };
+    case NotificationIntentType.RESULT_CREATED:
+      return {
+        title: "Resultado cargado",
+        body: `El otro equipo cargó el restultado del partido en ${location}. Revisalo para ver si estás de acuerdo.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "result-created"
+        }
+      };
+    case NotificationIntentType.RESULT_REJECTED:
+      return {
+        title: "Resultado rechazado",
+        body: `⚠️ Tu rival corrigió el resultado del partido en ${location}. ¡Corré a confirmarlo!`,
+        data: {
+          matchId: intent.matchId,
+          reason: "result-rejected"
+        }
+      };
+    case NotificationIntentType.RESULT_ACCEPTED:
+      return {
+        title: "Resultado aceptado",
+        body: `✅ El resultado del partido en ${location} fue confirmado. ¡Ya podés ver cómo impacta en tu ranking!`,
+        data: {
+          matchId: intent.matchId,
+          reason: "result-accepted"
+        }
+      };
     default:
       return {
         title: "PorTres",

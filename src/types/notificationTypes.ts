@@ -10,6 +10,10 @@ export enum NotificationJobType {
   APPLICATION_ACCEPTED_JOB = "application-accepted",
   MATCH_CONFIRMED_JOB = "match-confirmed",
   MATCH_CLOSED_JOB = "match-closed",
+  RESULT_CREATED_JOB = "result-created",
+  RESULT_AUTO_ACCEPTED_JOB = "result-auto-accepted",
+  RESULT_REJECTED_JOB = "result-rejected",
+  RESULT_ACCEPTED_JOB = "result-accepted",
   PROCESS_NOTIFICATION_INTENT_JOB = "process-notification-intent"
 }
 

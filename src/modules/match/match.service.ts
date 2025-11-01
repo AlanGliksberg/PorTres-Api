@@ -32,7 +32,10 @@ import {
   publishMatchCancelled,
   publishMatchConfirmed,
   publishPlayerAddedToMatch,
-  publishPlayerRemovedFromMatch
+  publishPlayerRemovedFromMatch,
+  publishResultAccepted,
+  publishResultCreated,
+  publishResultRejected
 } from "../../workers/publisher";
 
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
@@ -102,7 +105,12 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
         if (pId && pId !== playerId) await publishPlayerAddedToMatch(match.id, pId, playerId, 2);
       });
       if (matchStatus === MATCH_STATUS.COMPLETED) {
-        await publishMatchConfirmed(match.id, [...team1Ids, ...team2Ids], match.dateTime, match.creatorPlayerId);
+        await publishMatchConfirmed(
+          match.id,
+          [...team1Ids.filter((p) => p), ...team2Ids.filter((p) => p)],
+          match.dateTime,
+          match.creatorPlayerId
+        );
       }
     }
   }
@@ -516,7 +524,7 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
   if (status === MATCH_STATUS.COMPLETED) {
     await publishMatchConfirmed(
       matchId,
-      match.players.map((p) => p.id),
+      match.players.filter((p) => p.id).map((p) => p.id),
       match.dateTime,
       match.creatorPlayerId
     );
@@ -743,10 +751,19 @@ export const updateMatchResult = async (
   }
 
   if (!match.resultLoadedByTeam) {
+    // Es la primera vez que se carga el resultado
     await prisma.set.createMany({
       data: sets
     });
+
+    if (otherTeamHasPlayerWithApp)
+      await publishResultCreated(
+        match.id,
+        otherTeam!.players.filter((p) => p.id).map((p) => p.id),
+        resultLoadedByTeam
+      );
   } else {
+    // Se rechaza y actualiza el resultado
     // Para cada set en body.sets, actualiza el set existente o créalo si no existe
     for (let i = 0; i < body.sets.length; i++) {
       const setNumber = i + 1;
@@ -781,6 +798,13 @@ export const updateMatchResult = async (
         });
       }
     }
+
+    if (otherTeamHasPlayerWithApp)
+      await publishResultRejected(
+        match.id,
+        otherTeam!.players.filter((p) => p.id).map((p) => p.id),
+        resultLoadedByTeam
+      );
   }
 
   await prisma.match.update({
@@ -789,13 +813,23 @@ export const updateMatchResult = async (
   });
 };
 
-export const acceptMatchResult = async (match: MatchWithFullDetails) => {
+export const acceptMatchResult = async (
+  match: MatchWithFullDetails,
+  playerId: number | null,
+  withNotification = true
+) => {
   const winnerTeam = getWinnerTeamNumber(match.sets);
   await saveWinnerTeam(match.id, winnerTeam);
   if (winnerTeam === 0) return;
   if (match.gender.code !== GENDER.MIXTO) await updateRankings(match, winnerTeam);
   match.teams.forEach((t) => t.players.forEach(async (p) => await addConfidenceToPlayer(p)));
-  // TODO - notificar carga de puntos de partido?
+
+  if (withNotification)
+    await publishResultAccepted(
+      match.id,
+      match.players!.filter((p) => p.id && p.id !== playerId).map((p) => p.id),
+      match.resultLoadedByTeam!
+    );
 };
 
 export const createMatchWithResult = async (

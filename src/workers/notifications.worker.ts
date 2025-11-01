@@ -22,7 +22,10 @@ import {
   ApplicationRejectedEvent,
   MatchConfirmedEvent,
   MatchClosedEvent,
-  ApplicationAcceptedEvent
+  ApplicationAcceptedEvent,
+  ResultCreatedEvent,
+  ResultRejectedEvent,
+  ResultAcceptedEvent
 } from "../types/notifications";
 import { DispatchResult, NotificationIntentWithRelations, NotificationJobType } from "../types/notificationTypes";
 import { buildIntentCopy } from "./messages";
@@ -34,6 +37,10 @@ import { handleApplicationRejected } from "./events/applicationRejected";
 import { handleMatchConfirmed } from "./events/matchConfirmed";
 import { handleMatchClosed } from "./events/matchClosed";
 import { handleApplicationAccepted } from "./events/applicationAccepted";
+import { handleResultCreated } from "./events/resultCreated";
+import { handleResultAutoAccepted } from "./events/resultAutoAccepted";
+import { handleResultRejected } from "./events/resultRejected";
+import { handleResultAccepted } from "./events/resultAccepted";
 
 const dispatchIntent = async (intent: NotificationIntentWithRelations): Promise<DispatchResult> => {
   if (!intent.player) {
@@ -164,6 +171,18 @@ const worker = new Worker<NotificationJobData, any, NotificationJobType>(
         break;
       case NotificationJobType.MATCH_CLOSED_JOB:
         await handleMatchClosed(job as Job<MatchClosedEvent>);
+        break;
+      case NotificationJobType.RESULT_CREATED_JOB:
+        await handleResultCreated(job as Job<ResultCreatedEvent>);
+        break;
+      case NotificationJobType.RESULT_AUTO_ACCEPTED_JOB:
+        await handleResultAutoAccepted(job as Job<ResultCreatedEvent>);
+        break;
+      case NotificationJobType.RESULT_REJECTED_JOB:
+        await handleResultRejected(job as Job<ResultRejectedEvent>);
+        break;
+      case NotificationJobType.RESULT_ACCEPTED_JOB:
+        await handleResultAccepted(job as Job<ResultAcceptedEvent>);
         break;
       case NotificationJobType.PROCESS_NOTIFICATION_INTENT_JOB:
         await handleNotificationIntentJob(job as Job<ProcessNotificationIntentJobData>);

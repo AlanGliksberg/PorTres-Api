@@ -346,7 +346,7 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
       return;
     }
 
-    await matchService.acceptMatchResult(match);
+    await matchService.acceptMatchResult(match, req.user.playerId);
     res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);

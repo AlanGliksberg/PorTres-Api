@@ -50,6 +50,24 @@ export type MatchClosedEvent = {
   matchId: number;
 };
 
+export type ResultCreatedEvent = {
+  matchId: number;
+  playerIds: number[];
+  createdAt: string;
+};
+
+export type ResultRejectedEvent = {
+  matchId: number;
+  playerIds: number[];
+  createdAt: string;
+};
+
+export type ResultAcceptedEvent = {
+  matchId: number;
+  playerIds: number[];
+  createdAt: string;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };

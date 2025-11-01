@@ -284,7 +284,7 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
   if (status!.code === MATCH_STATUS.COMPLETED) {
     await publishMatchConfirmed(
       matchId,
-      newPlayers.map((p) => p.id),
+      newPlayers.filter((p) => p.id).map((p) => p.id),
       match?.dateTime!,
       match!.creatorPlayerId
     );
