@@ -1,5 +1,6 @@
 import { notificationQueue } from "../infrastructure/events/notification.queue";
 import {
+  ApplicationAcceptedEvent,
   ApplicationRejectedEvent,
   MatchCancelledEvent,
   MatchConfirmedEvent,
@@ -96,6 +97,16 @@ export const publishApplicationRejected = async (matchId: number, playerId: numb
   };
   const jobId = getJobId(NotificationJobType.APPLICATION_REJECTED_JOB, matchId, playerId, event.createdAt);
   await publishEvent(NotificationJobType.APPLICATION_REJECTED_JOB, event, jobId);
+};
+
+export const publishApplicationAccepted = async (matchId: number, playerId: number) => {
+  const event: ApplicationAcceptedEvent = {
+    matchId,
+    playerId,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.APPLICATION_ACCEPTED_JOB, matchId, playerId, event.createdAt);
+  await publishEvent(NotificationJobType.APPLICATION_ACCEPTED_JOB, event, jobId);
 };
 
 export const publishMatchConfirmed = async (

@@ -32,6 +32,12 @@ export type ApplicationRejectedEvent = {
   createdAt: string;
 };
 
+export type ApplicationAcceptedEvent = {
+  matchId: number;
+  playerId: number;
+  createdAt: string;
+};
+
 export type MatchConfirmedEvent = {
   matchId: number;
   playerIds: number[];

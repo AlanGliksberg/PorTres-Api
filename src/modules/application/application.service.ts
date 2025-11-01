@@ -8,6 +8,7 @@ import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
 import {
+  publishApplicationAccepted,
   publishApplicationRejected,
   publishPlayerAppliedToMatch
 } from "../../workers/publisher";
@@ -99,7 +100,7 @@ export const acceptApplication = async (playerId: number, applicationId: number,
   if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.COMPLETED);
   const appStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
 
-  //publishPlayerAddedToMatch(match.id, application.playerId, playerId, teamNumber);
+  await publishApplicationAccepted(application.matchId, application.playerId);
 
   return appStatus;
 };

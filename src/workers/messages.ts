@@ -1,7 +1,8 @@
 import { NotificationIntentType } from "@prisma/client";
 import { NotificationIntentWithRelations } from "../types/notificationTypes";
-import { PlayerAddedToMatchEvent, PlayerAppliedToMatchEvent } from "../types/notifications";
+import { ApplicationAcceptedEvent, PlayerAddedToMatchEvent, PlayerAppliedToMatchEvent } from "../types/notifications";
 import { getPlayerById } from "../utils/player";
+import { GENDER } from "../types/playerTypes";
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "short",
@@ -32,7 +33,7 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
       const player2 = await getPlayerById(playerAppliedData.playerAppliedId);
       return {
         title: "¡Se postularon a tu partido!",
-        body: `${player2?.firstName} quiere sumarse a tu partido en ${location} del día ${formattedDate} ¡Revisá su perfil!`,
+        body: `💥 ${player2?.firstName} quiere sumarse a tu partido en ${location} del día ${formattedDate} ¡Revisá su perfil!`,
         data: {
           matchId: intent.matchId,
           reason: "player-applied"
@@ -63,6 +64,18 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
         data: {
           matchId: intent.matchId,
           reason: "application-rejected"
+        }
+      };
+    case NotificationIntentType.APPLICATION_ACCEPTED:
+      const applicatinAcceptedData = intent.payload as ApplicationAcceptedEvent;
+      const player3 = await getPlayerById(applicatinAcceptedData.playerId, { gender: true });
+      const aceptadx = player3?.gender?.code === GENDER.CABALLERO ? "aceptado" : "aceptada";
+      return {
+        title: "¡Estás adentro!",
+        body: `🎉 Fuiste ${aceptadx} en el partido en ${location} del día ${formattedDate}`,
+        data: {
+          matchId: intent.matchId,
+          reason: "application-accepted"
         }
       };
     case NotificationIntentType.MATCH_CONFIRMED:
