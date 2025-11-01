@@ -1,7 +1,9 @@
 import { NotificationIntentStatus, NotificationIntentType } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { notificationQueue } from "../../infrastructure/events/notification.queue";
-import { NotificationJobType } from "../../types/notificationTypes";
+import { NotificationIntentWithRelations, NotificationJobType } from "../../types/notificationTypes";
+import { getMatchStatusById } from "../../utils/match";
+import { MATCH_STATUS } from "../../types/matchTypes";
 
 type CreateIntentParams = {
   type: NotificationIntentType;
@@ -94,12 +96,24 @@ export const markIntentFailed = async (intentId: number, error: Error | string) 
   });
 };
 
-export const cancelIntent = async (dedupeKey: string) => {
-  const intent = await prisma.notificationIntent.findUnique({ where: { dedupeKey } });
+export const cancelIntent = async (intentId: number) => {
+  const intent = await prisma.notificationIntent.findUnique({ where: { id: intentId } });
   if (!intent) return;
 
   await prisma.notificationIntent.update({
     where: { id: intent.id },
     data: { status: NotificationIntentStatus.CANCELLED }
   });
+};
+
+export const hasToSendNotification = async (intent: NotificationIntentWithRelations) => {
+  switch (intent.type) {
+    case NotificationIntentType.MATCH_REMINDER_1H:
+      // Solo mandar recordatorio si el partido sigue confirmado
+      return (await getMatchStatusById(intent.match.statusId))?.code === MATCH_STATUS.COMPLETED;
+    case NotificationIntentType.MATCH_LOAD_RESULT:
+      return !intent.match.resultLoadedByTeam;
+    default:
+      return true;
+  }
 };

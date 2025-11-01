@@ -3,7 +3,7 @@ import { Job } from "bullmq";
 import { createNotificationIntent } from "../../modules/notifications/intent.service";
 import { MatchClosedEvent, MatchConfirmedEvent } from "../../types/notifications";
 import { HOUR_IN_MS } from "../../constants/common";
-import { getJobId, publishEvent } from "../publisher";
+import { getJobId } from "../publisher";
 import { NotificationJobType } from "../../types/notificationTypes";
 import { notificationQueue } from "../../infrastructure/events/notification.queue";
 

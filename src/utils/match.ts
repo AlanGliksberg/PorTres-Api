@@ -16,7 +16,7 @@ import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { getUserSelect } from "./auth";
 import { getMatchById } from "../modules/match/match.service";
-import { publishPlayerAddedToMatch, publishPlayerRemovedFromMatch } from "../workers/publisher";
+import { publishMatchConfirmed, publishPlayerAddedToMatch, publishPlayerRemovedFromMatch } from "../workers/publisher";
 
 export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   return {
@@ -255,6 +255,7 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
     }
   });
 
+  // Notificaciones
   const removedPlayers = actualPlayers.filter((actualPlayer) => {
     return !newPlayers.some((newPlayer) => newPlayer.id === actualPlayer.id);
   });
@@ -279,6 +280,15 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
       );
     }
   });
+
+  if (status!.code === MATCH_STATUS.COMPLETED) {
+    await publishMatchConfirmed(
+      matchId,
+      newPlayers.map((p) => p.id),
+      match?.dateTime!,
+      match!.creatorPlayerId
+    );
+  }
 
   return updatedMatch;
 };
@@ -474,6 +484,14 @@ export const getMatchStatusByCode = async (code: MATCH_STATUS) => {
   return await prisma.matchStatus.findUnique({
     where: {
       code
+    }
+  });
+};
+
+export const getMatchStatusById = async (id: number) => {
+  return await prisma.matchStatus.findUnique({
+    where: {
+      id
     }
   });
 };

@@ -3,7 +3,9 @@ import { Worker, Job } from "bullmq";
 import { createRedisConnection } from "../infrastructure/events/redisConnection";
 import prisma from "../prisma/client";
 import {
+  cancelIntent,
   createNotificationIntent,
+  hasToSendNotification,
   markIntentCompleted,
   markIntentFailed,
   markIntentProcessing
@@ -121,8 +123,12 @@ const handleNotificationIntentJob = async (job: Job<ProcessNotificationIntentJob
   await markIntentProcessing(intent.id);
 
   try {
-    const result = await dispatchIntent(intent);
-    await markIntentCompleted(intent.id, result.warning);
+    if (await hasToSendNotification(intent)) {
+      const result = await dispatchIntent(intent);
+      await markIntentCompleted(intent.id, result.warning);
+    } else {
+      await cancelIntent(intent.id);
+    }
   } catch (error: any) {
     await markIntentFailed(intent.id, error);
     throw error;
