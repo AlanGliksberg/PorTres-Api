@@ -9,10 +9,8 @@ import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
 import {
   publishApplicationRejected,
-  publishPlayerAddedToMatch,
   publishPlayerAppliedToMatch
 } from "../../workers/publisher";
-import app from "../../app";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;

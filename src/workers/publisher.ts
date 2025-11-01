@@ -2,6 +2,7 @@ import { notificationQueue } from "../infrastructure/events/notification.queue";
 import {
   ApplicationRejectedEvent,
   MatchCancelledEvent,
+  MatchConfirmedEvent,
   NotificationJobData,
   PlayerAddedToMatchEvent,
   PlayerAppliedToMatchEvent,
@@ -9,7 +10,7 @@ import {
 } from "../types/notifications";
 import { NotificationJobType } from "../types/notificationTypes";
 
-const publishEvent = async (eventType: NotificationJobType, event: NotificationJobData, jobId: string) => {
+export const publishEvent = async (eventType: NotificationJobType, event: NotificationJobData, jobId: string) => {
   try {
     await notificationQueue.add(eventType, event, {
       jobId
@@ -19,12 +20,18 @@ const publishEvent = async (eventType: NotificationJobType, event: NotificationJ
   }
 };
 
-const getJobId = (type: NotificationJobType, matchId: number, playerId: number, createdAt: string) => {
+export const getJobId = (
+  type: NotificationJobType,
+  matchId: number,
+  playerId: number | number[],
+  createdAt: string
+) => {
   const createdAtTimestamp = new Date(createdAt).getTime();
   const createdAtToken = Number.isNaN(createdAtTimestamp)
     ? createdAt.replace(/[^a-zA-Z0-9]/g, "-")
     : createdAtTimestamp.toString();
-  return [type, matchId, playerId, createdAtToken].join("-");
+  const playerIds = Array.isArray(playerId) ? playerId.join("|") : playerId;
+  return [type, matchId, playerIds, createdAtToken].join("-");
 };
 
 export const publishPlayerAddedToMatch = async (
@@ -89,4 +96,21 @@ export const publishApplicationRejected = async (matchId: number, playerId: numb
   };
   const jobId = getJobId(NotificationJobType.APPLICATION_REJECTED_JOB, matchId, playerId, event.createdAt);
   await publishEvent(NotificationJobType.APPLICATION_REJECTED_JOB, event, jobId);
+};
+
+export const publishMatchConfirmed = async (
+  matchId: number,
+  playerIds: number[],
+  dateTime: Date,
+  creatorPlayerId: number
+) => {
+  const event: MatchConfirmedEvent = {
+    matchId,
+    playerIds,
+    creatorPlayerId,
+    dateTime,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.MATCH_CONFIRMED_JOB, matchId, playerIds, event.createdAt);
+  await publishEvent(NotificationJobType.MATCH_CONFIRMED_JOB, event, jobId);
 };

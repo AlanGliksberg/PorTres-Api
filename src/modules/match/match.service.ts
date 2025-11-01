@@ -30,6 +30,7 @@ import { GENDER, PlayerDTO } from "../../types/playerTypes";
 import { getUserSelect } from "../../utils/auth";
 import {
   publishMatchCancelled,
+  publishMatchConfirmed,
   publishPlayerAddedToMatch,
   publishPlayerRemovedFromMatch
 } from "../../workers/publisher";
@@ -88,13 +89,22 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
       players: true
     }
   });
-  if (teams) {
-    (teams.team1 || []).forEach(async (player) => {
-      if (player.id && player.id !== playerId) await publishPlayerAddedToMatch(match.id, player.id, playerId, 1);
-    });
-    (teams.team2 || []).forEach(async (player) => {
-      if (player.id && player.id !== playerId) await publishPlayerAddedToMatch(match.id, player.id, playerId, 2);
-    });
+
+  // Notificaciones a jugadores
+  if (withNotification) {
+    if (teams) {
+      const team1Ids = (teams.team1 || []).filter((p) => p.id).map((p) => p.id!);
+      const team2Ids = (teams.team2 || []).filter((p) => p.id).map((p) => p.id!);
+      team1Ids.forEach(async (pId) => {
+        if (pId && pId !== playerId) await publishPlayerAddedToMatch(match.id, pId, playerId, 1);
+      });
+      team2Ids.forEach(async (pId) => {
+        if (pId && pId !== playerId) await publishPlayerAddedToMatch(match.id, pId, playerId, 2);
+      });
+      if (matchStatus === MATCH_STATUS.COMPLETED) {
+        await publishMatchConfirmed(match.id, [...team1Ids, ...team2Ids], match.dateTime, match.creatorPlayerId);
+      }
+    }
   }
 
   return match;
@@ -503,6 +513,14 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
   });
 
   // TODO - si se cambia a COMPLETED, notificar a jugadores, guardar evento de cambio a CLOSED, guardar recordatorio de carga de resultado
+  if (status === MATCH_STATUS.COMPLETED) {
+    await publishMatchConfirmed(
+      matchId,
+      match.players.map((p) => p.id),
+      match.dateTime,
+      match.creatorPlayerId
+    );
+  }
 
   return match;
 };

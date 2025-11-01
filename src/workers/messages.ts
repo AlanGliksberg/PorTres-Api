@@ -65,26 +65,33 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
           reason: "application-rejected"
         }
       };
-    // case NotificationIntentType.MATCH_REMINDER_1H:
-    //   return {
-    //     title: "Tu partido comienza en 1 hora",
-    //     body: location
-    //       ? `Nos vemos en ${location}. Recordá estar a tiempo.`
-    //       : "Recordatorio: tu partido empieza en 1 hora.",
-    //     data: {
-    //       matchId: intent.matchId,
-    //       reason: "match-reminder-1h"
-    //     }
-    //   };
-    // case NotificationIntentType.MATCH_POST_1H:
-    //   return {
-    //     title: "¿Cómo te fue en el partido?",
-    //     body: "Contanos cómo resultó el encuentro y mantené tu perfil actualizado.",
-    //     data: {
-    //       matchId: intent.matchId,
-    //       reason: "match-post-1h"
-    //     }
-    //   };
+    case NotificationIntentType.MATCH_CONFIRMED:
+      return {
+        title: "¡Partido confirmado!",
+        body: `✅ El partido en ${location} el del día ${formattedDate} está confirmado. ¡A prepararse!`,
+        data: {
+          matchId: intent.matchId,
+          reason: "match-confirmed"
+        }
+      };
+    case NotificationIntentType.MATCH_REMINDER_1H:
+      return {
+        title: "¡Calentá que entrás!",
+        body: `Falta una hora para tu partido en ${location}.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "match-reminder-1h"
+        }
+      };
+    case NotificationIntentType.MATCH_LOAD_RESULT:
+      return {
+        title: "Actualizá el resultado",
+        body: `📝 ¿Cómo salió el partido en ${location}? Cargá el resultado para mantener actualizado tu ranking`,
+        data: {
+          matchId: intent.matchId,
+          reason: "match-reminder-1h"
+        }
+      };
     default:
       return {
         title: "PorTres",

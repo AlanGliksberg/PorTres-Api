@@ -32,6 +32,18 @@ export type ApplicationRejectedEvent = {
   createdAt: string;
 };
 
+export type MatchConfirmedEvent = {
+  matchId: number;
+  playerIds: number[];
+  creatorPlayerId: number;
+  dateTime: Date;
+  createdAt: string;
+};
+
+export type MatchClosedEvent = {
+  matchId: number;
+};
+
 export type ProcessNotificationIntentJobData = {
   intentId: number;
 };
