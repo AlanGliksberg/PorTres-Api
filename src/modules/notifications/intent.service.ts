@@ -25,7 +25,7 @@ const buildDedupeKey = (params: CreateIntentParams) => {
 export const createNotificationIntent = async (params: CreateIntentParams) => {
   const scheduledAt = params.scheduledAt;
   const dedupeKey = buildDedupeKey(params);
-  console.log({ params });
+  
   const intent = await prisma.notificationIntent.upsert({
     where: { dedupeKey },
     update: {
