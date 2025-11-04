@@ -9,8 +9,16 @@ const baseOptions: RedisOptions = {
 
 export const createRedisConnection = () => {
   const connection = new IORedis(redisUrl, baseOptions);
+  let shuttingDown = false;
+
   connection.on("error", (error) => {
-    console.error("[Redis] connection error", error);
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.error("[Redis] connection error - stopping application", error);
+
+    // Exit on next tick to allow logs to flush and avoid repeated error loops.
+    setImmediate(() => process.exit(1));
   });
+
   return connection;
 };
