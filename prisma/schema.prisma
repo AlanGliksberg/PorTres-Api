@@ -47,6 +47,7 @@ model Match {
   applications        Application[]
   category            Category              @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
+  notificationIntents NotificationIntent[]
 
   @@index([localMin], map: "idx_match_local_min")
   @@index([categoryId, genderId, dateTime])
@@ -73,6 +74,8 @@ model Player {
   applications        Application[]
   category            Category?             @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
+  expoPushTokens      ExpoPushToken[]
+  notificationIntents NotificationIntent[]
 }
 
 model Team {
@@ -211,4 +214,62 @@ model PlayerRankingChange {
   player Player @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
+}
+
+model ExpoPushToken {
+  id         Int      @id @default(autoincrement())
+  playerId   Int
+  token      String   @unique
+  deviceType String?
+  lastSeenAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@index([playerId])
+}
+
+model NotificationIntent {
+  id          Int                      @id @default(autoincrement())
+  type        NotificationIntentType
+  status      NotificationIntentStatus @default(PENDING)
+  scheduledAt DateTime
+  executedAt  DateTime?
+  matchId     Int
+  playerId    Int?
+  payload     Json?
+  error       String?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  dedupeKey   String?                  @unique
+
+  match  Match   @relation(fields: [matchId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+
+  @@index([scheduledAt, status])
+  @@index([matchId])
+  @@index([playerId])
+}
+
+enum NotificationIntentType {
+  PLAYER_ADDED
+  PLAYER_APPLIED
+  MATCH_CANCELLED
+  PLAYER_REMOVED
+  APPLICATION_REJECTED
+  APPLICATION_ACCEPTED
+  MATCH_CONFIRMED
+  MATCH_REMINDER_1H
+  MATCH_LOAD_RESULT
+  RESULT_CREATED
+  RESULT_ACCEPTED
+  RESULT_REJECTED
+}
+
+enum NotificationIntentStatus {
+  PENDING
+  SCHEDULED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

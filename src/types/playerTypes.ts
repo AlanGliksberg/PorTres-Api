@@ -26,6 +26,11 @@ export type UpdatePlayerBody = {
   positionId: number;
 };
 
+export type SaveExpoPushTokenBody = {
+  token: string;
+  deviceType?: string;
+};
+
 export type GetPlayersRequest = {
   name?: string;
   gender?: string | string[];

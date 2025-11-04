@@ -1,4 +1,4 @@
-import { ApplicationStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
@@ -7,6 +7,11 @@ import { changeApplicationStatus, getApplicationById } from "../../utils/applica
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
 import { changeState } from "../match/match.service";
+import {
+  publishApplicationAccepted,
+  publishApplicationRejected,
+  publishPlayerAppliedToMatch
+} from "../../workers/publisher";
 
 export const applyToMatch = async (playerId: number, data: CreateApplicationBody) => {
   const { matchId, teamNumber, message, phone } = data;
@@ -37,7 +42,7 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
       throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
   }
 
-  return await prisma.application.create({
+  const application = await prisma.application.create({
     data: {
       match: {
         connect: {
@@ -59,6 +64,10 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
       phone
     }
   });
+
+  await publishPlayerAppliedToMatch(matchId, playerId, match.creatorPlayerId, teamNumber);
+
+  return application;
 };
 
 export const acceptApplication = async (playerId: number, applicationId: number, teamNumber: 1 | 2) => {
@@ -89,7 +98,11 @@ export const acceptApplication = async (playerId: number, applicationId: number,
 
   const match = await addPlayerToMatchFromApplication(application, teamNumber);
   if (match.players.length === 4) await changeState(match.id, MATCH_STATUS.COMPLETED);
-  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
+  const appStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.ACCEPTED);
+
+  await publishApplicationAccepted(application.matchId, application.playerId);
+
+  return appStatus;
 };
 
 export const rejectApplication = async (playerId: number, applicationId: number) => {
@@ -115,7 +128,11 @@ export const rejectApplication = async (playerId: number, applicationId: number)
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
 
-  return await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
+  const applicationStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
+
+  await publishApplicationRejected(application.matchId, application.playerId);
+
+  return applicationStatus;
 };
 
 export const getApplicationStatus = async () => {

@@ -29,14 +29,17 @@ ENV PORT=8080
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends tini ca-certificates openssl \
   && rm -rf /var/lib/apt/lists/*
+# Copiamos el script de arranque y le damos permisos de ejecución antes de cambiar de usuario
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER node
 
 # Ahora copiamos el node_modules ya "pruneado" DESPUÉS del generate
 COPY --chown=node:node --from=prune /app/node_modules ./node_modules
 COPY --chown=node:node --from=build  /app/build        ./build
-COPY --chown=node:node package.json ./
+COPY --chown=node:node package.json ./ 
 COPY --chown=node:node prisma       ./prisma
 
 ENTRYPOINT ["/usr/bin/tini","--"]
-CMD ["node","build/server.js"]
+CMD ["docker-entrypoint.sh"]
 EXPOSE 8080  

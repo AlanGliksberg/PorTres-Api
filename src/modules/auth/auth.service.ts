@@ -7,6 +7,7 @@ import { creatUser } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { RegisterDTO, ChangePasswordDTO } from "../../types/auth";
+import { isValidExpoPushToken } from "../../utils/player";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -110,6 +111,26 @@ export const changePassword = async (userId: number, data: ChangePasswordDTO) =>
   await prisma.user.update({
     where: { id: userId },
     data: { passwordHash: newPasswordHash }
+  });
+};
+
+export const logout = async (userId: number, expoPushToken?: string) => {
+  if (!expoPushToken) return;
+  if (!isValidExpoPushToken(expoPushToken)) {
+    throw new CustomError("Token push invalido", ErrorCode.INVALID_PUSH_TOKEN);
+  }
+
+  const player = await prisma.player.findUnique({
+    where: { userId }
+  });
+
+  if (!player) return;
+
+  await prisma.expoPushToken.deleteMany({
+    where: {
+      playerId: player.id,
+      token: expoPushToken
+    }
   });
 };
 

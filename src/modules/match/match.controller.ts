@@ -143,7 +143,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
       return;
     }
 
-    const match = await matchService.deleteMatch(matchId);
+    const match = await matchService.deleteMatch(matchId, req.user.playerId);
     // TODO - notificar a jugadores
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
@@ -176,8 +176,7 @@ export const addPlayerToMatch = async (req: Request<AddPlayerToMatchRequest>, re
       return;
     }
 
-    const match = await matchService.addPlayerToMatch(req.body);
-    // TODO - notificar jugador
+    const match = await matchService.addPlayerToMatch(req.body, req.user.playerId!);
     if (match.players.length === 4) await matchService.changeState(req.body.matchId, MATCH_STATUS.COMPLETED);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
@@ -226,7 +225,7 @@ export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) =
 
     // TODO - agregar validaciones de campos (fechas futuras, duración válida, etc.)
 
-    const match = await matchService.updateMatch(matchId, req.body);
+    const match = await matchService.updateMatch(matchId, req.body, req.user.playerId);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
@@ -257,7 +256,7 @@ export const deletePlayerFromMatch = async (req: Request<DeletePlayerFromMatchRe
       return;
     }
 
-    const match = await matchService.deletePlayerFromMatch(req.body);
+    const match = await matchService.deletePlayerFromMatch(req.body, req.user.playerId!);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
@@ -347,7 +346,7 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
       return;
     }
 
-    await matchService.acceptMatchResult(match);
+    await matchService.acceptMatchResult(match, req.user.playerId);
     res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);

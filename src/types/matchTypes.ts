@@ -98,6 +98,7 @@ export type MatchWithFullDetails = Match & {
   teams: (Team & {
     players: Player[];
   })[];
+  players?: Player[];
   sets: Set[];
   status: MatchStatus;
   applications: Application[];

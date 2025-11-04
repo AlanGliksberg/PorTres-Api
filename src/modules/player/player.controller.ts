@@ -1,9 +1,14 @@
 import { Response } from "express";
-import { CreatePlayerBody, UpdatePlayerBody, GetPlayersRequest } from "../../types/playerTypes";
+import { CreatePlayerBody, UpdatePlayerBody, GetPlayersRequest, SaveExpoPushTokenBody } from "../../types/playerTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import * as playerService from "./player.service";
 import { Request } from "../../types/common";
-import { validateCreatePlayerBody, validateUpdatePlayerBody, parsePlayerFilters } from "../../utils/player";
+import {
+  validateCreatePlayerBody,
+  validateUpdatePlayerBody,
+  parsePlayerFilters,
+  validateExpoPushTokenBody
+} from "../../utils/player";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 
@@ -94,5 +99,22 @@ export const getQuestions = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting questions", e));
+  }
+};
+
+export const saveExpoPushToken = async (req: Request<SaveExpoPushTokenBody>, res: Response) => {
+  try {
+    validateExpoPushTokenBody(req.body);
+    const expoPushToken = await playerService.saveExpoPushToken(req.body, req.user);
+    res.status(200).json(new OkResponse({ expoPushToken }));
+  } catch (e: any) {
+    console.error(e);
+    if (e instanceof CustomError && e.code === ErrorCode.NO_PLAYER) {
+      res.status(404).json(new ErrorResponse("Jugador no encontrado", e));
+    } else if (e instanceof CustomError && e.code === ErrorCode.INVALID_PUSH_TOKEN) {
+      res.status(400).json(new ErrorResponse("Token push invalido", e));
+    } else {
+      res.status(500).json(new ErrorResponse("Error guardando token push", e));
+    }
   }
 };
