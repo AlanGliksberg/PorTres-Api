@@ -7,6 +7,10 @@ export type CreateApplicationBody = {
   phone?: string;
 };
 
+export type DeleteApplicationBody = {
+  matchId: number;
+}
+
 export type ApplicationWithRelations =
   | (Application & {
       match?: Match & {

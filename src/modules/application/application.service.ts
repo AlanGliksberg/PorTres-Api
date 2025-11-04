@@ -138,3 +138,12 @@ export const rejectApplication = async (playerId: number, applicationId: number)
 export const getApplicationStatus = async () => {
   return await prisma.applicationStatus.findMany();
 };
+
+export const deleteApplication = async (matchId: number, playerId: number) => {
+  await prisma.application.deleteMany({
+    where: {
+      matchId,
+      playerId
+    }
+  });
+};

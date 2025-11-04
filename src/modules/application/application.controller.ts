@@ -1,5 +1,5 @@
 import { ErrorCode } from "../../constants/errorCode";
-import { AcceptApplicationBody, CreateApplicationBody } from "../../types/application";
+import { AcceptApplicationBody, CreateApplicationBody, DeleteApplicationBody } from "../../types/application";
 import { CustomError } from "../../types/customError";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
@@ -54,6 +54,16 @@ export const getApplicationStatus = async (req: Request, res: Response) => {
   try {
     const status = await applicationService.getApplicationStatus();
     res.status(200).json(new OkResponse({ status }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting application status", e));
+  }
+};
+
+export const deleteApplication = async (req: Request<DeleteApplicationBody>, res: Response) => {
+  try {
+    await applicationService.deleteApplication(req.body.matchId, req.user.playerId!);
+    res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error getting application status", e));
