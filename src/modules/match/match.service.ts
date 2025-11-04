@@ -667,7 +667,6 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, 
   }
 
   // Eliminar el jugador del partido y del equipo
-  // TODO - revisar que al eliminar un jugador se pueda volver a agregar al mismo jugador
   const updatedMatch = await prisma.match.update({
     where: { id: data.matchId },
     data: {
@@ -687,6 +686,12 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, 
               disconnect: { id: data.playerId }
             }
           }
+        }
+      },
+      applications: {
+        deleteMany: {
+          playerId: data.playerId,
+          matchId: data.matchId
         }
       }
     },
