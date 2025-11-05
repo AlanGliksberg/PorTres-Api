@@ -162,7 +162,12 @@ export const validateCreateMatchBody = (body: MatchDto) => {
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
 };
 
-export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGenderId: number, playerId: number) => {
+export const updateTeams = async (
+  matchId: number,
+  teams: TeamDTO,
+  allowedGenderId: number,
+  matchCreatorPlayerId: number
+) => {
   const match = await getMatchById(matchId);
   const actualPlayers = match!.players;
 
@@ -265,17 +270,24 @@ export const updateTeams = async (matchId: number, teams: TeamDTO, allowedGender
   });
 
   removedPlayers.forEach(async (player) => {
-    if (player.userId && player.id !== playerId) {
-      await publishPlayerRemovedFromMatch(matchId, player.id);
+    if (player.userId && player.id !== matchCreatorPlayerId) {
+      await publishPlayerRemovedFromMatch(
+        matchId,
+        player.id,
+        matchCreatorPlayerId,
+        matchCreatorPlayerId,
+        [],
+        status?.code as MATCH_STATUS
+      );
     }
   });
 
   addedPlayers.forEach(async (player) => {
-    if (player.id !== playerId) {
+    if (player.id !== matchCreatorPlayerId) {
       await publishPlayerAddedToMatch(
         matchId,
         player.id,
-        playerId,
+        matchCreatorPlayerId,
         team1.players.connect.some((p) => p.id === player.id) ? 1 : 2
       );
     }

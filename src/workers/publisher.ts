@@ -1,4 +1,5 @@
 import { notificationQueue } from "../infrastructure/events/notification.queue";
+import { MATCH_STATUS } from "../types/matchTypes";
 import {
   ApplicationAcceptedEvent,
   ApplicationRejectedEvent,
@@ -82,13 +83,24 @@ export const publishMatchCancelled = async (matchId: number, playerId: number) =
   await publishEvent(NotificationJobType.MATCH_CANCELLED_JOB, event, jobId);
 };
 
-export const publishPlayerRemovedFromMatch = async (matchId: number, playerId: number) => {
+export const publishPlayerRemovedFromMatch = async (
+  matchId: number,
+  deletedPlayerId: number,
+  deletedById: number,
+  creatorPlayerId: number,
+  playerIds: number[],
+  status: MATCH_STATUS
+) => {
   const event: PlayerRemovedFromMatchEvent = {
     matchId,
-    playerId,
+    deletedPlayerId,
+    deletedById,
+    creatorPlayerId,
+    playerIds,
+    status,
     createdAt: new Date().toISOString()
   };
-  const jobId = getJobId(NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB, matchId, playerId, event.createdAt);
+  const jobId = getJobId(NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB, matchId, deletedPlayerId, event.createdAt);
   await publishEvent(NotificationJobType.PLAYER_REMOVED_FROM_MATCH_JOB, event, jobId);
 };
 

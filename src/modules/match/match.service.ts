@@ -315,7 +315,7 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       {
         status: {
           code: {
-            in: [MATCH_STATUS.PENDING, MATCH_STATUS.COMPLETED]
+            in: [MATCH_STATUS.PENDING, MATCH_STATUS.COMPLETED, MATCH_STATUS.CANCELLED]
           }
         }
       },
@@ -352,20 +352,6 @@ export const getMyPendingResults = async (playerId: number, filters: MatchFilter
           }
         }
       },
-      // Al menos un jugador de cada equipo tenga la aplicación
-      // {
-      //   teams: {
-      //     every: {
-      //       players: {
-      //         some: {
-      //           userId: {
-      //             not: null
-      //           }
-      //         }
-      //       }
-      //     }
-      //   }
-      // },
       {
         status: {
           code: MATCH_STATUS.CLOSED
@@ -576,7 +562,6 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto, playerI
     }
   }
 
-  // TODO - si hay 4 jugadores, el partido esta confirmed
   // Actualizar el partido
   const updatedMatch = await prisma.match.update({
     where: {
@@ -641,7 +626,7 @@ export const updateMatch = async (matchId: number, data: UpdateMatchDto, playerI
   return updatedMatch;
 };
 
-export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, playerId: number) => {
+export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, deletedById: number) => {
   // Obtener el partido actual para validaciones
   const currentMatch = await getMatchById(data.matchId);
   if (!currentMatch) {
@@ -718,9 +703,15 @@ export const deletePlayerFromMatch = async (data: DeletePlayerFromMatchRequest, 
     await prisma.player.delete({
       where: { id: data.playerId }
     });
-  } else if (playerToDelete.id !== playerId) {
-    //notificar que fue eliminado (solo si no es quien está eliminando)
-    await publishPlayerRemovedFromMatch(data.matchId, playerToDelete.id);
+  } else {
+    await publishPlayerRemovedFromMatch(
+      data.matchId,
+      playerToDelete.id,
+      deletedById,
+      currentMatch.creatorPlayerId,
+      currentMatch.players.map((p) => p.id),
+      currentMatch.status.code as MATCH_STATUS
+    );
   }
 
   if (currentMatch.status.code !== MATCH_STATUS.PENDING) {
@@ -741,7 +732,6 @@ export const updateMatchResult = async (
   body: UpdateMatchResultDto,
   resultLoadedByTeam: number
 ) => {
-  // TODO - si en el otro equipo no hay un jugador que tenga la app, ya hay que marcar al equipo ganador
   const sets = body.sets.map((set, index) => ({
     matchId: match.id,
     setNumber: index + 1,

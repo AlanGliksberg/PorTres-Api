@@ -1,3 +1,5 @@
+import { MATCH_STATUS } from "./matchTypes";
+
 export type PlayerAddedToMatchEvent = {
   matchId: number;
   playerId: number;
@@ -22,7 +24,11 @@ export type MatchCancelledEvent = {
 
 export type PlayerRemovedFromMatchEvent = {
   matchId: number;
-  playerId: number;
+  deletedPlayerId: number;
+  deletedById: number;
+  creatorPlayerId: number;
+  playerIds: number[];
+  status: MATCH_STATUS;
   createdAt: string;
 };
 

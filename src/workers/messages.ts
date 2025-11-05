@@ -57,6 +57,24 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
           reason: "player-removed"
         }
       };
+    case NotificationIntentType.PLAYER_CANCELLED:
+      return {
+        title: "¡Falta uno!",
+        body: `Un jugador se bajó del partido en ${location} del día ${formattedDate} El partido vuelve a estar pendiente de confirmación.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "player-cancelled"
+        }
+      };
+    case NotificationIntentType.PLAYER_CANCELLED_CREATOR:
+      return {
+        title: "Se bajó un jugador",
+        body: `Un jugador se bajó de tu partido en ${location} del día ${formattedDate}`,
+        data: {
+          matchId: intent.matchId,
+          reason: "player-cancelled-creator"
+        }
+      };
     case NotificationIntentType.APPLICATION_REJECTED:
       return {
         title: "Solicitud rechazada",
