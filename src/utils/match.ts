@@ -1,6 +1,6 @@
 import { Category, Match, Player, Prisma, Set } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails, MATCH_STATUS } from "../types/matchTypes";
-import { PlayerDTO } from "../types/playerTypes";
+import { CATEGORY, PlayerDTO } from "../types/playerTypes";
 import { TeamDTO, TeamWithPlayers } from "../types/team";
 import {
   convertStringIntoNumberArray,
@@ -16,7 +16,13 @@ import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { getUserSelect } from "./auth";
 import { getMatchById } from "../modules/match/match.service";
-import { publishMatchConfirmed, publishPlayerAddedToMatch, publishPlayerRemovedFromMatch } from "../workers/publisher";
+import {
+  publishMatchConfirmed,
+  publishPlayerAddedToMatch,
+  publishPlayerAscended,
+  publishPlayerDescended,
+  publishPlayerRemovedFromMatch
+} from "../workers/publisher";
 
 export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undefined, allowedGenderId: number) => {
   return {
@@ -418,7 +424,6 @@ export const updatePlayersElo = async (matchId: number, player: Player, baseChan
   let newElo = player.rankingPoints + deltaPoints;
   if (newElo < 0) newElo = 0;
 
-  // TODO - ver si hay que cambiar de categoria
   await prisma.player.update({
     where: { id: player.id },
     data: { rankingPoints: newElo }
@@ -448,13 +453,17 @@ const checkAscenseOrDescense = async (player: Player, newElo: number) => {
 const ascendPlayer = async (player: Player, category: Category) => {
   const newCategory = await getOneCategoryUp(category);
   await changePlayerCategory(player.id, newCategory.id);
-  // TODO - notificar ascenso
+
+  // Notificar ascenso
+  await publishPlayerAscended(player.id, category.code as CATEGORY);
 };
 
 const descendPlayer = async (player: Player, category: Category) => {
   const newCategory = await getOneCategoryDown(category);
   await changePlayerCategory(player.id, newCategory.id);
-  // TODO - notificar descenso
+
+  // Notificar descenso
+  await publishPlayerDescended(player.id, category.code as CATEGORY);
 };
 
 const changePlayerCategory = async (playerId: number, categoryId: number) => {

@@ -144,7 +144,6 @@ export const deleteMatch = async (req: Request, res: Response) => {
     }
 
     const match = await matchService.deleteMatch(matchId, req.user.playerId);
-    // TODO - notificar a jugadores
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);
@@ -210,18 +209,21 @@ export const updateMatch = async (req: Request<UpdateMatchDto>, res: Response) =
       return;
     }
 
-    // TODO - Validar que el partido esté en estado PENDING o COMPLETED para editar equipos
-    // if (req.body.teams && currentMatch.status.code !== MATCH_STATUS.PENDING) {
-    //   res
-    //     .status(400)
-    //     .json(
-    //       new ErrorResponse(
-    //         "Solo se pueden editar equipos en partidos pendientes",
-    //         new CustomError("Estado inválido", ErrorCode.CREATE_MATCH_INCORRECT_BODY)
-    //       )
-    //     );
-    //   return;
-    // }
+    if (
+      req.body.teams &&
+      currentMatch.status.code !== MATCH_STATUS.PENDING &&
+      currentMatch.status.code !== MATCH_STATUS.COMPLETED
+    ) {
+      res
+        .status(400)
+        .json(
+          new ErrorResponse(
+            "Solo se pueden editar equipos en partidos pendientes",
+            new CustomError("Estado inválido", ErrorCode.CREATE_MATCH_INCORRECT_BODY)
+          )
+        );
+      return;
+    }
 
     // TODO - agregar validaciones de campos (fechas futuras, duración válida, etc.)
 
@@ -357,7 +359,6 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
 export const createMatchWithResult = async (req: Request<CreateMatchWithResultDto>, res: Response) => {
   try {
     // TODO - validar datos de entrada
-    const teams = [req.body.teams.team1!, req.body.teams.team2!];
     let playerTeamNumber = 0;
     if (req.body.teams.team1!.some((p) => p.id === req.user.playerId)) playerTeamNumber = 1;
     else if (req.body.teams.team2!.some((p) => p.id === req.user.playerId)) playerTeamNumber = 2;

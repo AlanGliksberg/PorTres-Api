@@ -25,7 +25,8 @@ import {
   ApplicationAcceptedEvent,
   ResultCreatedEvent,
   ResultRejectedEvent,
-  ResultAcceptedEvent
+  ResultAcceptedEvent,
+  AscendDescendEvent
 } from "../types/notifications";
 import { DispatchResult, NotificationIntentWithRelations, NotificationJobType } from "../types/notificationTypes";
 import { buildIntentCopy } from "./messages";
@@ -41,6 +42,8 @@ import { handleResultCreated } from "./events/resultCreated";
 import { handleResultAutoAccepted } from "./events/resultAutoAccepted";
 import { handleResultRejected } from "./events/resultRejected";
 import { handleResultAccepted } from "./events/resultAccepted";
+import { handlePlayerAscended } from "./events/playerAscended";
+import { handlePlayerDescended } from "./events/playerDescended";
 
 const dispatchIntent = async (intent: NotificationIntentWithRelations): Promise<DispatchResult> => {
   if (!intent.player) {
@@ -183,6 +186,12 @@ const worker = new Worker<NotificationJobData, any, NotificationJobType>(
         break;
       case NotificationJobType.RESULT_ACCEPTED_JOB:
         await handleResultAccepted(job as Job<ResultAcceptedEvent>);
+        break;
+      case NotificationJobType.PLAYER_ASCENDED_JOB:
+        await handlePlayerAscended(job as Job<AscendDescendEvent>);
+        break;
+      case NotificationJobType.PLAYER_DESCENDED_JOB:
+        await handlePlayerDescended(job as Job<AscendDescendEvent>);
         break;
       case NotificationJobType.PROCESS_NOTIFICATION_INTENT_JOB:
         await handleNotificationIntentJob(job as Job<ProcessNotificationIntentJobData>);

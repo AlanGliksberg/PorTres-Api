@@ -3,6 +3,7 @@ import { MATCH_STATUS } from "../types/matchTypes";
 import {
   ApplicationAcceptedEvent,
   ApplicationRejectedEvent,
+  AscendDescendEvent,
   MatchCancelledEvent,
   MatchConfirmedEvent,
   NotificationJobData,
@@ -14,6 +15,7 @@ import {
   ResultRejectedEvent
 } from "../types/notifications";
 import { NotificationJobType } from "../types/notificationTypes";
+import { CATEGORY } from "../types/playerTypes";
 
 export const publishEvent = async (eventType: NotificationJobType, event: NotificationJobData, jobId: string) => {
   try {
@@ -169,4 +171,24 @@ export const publishResultAccepted = async (matchId: number, playerIds: number[]
   };
   const jobId = getJobId(NotificationJobType.RESULT_ACCEPTED_JOB, matchId, playerIds, event.createdAt);
   await publishEvent(NotificationJobType.RESULT_ACCEPTED_JOB, event, jobId);
+};
+
+export const publishPlayerAscended = async (playerId: number, category: CATEGORY) => {
+  const event: AscendDescendEvent = {
+    playerId,
+    category,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.PLAYER_ASCENDED_JOB, 0, playerId, event.createdAt);
+  await publishEvent(NotificationJobType.PLAYER_ASCENDED_JOB, event, jobId);
+};
+
+export const publishPlayerDescended = async (playerId: number, category: CATEGORY) => {
+  const event: AscendDescendEvent = {
+    playerId,
+    category,
+    createdAt: new Date().toISOString()
+  };
+  const jobId = getJobId(NotificationJobType.PLAYER_DESCENDED_JOB, 0, playerId, event.createdAt);
+  await publishEvent(NotificationJobType.PLAYER_DESCENDED_JOB, event, jobId);
 };

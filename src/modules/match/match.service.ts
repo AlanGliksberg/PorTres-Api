@@ -453,7 +453,6 @@ export const addPlayerToMatch = async (data: AddPlayerToMatchRequest, addedByPla
   const playerConnect = await createOrGetPlayer(player, currentMatch.genderId);
   const playerId = playerConnect.id;
 
-  // TODO - validar genero de jugador contra el genero de partido
   const updatedMatch = await prisma.match.update({
     where: {
       id: data.matchId
@@ -506,7 +505,6 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
     }
   });
 
-  // TODO - si se cambia a COMPLETED, notificar a jugadores, guardar evento de cambio a CLOSED, guardar recordatorio de carga de resultado
   if (status === MATCH_STATUS.COMPLETED) {
     await publishMatchConfirmed(
       matchId,

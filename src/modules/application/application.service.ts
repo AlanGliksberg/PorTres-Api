@@ -3,9 +3,11 @@ import prisma from "../../prisma/client";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { APPLICATION_STATUS, CreateApplicationBody } from "../../types/application";
+import { GENDER } from "../../types/playerTypes";
 import { changeApplicationStatus, getApplicationById } from "../../utils/application";
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { addPlayerToMatchFromApplication } from "../../utils/match";
+import { getPlayerById } from "../../utils/player";
 import { changeState } from "../match/match.service";
 import {
   publishApplicationAccepted,
@@ -24,13 +26,24 @@ export const applyToMatch = async (playerId: number, data: CreateApplicationBody
           players: true
         }
       },
-      applications: true
+      applications: true,
+      gender: true
     }
   });
   if (!match) throw new CustomError("No existing match with id: " + matchId, ErrorCode.NO_MATCH);
 
+  const player = await getPlayerById(playerId, { gender: true });
+  if (!player) throw new CustomError("Player not found", ErrorCode.NO_PLAYER);
+  const playerGenderCode = player.gender?.code as GENDER | undefined;
+  const matchGenderCode = match.gender?.code as GENDER | undefined;
+  if (matchGenderCode && matchGenderCode !== GENDER.MIXTO && playerGenderCode && matchGenderCode !== playerGenderCode) {
+    throw new CustomError(
+      `Invalid gender | Allowed gender: ${match.gender?.name} | Gender: ${player.gender?.name}`,
+      ErrorCode.APPLICATION_INVALID_GENDER
+    );
+  }
+
   // TODO - no se pueden postular el creador del partido y jugadores ya en el partido
-  // TODO - validar generos
   const existingApplication = match.applications.find((app) => app.playerId === playerId);
   if (existingApplication) {
     throw new CustomError("Ya te has postulado a este partido", ErrorCode.APPLICATION_ALREADY_EXISTS);

@@ -1,6 +1,11 @@
 import { NotificationIntentType } from "@prisma/client";
 import { NotificationIntentWithRelations } from "../types/notificationTypes";
-import { ApplicationAcceptedEvent, PlayerAddedToMatchEvent, PlayerAppliedToMatchEvent } from "../types/notifications";
+import {
+  ApplicationAcceptedEvent,
+  AscendDescendEvent,
+  PlayerAddedToMatchEvent,
+  PlayerAppliedToMatchEvent
+} from "../types/notifications";
 import { getPlayerById } from "../utils/player";
 import { GENDER } from "../types/playerTypes";
 
@@ -148,6 +153,26 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
         data: {
           matchId: intent.matchId,
           reason: "result-accepted"
+        }
+      };
+    case NotificationIntentType.PLAYER_ASCENDED:
+      const playerAscendedData = intent.payload as AscendDescendEvent;
+      return {
+        title: "¡Felicitaciones!",
+        body: `🎉 Después de tu último partido en ${location} ascendiste a ${playerAscendedData.category}.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "player-ascended"
+        }
+      };
+    case NotificationIntentType.PLAYER_DESCENDED:
+      const playerDescendedData = intent.payload as AscendDescendEvent;
+      return {
+        title: "¡No te desanimes!",
+        body: `Después de tu último partido en ${location} descendiste a ${playerDescendedData.category}. Seguí jugando para volver lo antes posible.`,
+        data: {
+          matchId: intent.matchId,
+          reason: "player-descended"
         }
       };
     default:

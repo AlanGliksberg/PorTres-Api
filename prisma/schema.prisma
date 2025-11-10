@@ -265,6 +265,8 @@ enum NotificationIntentType {
   RESULT_CREATED
   RESULT_ACCEPTED
   RESULT_REJECTED
+  PLAYER_ASCENDED
+  PLAYER_DESCENDED
 }
 
 enum NotificationIntentStatus {

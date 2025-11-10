@@ -14,6 +14,8 @@ export enum NotificationJobType {
   RESULT_AUTO_ACCEPTED_JOB = "result-auto-accepted",
   RESULT_REJECTED_JOB = "result-rejected",
   RESULT_ACCEPTED_JOB = "result-accepted",
+  PLAYER_ASCENDED_JOB = "player-ascended",
+  PLAYER_DESCENDED_JOB = "player-descended",
   PROCESS_NOTIFICATION_INTENT_JOB = "process-notification-intent"
 }
 

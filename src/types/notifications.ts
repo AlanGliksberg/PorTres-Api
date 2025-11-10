@@ -1,4 +1,5 @@
 import { MATCH_STATUS } from "./matchTypes";
+import { CATEGORY } from "./playerTypes";
 
 export type PlayerAddedToMatchEvent = {
   matchId: number;
@@ -71,6 +72,12 @@ export type ResultRejectedEvent = {
 export type ResultAcceptedEvent = {
   matchId: number;
   playerIds: number[];
+  createdAt: string;
+};
+
+export type AscendDescendEvent = {
+  playerId: number;
+  category: CATEGORY;
   createdAt: string;
 };
 
