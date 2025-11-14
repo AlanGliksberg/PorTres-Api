@@ -11,6 +11,8 @@ import prisma from "../../prisma/client";
 import { getUserSelect } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
+import { MATCH_STATUS } from "../../types/matchTypes";
+import { deletePlayerFromMatch } from "../match/match.service";
 
 export const createPlayer = async (data: CreatePlayerBody, user: User) => {
   let existingPlayer = await getPlayerByUserId(user.id);
@@ -145,23 +147,47 @@ export const saveExpoPushToken = async (data: SaveExpoPushTokenBody, user: User)
 };
 
 export const deleteUserAccount = async (userId: number) => {
-  return await prisma.$transaction(async (tx) => {
-    const user = await tx.user.findUnique({
-      where: { id: userId },
-      include: { player: true }
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { player: true }
+  });
+
+  if (!user) {
+    throw new CustomError("Usuario no encontrado", ErrorCode.USER_NOT_FOUND);
+  }
+
+  const playerId = user.player?.id;
+
+  if (playerId) {
+    const activeMatches = await prisma.match.findMany({
+      where: {
+        players: {
+          some: { id: playerId }
+        },
+        status: {
+          code: {
+            in: [MATCH_STATUS.PENDING, MATCH_STATUS.COMPLETED]
+          }
+        }
+      },
+      select: {
+        id: true
+      }
     });
 
-    if (!user) {
-      throw new CustomError("Usuario no encontrado", ErrorCode.USER_NOT_FOUND);
+    for (const match of activeMatches) {
+      await deletePlayerFromMatch({ matchId: match.id, playerId }, playerId);
     }
+  }
 
-    if (user.player) {
+  await prisma.$transaction(async (tx) => {
+    if (playerId) {
       await tx.expoPushToken.deleteMany({
-        where: { playerId: user.player.id }
+        where: { playerId }
       });
 
       await tx.player.update({
-        where: { id: user.player.id },
+        where: { id: playerId },
         data: {
           userId: null
         }
@@ -171,7 +197,7 @@ export const deleteUserAccount = async (userId: number) => {
     await tx.user.delete({
       where: { id: userId }
     });
-
-    return { userId };
   });
+
+  return { userId };
 };
