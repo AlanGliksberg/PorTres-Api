@@ -118,3 +118,17 @@ export const saveExpoPushToken = async (req: Request<SaveExpoPushTokenBody>, res
     }
   }
 };
+
+export const deleteCurrentUser = async (req: Request, res: Response) => {
+  try {
+    await playerService.deleteUserAccount(req.user.id);
+    res.status(200).json(new OkResponse({ deleted: true }));
+  } catch (e: any) {
+    console.error(e);
+    if (e instanceof CustomError && e.code === ErrorCode.USER_NOT_FOUND) {
+      res.status(404).json(new ErrorResponse("Usuario no encontrado", e));
+    } else {
+      res.status(500).json(new ErrorResponse("Error eliminando usuario", e));
+    }
+  }
+};

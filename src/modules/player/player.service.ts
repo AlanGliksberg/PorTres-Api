@@ -143,3 +143,35 @@ export const saveExpoPushToken = async (data: SaveExpoPushTokenBody, user: User)
     }
   });
 };
+
+export const deleteUserAccount = async (userId: number) => {
+  return await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      include: { player: true }
+    });
+
+    if (!user) {
+      throw new CustomError("Usuario no encontrado", ErrorCode.USER_NOT_FOUND);
+    }
+
+    if (user.player) {
+      await tx.expoPushToken.deleteMany({
+        where: { playerId: user.player.id }
+      });
+
+      await tx.player.update({
+        where: { id: user.player.id },
+        data: {
+          userId: null
+        }
+      });
+    }
+
+    await tx.user.delete({
+      where: { id: userId }
+    });
+
+    return { userId };
+  });
+};

@@ -6,6 +6,7 @@ router.post("/", playerController.createPlayer);
 router.put("/", playerController.updatePlayer);
 router.post("/push-token", playerController.saveExpoPushToken);
 router.get("/me", playerController.getCurrentPlayer);
+router.delete("/", playerController.deleteCurrentUser);
 router.get("/", playerController.getPlayers);
 router.get("/gender", playerController.getGenders);
 router.get("/position", playerController.getPositions);
