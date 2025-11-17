@@ -24,6 +24,12 @@ export const register = async (data: RegisterDTO) => {
     throw new CustomError("User already exists", ErrorCode.USER_ALREADY_EXISTS);
   }
 
+  let photoUrl = null;
+  if (data.profilePhoto) {
+    console.log("data.profilePhoto", data.profilePhoto);
+    photoUrl = "";
+  }
+
   const user = await creatUser({
     email: data.email,
     passwordHash,
@@ -31,7 +37,7 @@ export const register = async (data: RegisterDTO) => {
     lastName: data.lastName.trim().replace(/\b\w/g, (char) => char.toUpperCase()),
     phoneNumber: data.phone?.trim() || null,
     dni: data.dni?.trim() || null,
-    photoUrl: data.photoUrl?.trim() || null
+    photoUrl
   });
 
   return {

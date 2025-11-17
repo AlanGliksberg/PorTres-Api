@@ -4,9 +4,7 @@ export interface RegisterDTO {
   firstName: string;
   lastName: string;
   dni?: string;
-  photoUrl?: string;
-  socialId?: string;
-  socialPlatform?: string;
+  profilePhoto?: string;
   phone?: string;
 }
 
