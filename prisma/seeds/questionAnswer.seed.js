@@ -26,7 +26,6 @@ export async function seedQuestionAnswer(prisma) {
 
   const codes = answers.map((answer) => answer.code);
 
-  // Remove legacy answers (e.g. A5.4) so the DB mirrors the current seed list.
   await prisma.questionAnswer.deleteMany({
     where: { code: { notIn: codes } }
   });
