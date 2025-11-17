@@ -125,7 +125,7 @@ const calculatePlayerCategory = async (data: CreatePlayerBody): Promise<Category
       const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
       const averagePoints = totalPoints / answers.length;
 
-      if (averagePoints <= 20) {
+      if (averagePoints <= 18) {
         categoryCode = CATEGORY.C9;
       } else if (averagePoints <= 28) {
         categoryCode = CATEGORY.C8;
