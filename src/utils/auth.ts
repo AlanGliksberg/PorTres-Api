@@ -23,7 +23,8 @@ export const getUserSelect = () => {
       createdAt: true,
       dni: true,
       photoUrl: true,
-      googleId: true
+      socialId: true,
+      socialPlatform: true
     }
   };
 };

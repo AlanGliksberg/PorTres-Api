@@ -1,4 +1,4 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User, SocialPlatform } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import { signToken, verifyToken } from "../../utils/jwt";
@@ -6,8 +6,9 @@ import { OAuth2Client } from "google-auth-library";
 import { creatUser } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
-import { RegisterDTO, ChangePasswordDTO } from "../../types/auth";
+import { RegisterDTO, ChangePasswordDTO, AppleLoginDTO } from "../../types/auth";
 import { isValidExpoPushToken } from "../../utils/player";
+import appleSigninAuth from "apple-signin-auth";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -56,23 +57,56 @@ export const loginWithGoogle = async (idToken: string) => {
     throw new CustomError("Invalid Google token", ErrorCode.INVALID_GOOGLE_TOKEN);
 
   const user = await prisma.user.upsert({
-    where: { googleId: payload.sub },
+    where: { socialId: payload.sub },
     create: {
       email: payload.email,
       firstName: payload.given_name || "",
       lastName: payload.family_name || "",
       photoUrl: payload.picture,
-      googleId: payload.sub
+      socialId: payload.sub,
+      socialPlatform: SocialPlatform.GOOGLE
     },
-    update: {
-      firstName: payload.given_name ?? undefined,
-      lastName: payload.family_name ?? undefined,
-      photoUrl: payload.picture ?? undefined,
-      email: payload.email
-    },
+    update: {},
     include: { player: true }
   });
-  
+
+  return getToken(user);
+};
+
+export const loginWithApple = async (data: AppleLoginDTO) => {
+  if (!data.identityToken) throw new CustomError("Token de Apple faltante", ErrorCode.INVALID_APPLE_TOKEN);
+  if (!process.env.APPLE_CLIENT_ID)
+    throw new CustomError("Apple Sign In no está configurado", ErrorCode.APPLE_AUTH_NOT_CONFIGURED);
+
+  let payload;
+  try {
+    payload = await appleSigninAuth.verifyIdToken(data.identityToken, {
+      audience: process.env.APPLE_CLIENT_ID
+    });
+  } catch (err) {
+    console.error("Error verificando token de Apple", err);
+    throw new CustomError("Token de Apple inválido", ErrorCode.INVALID_APPLE_TOKEN);
+  }
+
+  if (!payload?.sub) throw new CustomError("Token de Apple inválido", ErrorCode.INVALID_APPLE_TOKEN);
+
+  const payloadEmail = payload.email ?? data.email ?? undefined;
+  const providedFirstName = data.firstName;
+  const providedLastName = data.lastName;
+
+  const user = await prisma.user.upsert({
+    where: { socialId: payload.sub },
+    create: {
+      email: payloadEmail,
+      firstName: providedFirstName || "",
+      lastName: providedLastName || "",
+      socialId: payload.sub,
+      socialPlatform: SocialPlatform.APPLE
+    },
+    update: {},
+    include: { player: true }
+  });
+
   return getToken(user);
 };
 

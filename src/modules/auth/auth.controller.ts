@@ -2,7 +2,7 @@ import { Response } from "express";
 import * as authService from "./auth.service";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import { Request } from "../../types/common";
-import { RefreshTokenDTO, RegisterDTO, ChangePasswordDTO, LogoutDTO } from "../../types/auth";
+import { RefreshTokenDTO, RegisterDTO, ChangePasswordDTO, LogoutDTO, AppleLoginDTO } from "../../types/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 
@@ -33,6 +33,16 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.log(e);
     res.status(500).json(new ErrorResponse("Google error", e));
+  }
+};
+
+export const loginWithApple = async (req: Request<AppleLoginDTO>, res: Response) => {
+  try {
+    const token = await authService.loginWithApple(req.body);
+    res.status(200).json(new OkResponse({ token }));
+  } catch (e: any) {
+    console.log(e);
+    res.status(500).json(new ErrorResponse("Apple error", e));
   }
 };
 

@@ -17,7 +17,8 @@ model User {
   createdAt    DateTime @default(now())
   dni          String?
   photoUrl     String?
-  googleId     String?  @unique
+  socialId     String?         @unique
+  socialPlatform SocialPlatform?
 
   player Player?
 }
@@ -248,6 +249,11 @@ model NotificationIntent {
   @@index([scheduledAt, status])
   @@index([matchId])
   @@index([playerId])
+}
+
+enum SocialPlatform {
+  GOOGLE
+  APPLE
 }
 
 enum NotificationIntentType {

@@ -18,7 +18,7 @@ API REST para la gestión de partidos de pádel, jugadores y aplicaciones. Desar
 
 ## ✨ Características
 
-- 🔐 **Autenticación JWT** con soporte para Google OAuth
+- 🔐 **Autenticación JWT** con soporte para Google OAuth y Apple Sign In
 - 👥 **Gestión de Jugadores** con perfiles completos
 - 🏆 **Sistema de Categorías** y posiciones de juego
 - 🎾 **Gestión de Partidos** con equipos y sets
@@ -36,7 +36,7 @@ API REST para la gestión de partidos de pádel, jugadores y aplicaciones. Desar
 - **Lenguaje**: TypeScript
 - **Base de Datos**: PostgreSQL
 - **ORM**: Prisma
-- **Autenticación**: JWT, Google OAuth
+- **Autenticación**: JWT, Google OAuth, Apple Sign In
 - **Encriptación**: bcrypt
 - **CORS**: Habilitado para desarrollo
 - **Gestión de Paquetes**: pnpm
@@ -102,6 +102,9 @@ JWT_SECRET="tu-secreto-jwt-super-seguro"
 # Google OAuth
 GOOGLE_CLIENT_ID="tu-google-client-id"
 
+# Apple Sign In
+APPLE_CLIENT_ID="tu-apple-service-id"
+
 # Servidor
 PORT=3000
 NODE_ENV=development
@@ -165,6 +168,7 @@ PadelCole-Api/
 | POST   | `/register` | Registrar nuevo usuario |
 | POST   | `/login`    | Iniciar sesión          |
 | POST   | `/google`   | Login con Google OAuth  |
+| POST   | `/apple`    | Login con Apple Sign In |
 
 ### Jugadores (`/api/player`)
 
@@ -230,6 +234,17 @@ Authorization: Bearer <tu-token-jwt>
 ### Google OAuth
 
 Soporte para autenticación con Google. Configura `GOOGLE_CLIENT_ID` en las variables de entorno.
+
+### Apple Sign In
+
+Autenticación con Apple Sign In consumiendo el `identityToken` que entrega Apple en el cliente. Configura `APPLE_CLIENT_ID` con el Service ID (o Bundle ID si usás el flujo nativo) y envía en el body del endpoint `/auth/apple`:
+
+- `identityToken` (**obligatorio**): token JWT devuelto por Apple.
+- `email`, `firstName`, `lastName` (**opcionales**): envíalos la primera vez, ya que Apple solo comparte esos datos una vez; en logins posteriores el backend seguirá usando lo almacenado. Si el usuario decide ocultar el email, no podremos crear una cuenta nueva hasta que lo habilite desde su Apple ID.
+
+Los usuarios creados vía login social almacenan un `socialId` único y el campo `socialPlatform` (GOOGLE/APPLE), de modo que cualquier proveedor nuevo reutiliza la misma estructura sin agregar columnas adicionales.
+- `email`: opcional, pero recomendado para el primer login en caso de que Apple no lo envíe en el token.
+- `firstName` y `lastName`: opcionales, pero necesarios el primer login porque Apple solo devuelve el nombre una vez.
 
 ## 📜 Scripts Disponibles
 

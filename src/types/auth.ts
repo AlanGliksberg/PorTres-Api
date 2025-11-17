@@ -5,7 +5,8 @@ export interface RegisterDTO {
   lastName: string;
   dni?: string;
   photoUrl?: string;
-  googleId?: string;
+  socialId?: string;
+  socialPlatform?: string;
   phone?: string;
 }
 
@@ -20,4 +21,11 @@ export interface ChangePasswordDTO {
 
 export interface LogoutDTO {
   expoPushToken?: string;
+}
+
+export interface AppleLoginDTO {
+  identityToken: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
 }
