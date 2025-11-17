@@ -70,7 +70,13 @@ export const createOrGetPlayer = async (player: PlayerDTO, allowedGenderId: numb
   return { id: createdPlayer.id };
 };
 
-export const createPlayer = async (name: string, lastName: string, data: CreatePlayerBody, userId: number) => {
+export const createPlayer = async (
+  name: string,
+  lastName: string,
+  data: CreatePlayerBody,
+  userId: number,
+  email: string
+) => {
   const category = await calculatePlayerCategory(data);
   const rankingPoints = category.initialPoints;
 
@@ -83,6 +89,7 @@ export const createPlayer = async (name: string, lastName: string, data: CreateP
       categoryId: category.id,
       rankingPoints,
       positionId: data.positionId,
+      email,
       userId
     },
     include: {
