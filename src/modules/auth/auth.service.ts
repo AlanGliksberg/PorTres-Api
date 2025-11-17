@@ -101,6 +101,9 @@ export const loginWithApple = async (data: AppleLoginDTO) => {
     const existingPlayer = await prisma.player.findFirst({
       where: {
         email: payloadEmail
+      },
+      orderBy: {
+        id: "desc"
       }
     });
     if (existingPlayer) {
