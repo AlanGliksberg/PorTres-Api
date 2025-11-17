@@ -92,8 +92,22 @@ export const loginWithApple = async (data: AppleLoginDTO) => {
   if (!payload?.sub) throw new CustomError("Token de Apple inválido", ErrorCode.INVALID_APPLE_TOKEN);
 
   const payloadEmail = payload.email ?? data.email ?? undefined;
-  const formattedFirstName = formatName(data.firstName);
-  const formattedLastName = formatName(data.lastName);
+  let formattedFirstName = formatName(data.firstName);
+  let formattedLastName = formatName(data.lastName);
+
+  const existingUser = await prisma.user.findUnique({ where: { socialId: payload.sub } });
+  if (!existingUser) {
+    // Tengo que revisar si el usuario estuvo alguna vez creado (a través del player llego a eso)
+    const existingPlayer = await prisma.player.findFirst({
+      where: {
+        email: payloadEmail
+      }
+    });
+    if (existingPlayer) {
+      formattedFirstName = existingPlayer.firstName || "";
+      formattedLastName = existingPlayer.lastName || "";
+    }
+  }
 
   const user = await prisma.user.upsert({
     where: { socialId: payload.sub },
