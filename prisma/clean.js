@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Tablas específicas a truncar
-  const tables = ["Application", "Match", "User", "Team", "Set", "Player", "Question"];
+  const tables = ["Application", "Match", "User", "Team", "Set", "Player", "Question", "ExpoPushToken", "NotificationIntent", "PlayerRankingChange"];
 
   // Construir la instrucción TRUNCATE
   const tableNames = tables.map((t) => `public."${t}"`);
