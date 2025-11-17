@@ -1,3 +1,5 @@
+export const formatName = (value?: string | null) => (value ? value.trim().replace(/\b\w/g, (char) => char.toUpperCase()) : "");
+
 export const convertStringIntoArray = <P = string>(data: string | string[] | undefined): P[] => {
   if (!data) return [];
 

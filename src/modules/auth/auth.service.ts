@@ -4,6 +4,7 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import { signToken, verifyToken } from "../../utils/jwt";
 import { OAuth2Client } from "google-auth-library";
 import { creatUser } from "../../utils/auth";
+import { formatName } from "../../utils/common";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { RegisterDTO, ChangePasswordDTO, AppleLoginDTO } from "../../types/auth";
@@ -27,8 +28,8 @@ export const register = async (data: RegisterDTO) => {
   const user = await creatUser({
     email: data.email,
     passwordHash,
-    firstName: data.firstName.trim().replace(/\b\w/g, (char) => char.toUpperCase()),
-    lastName: data.lastName.trim().replace(/\b\w/g, (char) => char.toUpperCase()),
+    firstName: formatName(data.firstName),
+    lastName: formatName(data.lastName),
     phoneNumber: data.phone?.trim() || null,
     dni: data.dni?.trim() || null,
     photoUrl: data.photoUrl?.trim() || null
@@ -91,15 +92,15 @@ export const loginWithApple = async (data: AppleLoginDTO) => {
   if (!payload?.sub) throw new CustomError("Token de Apple inválido", ErrorCode.INVALID_APPLE_TOKEN);
 
   const payloadEmail = payload.email ?? data.email ?? undefined;
-  const providedFirstName = data.firstName;
-  const providedLastName = data.lastName;
+  const formattedFirstName = formatName(data.firstName);
+  const formattedLastName = formatName(data.lastName);
 
   const user = await prisma.user.upsert({
     where: { socialId: payload.sub },
     create: {
       email: payloadEmail,
-      firstName: providedFirstName || "",
-      lastName: providedLastName || "",
+      firstName: formattedFirstName,
+      lastName: formattedLastName,
       socialId: payload.sub,
       socialPlatform: SocialPlatform.APPLE
     },
