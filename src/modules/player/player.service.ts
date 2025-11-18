@@ -18,7 +18,7 @@ export const createPlayer = async (data: CreatePlayerBody, user: User) => {
   let existingPlayer = await getPlayerByUserId(user.id);
   if (existingPlayer) return existingPlayer;
 
-  return await createPlayerDB(user.firstName, user.lastName, data, user.id, user.email);
+  return await createPlayerDB(user.firstName, user.lastName, data, user);
 };
 
 export const updatePlayer = async (data: UpdatePlayerBody, user: User) => {
