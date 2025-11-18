@@ -139,27 +139,13 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
     ]
   };
 
-  const include = {
-    status: true,
-    category: true,
-    gender: true,
-    players: true,
-    teams: {
-      include: {
-        players: {
-          include: {
-            user: getUserSelect()
-          }
-        }
-      }
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.applications = {
+    where: {
+      playerId
     },
-    applications: {
-      where: {
-        playerId
-      },
-      include: {
-        status: true
-      }
+    include: {
+      status: true
     }
   };
 
