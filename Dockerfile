@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY . .
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE=true
+ENV DATABASE_URL=dummy
 RUN pnpm exec prisma generate --schema=./prisma/schema.prisma
 RUN pnpm build
 
