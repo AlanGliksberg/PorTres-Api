@@ -288,6 +288,27 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
 export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
   const { page, pageSize } = filters;
   const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.applications = {
+    where: {
+      match: {
+        creatorPlayerId: playerId
+      },
+      status: {
+        code: APPLICATION_STATUS.PENDING
+      }
+    },
+    include: {
+      player: {
+        include: {
+          gender: true,
+          category: true,
+          position: true,
+          user: getUserSelect()
+        }
+      },
+      status: true
+    }
+  };
 
   const where: Prisma.MatchWhereInput = {
     AND: [
