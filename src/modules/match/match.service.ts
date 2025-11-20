@@ -93,6 +93,7 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
     }
   });
 
+  //TODO - sacar foreach async en todos lados
   // Notificaciones a jugadores
   if (withNotification) {
     if (teams) {
