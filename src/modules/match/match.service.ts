@@ -93,6 +93,7 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
     }
   });
 
+  //TODO - sacar foreach async en todos lados
   // Notificaciones a jugadores
   if (withNotification) {
     if (teams) {
@@ -139,27 +140,13 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
     ]
   };
 
-  const include = {
-    status: true,
-    category: true,
-    gender: true,
-    players: true,
-    teams: {
-      include: {
-        players: {
-          include: {
-            user: getUserSelect()
-          }
-        }
-      }
+  const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.applications = {
+    where: {
+      playerId
     },
-    applications: {
-      where: {
-        playerId
-      },
-      include: {
-        status: true
-      }
+    include: {
+      status: true
     }
   };
 
@@ -302,6 +289,27 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
 export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
   const { page, pageSize } = filters;
   const include: Prisma.MatchInclude = getCommonMatchInlcude();
+  include.applications = {
+    where: {
+      match: {
+        creatorPlayerId: playerId
+      },
+      status: {
+        code: APPLICATION_STATUS.PENDING
+      }
+    },
+    include: {
+      player: {
+        include: {
+          gender: true,
+          category: true,
+          position: true,
+          user: getUserSelect()
+        }
+      },
+      status: true
+    }
+  };
 
   const where: Prisma.MatchWhereInput = {
     AND: [

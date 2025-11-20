@@ -4,20 +4,19 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String?
-  firstName    String
-  lastName     String
-  phoneNumber  String?
-  createdAt    DateTime @default(now())
-  dni          String?
-  photoUrl     String?
-  socialId     String?         @unique
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  passwordHash   String?
+  firstName      String
+  lastName       String
+  phoneNumber    String?
+  createdAt      DateTime        @default(now())
+  dni            String?
+  photoUrl       String?
+  socialId       String?         @unique
   socialPlatform SocialPlatform?
 
   player Player?
@@ -61,6 +60,7 @@ model Player {
   categoryId    Int?
   rankingPoints Int     @default(0)
   phone         String?
+  email         String?
   userId        Int?    @unique
   genderId      Int?
   positionId    Int?

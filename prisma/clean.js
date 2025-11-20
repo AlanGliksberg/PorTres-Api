@@ -1,11 +1,19 @@
-// scripts/pclean.ts
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // Tablas específicas a truncar
-  const tables = ["Application", "Match", "User", "Team", "Set", "Player", "Question"];
+  const tables = ["Application", "Match", "User", "Team", "Set", "Player", "Question", "ExpoPushToken", "NotificationIntent", "PlayerRankingChange"];
 
   // Construir la instrucción TRUNCATE
   const tableNames = tables.map((t) => `public."${t}"`);

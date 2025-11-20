@@ -13,7 +13,7 @@ import {
 import { CustomError } from "../types/customError";
 import { ErrorCode } from "../constants/errorCode";
 import { convertStringIntoArray, parsePagesFilters } from "./common";
-import { Category, Prisma } from "@prisma/client";
+import { Category, Prisma, User } from "@prisma/client";
 import { getGenderById } from "./gender";
 
 export const expoPushTokenRegex = /^Expo(nent)?PushToken\[[A-Za-z0-9\-_]{1,}\]$/;
@@ -70,7 +70,12 @@ export const createOrGetPlayer = async (player: PlayerDTO, allowedGenderId: numb
   return { id: createdPlayer.id };
 };
 
-export const createPlayer = async (name: string, lastName: string, data: CreatePlayerBody, userId: number) => {
+export const createPlayer = async (
+  name: string,
+  lastName: string,
+  data: CreatePlayerBody,
+  user: User
+) => {
   const category = await calculatePlayerCategory(data);
   const rankingPoints = category.initialPoints;
 
@@ -79,11 +84,12 @@ export const createPlayer = async (name: string, lastName: string, data: CreateP
       firstName: name,
       lastName: lastName,
       genderId: data.genderId,
-      phone: data.phone,
+      phone: data.phone || user.phoneNumber || null,
       categoryId: category.id,
       rankingPoints,
       positionId: data.positionId,
-      userId
+      email: user.email,
+      userId: user.id
     },
     include: {
       category: true,
