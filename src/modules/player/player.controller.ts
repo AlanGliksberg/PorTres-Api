@@ -1,4 +1,5 @@
 import { Response } from "express";
+import type { Express } from "express";
 import { CreatePlayerBody, UpdatePlayerBody, GetPlayersRequest, SaveExpoPushTokenBody } from "../../types/playerTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import * as playerService from "./player.service";
@@ -7,20 +8,57 @@ import {
   validateCreatePlayerBody,
   validateUpdatePlayerBody,
   parsePlayerFilters,
-  validateExpoPushTokenBody
+  validateExpoPushTokenBody,
+  parseCreatePlayerBody
 } from "../../utils/player";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 
-export const createPlayer = async (req: Request<CreatePlayerBody>, res: Response) => {
+export const createPlayer = async (req: Request<CreatePlayerBody, any>, res: Response) => {
   try {
-    // TODO - agregar apodo
-    validateCreatePlayerBody(req.body);
-    const player = await playerService.createPlayer(req.body, req.user);
+    const parsedBody = parseCreatePlayerBody(req.body);
+    validateCreatePlayerBody(parsedBody);
+    const files = Array.isArray(req.files) ? (req.files as Express.Multer.File[]) : [];
+    const profilePhotoFile = files.find((file) => file.fieldname === "profilePhoto");
+    const player = await playerService.createPlayer(parsedBody, req.user, profilePhotoFile);
     res.status(200).json(new OkResponse({ player }));
   } catch (e: any) {
     console.error(e);
     res.status(500).json(new ErrorResponse("Error creating player", e));
+  }
+};
+
+export const updatePlayerPhoto = async (req: Request, res: Response) => {
+  try {
+    const file = req.file as Express.Multer.File | undefined;
+    if (!file) {
+      res.status(400).json(new ErrorResponse("Foto requerida", new Error("Foto requerida")));
+      return;
+    }
+
+    const photoUrl = await playerService.updatePlayerPhoto(req.user, file);
+    res.status(200).json(new OkResponse({ photoUrl }));
+  } catch (e: any) {
+    console.error(e);
+    if (e instanceof CustomError && e.code === ErrorCode.NO_PLAYER) {
+      res.status(404).json(new ErrorResponse("Jugador no encontrado", e));
+    } else {
+      res.status(500).json(new ErrorResponse("Error actualizando foto", e));
+    }
+  }
+};
+
+export const deletePlayerPhoto = async (req: Request, res: Response) => {
+  try {
+    await playerService.deletePlayerPhoto(req.user);
+    res.status(200).json(new OkResponse({ deleted: true }));
+  } catch (e: any) {
+    console.error(e);
+    if (e instanceof CustomError && e.code === ErrorCode.NO_PLAYER) {
+      res.status(404).json(new ErrorResponse("Jugador no encontrado", e));
+    } else {
+      res.status(500).json(new ErrorResponse("Error eliminando foto", e));
+    }
   }
 };
 

@@ -1,6 +1,6 @@
 import { Request as R } from "express";
 
-export type Request<P = any> = R<any, any, P, P>;
+export type Request<B = any, Q = B> = R<any, any, B, Q>;
 
 export type PageFilterString = {
   page: string;

@@ -16,6 +16,7 @@
     "notifications": "tsx src/workers/notifications.worker.ts"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.17.3",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "apple-signin-auth": "^2.0.0",
@@ -28,6 +29,7 @@
     "google-auth-library": "^8.7.0",
     "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.0",
+    "multer": "^2.0.2",
     "tsx": "^4.19.3"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^2.0.0",
     "prettier": "^3.5.3",
     "prisma": "^7.0.0",
     "ts-node-dev": "^2.0.0",

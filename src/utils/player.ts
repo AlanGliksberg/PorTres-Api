@@ -221,6 +221,25 @@ export const getDBFilter = (filters: PlayerFilters) => {
   return where;
 };
 
+export const parseCreatePlayerBody = (body: any): CreatePlayerBody => {
+  const parsed: CreatePlayerBody = {
+    genderId: parseRequiredNumber(body?.genderId),
+    positionId: parseRequiredNumber(body?.positionId),
+    knowsCategory: parseBooleanField(body?.knowsCategory)
+  };
+
+  const phone = parseOptionalString(body?.phone);
+  if (phone) parsed.phone = phone;
+
+  const categoryId = parseOptionalNumber(body?.categoryId);
+  if (categoryId !== undefined) parsed.categoryId = categoryId;
+
+  const answers = parseAnswersField(body?.answers);
+  if (answers && answers.length > 0) parsed.answers = answers;
+
+  return parsed;
+};
+
 export const validateCreatePlayerBody = (body: CreatePlayerBody) => {
   if (
     !body.genderId ||
@@ -253,6 +272,81 @@ export const validateExpoPushTokenBody = (body: SaveExpoPushTokenBody) => {
 
   if (body.deviceType && body.deviceType.trim().length === 0) {
     throw new CustomError("Tipo de dispositivo invalido", ErrorCode.INVALID_PUSH_TOKEN);
+  }
+};
+
+const parseRequiredNumber = (value: unknown): number => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return NaN;
+    return Number(trimmed);
+  }
+  if (typeof value === "boolean") {
+    return value ? 1 : 0;
+  }
+  return Number(value);
+};
+
+const parseOptionalNumber = (value: unknown): number | undefined => {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const parsed = Number(trimmed);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+};
+
+const parseBooleanField = (value: unknown): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
+  if (typeof value === "number") return value === 1;
+  return Boolean(value);
+};
+
+const parseOptionalString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const parseAnswersField = (value: unknown): number[] | undefined => {
+  if (!value) return undefined;
+  if (Array.isArray(value)) {
+    const numbers = value.map((v) => Number(v)).filter((v) => !Number.isNaN(v));
+    return numbers.length > 0 ? numbers : undefined;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    const parsedFromJson = safeJsonParse(trimmed);
+    if (Array.isArray(parsedFromJson)) {
+      const numbers = parsedFromJson.map((v) => Number(v)).filter((v) => !Number.isNaN(v));
+      return numbers.length > 0 ? numbers : undefined;
+    }
+
+    const numbers = trimmed
+      .split(",")
+      .map((v) => Number(v.trim()))
+      .filter((v) => !Number.isNaN(v));
+    return numbers.length > 0 ? numbers : undefined;
+  }
+  return undefined;
+};
+
+const safeJsonParse = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch (_err) {
+    return undefined;
   }
 };
 

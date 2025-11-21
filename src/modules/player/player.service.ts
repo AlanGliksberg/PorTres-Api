@@ -1,4 +1,5 @@
 import { User } from "@prisma/client";
+import type { Express } from "express";
 import {
   CreatePlayerBody,
   UpdatePlayerBody,
@@ -13,12 +14,45 @@ import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { deletePlayerFromMatch } from "../match/match.service";
+import { deletePlayerProfilePhoto, uploadPlayerProfilePhoto } from "../../utils/storage";
 
-export const createPlayer = async (data: CreatePlayerBody, user: User) => {
+export const createPlayer = async (data: CreatePlayerBody, user: User, profilePhotoFile?: Express.Multer.File) => {
   let existingPlayer = await getPlayerByUserId(user.id);
-  if (existingPlayer) return existingPlayer;
+  if (existingPlayer) {
+    if (profilePhotoFile) {
+      await updatePlayerPhoto(user, profilePhotoFile);
+    }
+    return existingPlayer;
+  }
 
-  return await createPlayerDB(user.firstName, user.lastName, data, user);
+  const player = await createPlayerDB(user.firstName, user.lastName, data, user);
+
+  if (profilePhotoFile) {
+    await updatePlayerPhoto(user, profilePhotoFile);
+  }
+
+  return player;
+};
+
+export const updatePlayerPhoto = async (user: User, profilePhotoFile: Express.Multer.File) => {
+  const photoUrl = await uploadPlayerProfilePhoto(profilePhotoFile, user.id);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { photoUrl }
+  });
+
+  return photoUrl;
+};
+
+export const deletePlayerPhoto = async (user: User) => {
+  await deletePlayerProfilePhoto(user.id);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { photoUrl: null }
+  });
+
+  return { deleted: true };
 };
 
 export const updatePlayer = async (data: UpdatePlayerBody, user: User) => {
@@ -198,6 +232,8 @@ export const deleteUserAccount = async (userId: number) => {
       where: { id: userId }
     });
   });
+
+  await deletePlayerProfilePhoto(userId);
 
   return { userId };
 };
