@@ -3,7 +3,7 @@ import { TeamDTO } from "./team";
 import { Match, Team, Player, Set, MatchStatus, Application, Gender } from "@prisma/client";
 
 export interface MatchDto {
-  location: string;
+  location?: string;
   description?: string;
   date: string;
   time: string;
@@ -13,6 +13,7 @@ export interface MatchDto {
   teams?: TeamDTO;
   pointsDeviation?: number;
   creatorPlayerId?: number;
+  clubId?: number;
 }
 
 export interface UpdateMatchDto {
@@ -37,13 +38,14 @@ export interface AcceptResultDto {
 }
 
 export interface CreateMatchWithResultDto {
-  location: string;
+  location?: string;
   date: string;
   time: string;
   gender: number;
   category: number;
   teams: TeamDTO;
   sets: [number, number][];
+  matchClubId?: number;
 }
 
 export type GetMatchesRequest = {

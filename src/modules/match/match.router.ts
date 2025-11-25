@@ -3,6 +3,7 @@ import * as matchController from "./match.controller";
 
 const router = Router();
 router.post("/", matchController.createMatch);
+router.get("/clubs", matchController.getMatchClubs);
 router.get("/", matchController.getMatches);
 router.get("/created", matchController.getCreatedMatches);
 router.get("/played", matchController.getPlayedMatches);

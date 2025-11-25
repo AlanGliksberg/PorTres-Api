@@ -27,6 +27,7 @@ model Match {
   dateTime           DateTime
   location           String
   description        String?
+  matchClubId        Int?
   categoryId         Int
   pointsDeviation    Int?
   statusId           Int
@@ -48,9 +49,18 @@ model Match {
   category            Category              @relation(fields: [categoryId], references: [id])
   playerRankingChange PlayerRankingChange[]
   notificationIntents NotificationIntent[]
+  matchClub           MatchClub?            @relation(fields: [matchClubId], references: [id])
 
   @@index([localMin], map: "idx_match_local_min")
   @@index([categoryId, genderId, dateTime])
+}
+
+model MatchClub {
+  id          Int    @id
+  name        String
+  description String
+  enabled     Boolean @default(true)
+  matches     Match[]
 }
 
 model Player {

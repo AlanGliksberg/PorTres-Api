@@ -28,6 +28,16 @@ export const createMatch = async (req: Request<MatchDto>, res: Response) => {
   }
 };
 
+export const getMatchClubs = async (_req: Request, res: Response) => {
+  try {
+    const clubs = await matchService.getEnabledMatchClubs();
+    res.status(200).json(new OkResponse({ clubs }));
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json(new ErrorResponse("Error getting match clubs", e));
+  }
+};
+
 export const getMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
     const filters = parseMatchFilters(req.query);

@@ -9,6 +9,7 @@ import { seedQuestionType } from "./seeds/questionType.seed.js";
 import { seedQuestion } from "./seeds/question.seed.js";
 import { seedQuestionAnswer } from "./seeds/questionAnswer.seed.js";
 import { seedApplicationStatus } from "./seeds/applicationStatus.seed.js";
+import { seedMatchClub } from "./seeds/matchClub.seed.js";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -28,6 +29,7 @@ async function main() {
   await seedQuestion(prisma);
   await seedQuestionAnswer(prisma);
   await seedApplicationStatus(prisma);
+  await seedMatchClub(prisma);
 }
 
 main()

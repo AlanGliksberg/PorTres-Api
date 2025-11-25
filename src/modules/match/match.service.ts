@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { MatchClub, Prisma } from "@prisma/client";
 import prisma from "../../prisma/client";
 import {
   MatchDto,
@@ -17,6 +17,7 @@ import {
   executeGetMatch,
   getCommonMatchInlcude,
   getDBFilter,
+  getMatchClubById,
   getWinnerTeamNumber,
   saveWinnerTeam,
   updateRankings,
@@ -39,7 +40,8 @@ import {
 } from "../../workers/publisher";
 
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
-  const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration } = data;
+  const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration, clubId } =
+    data;
 
   // Validar que cada jugador aparezca solo una vez en los equipos
   if (teams) {
@@ -52,6 +54,17 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
     }
   }
 
+  let finalLocation = location || "";
+  let finalDescription = description;
+  let matchClubRelation: Prisma.MatchCreateInput["matchClub"] | undefined;
+
+  if (clubId) {
+    const matchClub = await getMatchClubById(clubId);
+    finalLocation = matchClub.name;
+    finalDescription = description ? `${matchClub.description} - ${description}` : matchClub.description;
+    matchClubRelation = { connect: { id: clubId } };
+  }
+
   const matchStatus: MATCH_STATUS =
     status ||
     ((teams?.team1?.length || 0) + (teams?.team2?.length || 0) === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
@@ -62,8 +75,8 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
   const match = await prisma.match.create({
     data: {
       dateTime: `${date}T${time}:00.000Z`,
-      location,
-      description,
+      location: finalLocation,
+      description: finalDescription,
       pointsDeviation,
       category: {
         connect: {
@@ -81,7 +94,8 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
       teams: {
         create: [team1, team2]
       },
-      duration
+      duration,
+      ...(matchClubRelation && { matchClub: matchClubRelation })
     },
     include: {
       teams: {
@@ -117,6 +131,13 @@ export const createMatch = async (playerId: number, data: MatchDto, withNotifica
   }
 
   return match;
+};
+
+export const getEnabledMatchClubs = async (): Promise<MatchClub[]> => {
+  return prisma.matchClub.findMany({
+    where: { enabled: true },
+    orderBy: { name: "asc" }
+  });
 };
 
 export const getOpenMatches = async (filters: MatchFilters, playerId: number | undefined) => {
@@ -526,7 +547,7 @@ export const changeState = async (matchId: number, status: MATCH_STATUS) => {
 };
 
 export const updateMatch = async (matchId: number, data: UpdateMatchDto, playerId: number) => {
-  const updateData: any = {};
+  const updateData: Prisma.MatchUpdateInput = {};
 
   if (data.location !== undefined) updateData.location = data.location;
   if (data.description !== undefined) updateData.description = data.description;
@@ -838,14 +859,15 @@ export const createMatchWithResult = async (
   data: CreateMatchWithResultDto,
   resultLoadedByTeam: number
 ) => {
-  const { location, date, time, gender, category, teams, sets } = data;
+  const { location, date, time, gender, category, teams, sets, matchClubId } = data;
   const createMatchBody = {
     location,
     date,
     time,
     genderId: gender,
     categoryId: category,
-    teams
+    teams,
+    matchClubId
   };
   const match = await createMatch(playerId, createMatchBody, false, MATCH_STATUS.CLOSED);
 

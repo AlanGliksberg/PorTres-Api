@@ -1,4 +1,4 @@
-import { Category, Match, Player, Prisma, Set } from "@prisma/client";
+import { Category, Match, MatchClub, Player, Prisma, Set } from "@prisma/client";
 import { MatchDto, GetMatchesRequest, MatchFilters, MatchWithFullDetails, MATCH_STATUS } from "../types/matchTypes";
 import { CATEGORY, PlayerDTO } from "../types/playerTypes";
 import { TeamDTO, TeamWithPlayers } from "../types/team";
@@ -164,8 +164,17 @@ export const addPlayerToMatchFromApplication = async (
 
 export const validateCreateMatchBody = (body: MatchDto) => {
   // TODO - completar
-  if (!body.date || !body.time || !body.location || !body.duration)
+  if (!body.date || !body.time || !body.duration || (!body.location && !body.clubId))
     throw new CustomError("Body incorrecto", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
+};
+
+export const getMatchClubById = async (matchClubId: number): Promise<MatchClub> => {
+  const matchClub = await prisma.matchClub.findUnique({ where: { id: matchClubId } });
+  if (!matchClub) {
+    throw new CustomError("Club no encontrado", ErrorCode.CREATE_MATCH_INCORRECT_BODY);
+  }
+
+  return matchClub;
 };
 
 export const updateTeams = async (
