@@ -153,6 +153,7 @@ export const getApplicationStatus = async () => {
 };
 
 export const deleteApplication = async (matchId: number, playerId: number) => {
+  // TODO - solo se puede eliminar si la postulacion esta pendiente
   await prisma.application.deleteMany({
     where: {
       matchId,
