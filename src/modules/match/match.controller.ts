@@ -66,9 +66,10 @@ export const getCreatedMatches = async (req: Request<GetMatchesRequest>, res: Re
 
 export const getPlayedMatches = async (req: Request<GetMatchesRequest>, res: Response) => {
   try {
-    if (!req.user.playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
+    const playerId = Number(req.params.id);
+    if (!req.user.playerId || !playerId) throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
     const filters = parseMatchFilters(req.query);
-    const [matches, totalMatches] = await matchService.getPlayedMatches(req.user.playerId, filters);
+    const [matches, totalMatches] = await matchService.getPlayedMatches(playerId, filters);
     const parsedMatches = parseMatches(matches);
     res.status(200).json(new OkResponse({ matches: parsedMatches, totalMatches }));
   } catch (e: any) {
@@ -278,11 +279,12 @@ export const deletePlayerFromMatch = async (req: Request<DeletePlayerFromMatchRe
 
 export const getPlayedMatchesCount = async (req: Request, res: Response) => {
   try {
-    if (!req.user.playerId) {
+    const playerId = Number(req.params.id);
+    if (!req.user.playerId || !playerId) {
       throw new CustomError("Not a player", ErrorCode.USER_NOT_PLAYER);
     }
 
-    const count = await matchService.getPlayedMatchesCount(req.user.playerId);
+    const count = await matchService.getPlayedMatchesCount(playerId);
     res.status(200).json(new OkResponse({ count }));
   } catch (e: any) {
     console.error(e);
