@@ -9,10 +9,12 @@ import {
   validateUpdatePlayerBody,
   parsePlayerFilters,
   validateExpoPushTokenBody,
-  parseCreatePlayerBody
+  parseCreatePlayerBody,
+  getPlayerById
 } from "../../utils/player";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
+import { getUserSelect } from "../../utils/auth";
 
 export const createPlayer = async (req: Request<CreatePlayerBody, any>, res: Response) => {
   try {
@@ -73,9 +75,15 @@ export const updatePlayer = async (req: Request<UpdatePlayerBody>, res: Response
   }
 };
 
-export const getCurrentPlayer = async (req: Request, res: Response) => {
+export const getPlayerDetails = async (req: Request, res: Response) => {
   try {
-    const player = await playerService.getCurrentPlayer(req.user);
+    const playerId = Number(req.params.id);
+    const player = await getPlayerById(playerId, {
+      position: true,
+      category: true,
+      gender: true,
+      user: getUserSelect()
+    });
 
     if (!player) {
       const error = new CustomError("Jugador no encontrado", ErrorCode.NO_PLAYER);
