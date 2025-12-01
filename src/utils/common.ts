@@ -1,5 +1,10 @@
 export const formatName = (value?: string | null) =>
-  value ? value.trim().toLowerCase().replace(/\b\p{L}/gu, (char) => char.toUpperCase()) : "";
+  value
+    ? value
+        .trim()
+        .toLowerCase()
+        .replace(/\b\p{L}/gu, (char) => char.toUpperCase())
+    : "";
 
 export const convertStringIntoArray = <P = string>(data: string | string[] | undefined): P[] => {
   if (!data) return [];
@@ -65,4 +70,8 @@ export const getLocalMinFromDate = (date: Date): number => {
   const localMin = ((minutesLocal % 1440) + 1440) % 1440;
 
   return localMin;
+};
+
+export const getDateTime = () => {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
 };

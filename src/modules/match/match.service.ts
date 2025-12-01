@@ -38,10 +38,10 @@ import {
   publishResultCreated,
   publishResultRejected
 } from "../../workers/publisher";
+import { getDateTime } from "../../utils/common";
 
 export const createMatch = async (playerId: number, data: MatchDto, withNotification = true, status?: MATCH_STATUS) => {
-  const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration, clubId } =
-    data;
+  const { date, time, location, description, categoryId, pointsDeviation, teams, genderId, duration, clubId } = data;
 
   // Validar que cada jugador aparezca solo una vez en los equipos
   if (teams) {
@@ -142,8 +142,6 @@ export const getEnabledMatchClubs = async (): Promise<MatchClub[]> => {
 
 export const getOpenMatches = async (filters: MatchFilters, playerId: number | undefined) => {
   const { page, pageSize } = filters;
-  const now = new Date();
-  const currentTimeWithoutOffset = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
 
   const where = {
     AND: [
@@ -155,7 +153,7 @@ export const getOpenMatches = async (filters: MatchFilters, playerId: number | u
       getDBFilter(filters),
       {
         dateTime: {
-          gte: currentTimeWithoutOffset
+          gte: getDateTime()
         }
       }
     ]
@@ -213,7 +211,7 @@ export const getCreatedMatches = async (playerId: number, filters: MatchFilters)
       },
       {
         dateTime: {
-          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
+          gte: new Date(getDateTime().setUTCHours(0, 0, 0, 0))
         }
       }
     ]
@@ -293,7 +291,7 @@ export const getAppliedMatches = async (playerId: number, filters: MatchFilters)
       },
       {
         dateTime: {
-          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
+          gte: new Date(getDateTime().setUTCHours(0, 0, 0, 0))
         }
       },
       getDBFilter(filters)
@@ -350,7 +348,7 @@ export const getMyMatches = async (playerId: number, filters: MatchFilters) => {
       },
       {
         dateTime: {
-          gte: new Date(new Date().setUTCHours(0, 0, 0, 0))
+          gte: new Date(getDateTime().setUTCHours(0, 0, 0, 0))
         }
       }
     ]
