@@ -360,6 +360,18 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
       return;
     }
 
+    if (match.winnerTeamNumber) {
+      res
+        .status(400)
+        .json(
+          new ErrorResponse(
+            "El resultado a fue cargado",
+            new CustomError("No autorizado", ErrorCode.RESULT_ALREADY_LOADED)
+          )
+        );
+      return;
+    }
+
     await matchService.acceptMatchResult(match, req.user.playerId);
     res.status(200).json(new OkResponse());
   } catch (e: any) {
