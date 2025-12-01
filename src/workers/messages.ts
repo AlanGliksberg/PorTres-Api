@@ -8,6 +8,7 @@ import {
 } from "../types/notifications";
 import { getPlayerById } from "../utils/player";
 import { GENDER } from "../types/playerTypes";
+import { getMatchById } from "../modules/match/match.service";
 
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   dateStyle: "short",
@@ -147,9 +148,14 @@ export const buildIntentCopy = async (intent: NotificationIntentWithRelations) =
         }
       };
     case NotificationIntentType.RESULT_ACCEPTED:
+      const matchWithGender = await getMatchById(match.id);
+      const msg =
+        matchWithGender?.gender.code === GENDER.MIXTO
+          ? "¡Ya podés verlo en tu historial!"
+          : "¡Ya podés ver cómo impacta en tu ranking!";
       return {
         title: "Resultado aceptado",
-        body: `✅ El resultado del partido en ${location} fue confirmado. ¡Ya podés ver cómo impacta en tu ranking!`,
+        body: `✅ El resultado del partido en ${location} fue confirmado. ${msg}`,
         data: {
           matchId: intent.matchId,
           reason: "result-accepted"
