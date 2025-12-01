@@ -10,7 +10,7 @@ router.post("/update-picture", upload.single("profilePhoto"), playerController.u
 router.delete("/picture", playerController.deletePlayerPhoto);
 router.put("/", playerController.updatePlayer);
 router.post("/push-token", playerController.saveExpoPushToken);
-router.get("/me", playerController.getCurrentPlayer);
+router.get("/details/:id", playerController.getPlayerDetails);
 router.delete("/", playerController.deleteCurrentUser);
 router.get("/", playerController.getPlayers);
 router.get("/gender", playerController.getGenders);
