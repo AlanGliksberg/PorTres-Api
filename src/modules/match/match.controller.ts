@@ -321,6 +321,18 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
       return;
     }
 
+    if (match.winnerTeamNumber) {
+      res
+        .status(400)
+        .json(
+          new ErrorResponse(
+            "El resultado ya fue cargado",
+            new CustomError("Resultado cargado", ErrorCode.RESULT_ALREADY_LOADED)
+          )
+        );
+      return;
+    }
+
     // TODO - validar que el resultado sea válido
 
     await matchService.updateMatchResult(match, req.body, isMatchPlayer.teamNumber);
@@ -365,8 +377,8 @@ export const acceptResult = async (req: Request<AcceptResultDto>, res: Response)
         .status(400)
         .json(
           new ErrorResponse(
-            "El resultado a fue cargado",
-            new CustomError("No autorizado", ErrorCode.RESULT_ALREADY_LOADED)
+            "El resultado ya fue cargado",
+            new CustomError("Resultado cargado", ErrorCode.RESULT_ALREADY_LOADED)
           )
         );
       return;
