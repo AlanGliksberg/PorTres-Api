@@ -5,6 +5,7 @@ import authRouter from "./modules/auth/auth.router";
 import matchRouter from "./modules/match/match.router";
 import playerRouter from "./modules/player/player.router";
 import applicationRouter from "./modules/application/application.router";
+import storeRouter from "./modules/store/store.router";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requestLogger } from "./middlewares/logger";
 
@@ -26,6 +27,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api", storeRouter);
 
 app.use(authenticate as RequestHandler);
 
