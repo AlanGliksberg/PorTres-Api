@@ -9,12 +9,12 @@ import {
 } from "../../types/playerTypes";
 import { createPlayer as createPlayerDB, getDBFilter, getPlayerByUserId } from "../../utils/player";
 import prisma from "../../prisma/client";
-import { getUserSelect } from "../../utils/auth";
 import { CustomError } from "../../types/customError";
 import { ErrorCode } from "../../constants/errorCode";
 import { MATCH_STATUS } from "../../types/matchTypes";
 import { deletePlayerFromMatch } from "../match/match.service";
 import { deletePlayerProfilePhoto, uploadPlayerProfilePhoto } from "../../utils/storage";
+import { formatName } from "../../utils/common";
 
 export const createPlayer = async (data: CreatePlayerBody, user: User, profilePhotoFile?: Express.Multer.File) => {
   let existingPlayer = await getPlayerByUserId(user.id);
@@ -62,8 +62,8 @@ export const updatePlayer = async (data: UpdatePlayerBody, user: User) => {
     phone: string | null;
     positionId: number;
   } = {
-    firstName: data.firstName.trim(),
-    lastName: data.lastName.trim(),
+    firstName: formatName(data.firstName),
+    lastName: formatName(data.lastName),
     phone: data.phone?.trim() || null,
     positionId: data.positionId
   };
