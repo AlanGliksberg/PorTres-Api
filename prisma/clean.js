@@ -13,7 +13,25 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // Tablas específicas a truncar
-  const tables = ["Application", "Match", "User", "Team", "Set", "Player", "Question", "ExpoPushToken", "NotificationIntent", "PlayerRankingChange"];
+  const tables = [
+    "Application",
+    "ApplicationStatus",
+    "Category",
+    "Gender",
+    "Match",
+    "MatchClub",
+    "MatchStatus",
+    "NotificationIntent",
+    "Player",
+    "PlayerPosition",
+    "PlayerRankingChange",
+    "Question",
+    "QuestionAnswer",
+    "QuestionType",
+    "Set",
+    "Team",
+    "ExpoPushToken",
+  ];
 
   // Construir la instrucción TRUNCATE
   const tableNames = tables.map((t) => `public."${t}"`);
@@ -21,6 +39,12 @@ async function main() {
 
   await prisma.$executeRawUnsafe(truncateSql);
   console.log("✅ Tablas truncadas: " + tables.join(", "));
+
+  // Borrar usuarios que no son de Apple
+  const deleteNonAppleUsersSql =
+    'DELETE FROM public."User" WHERE "socialPlatform" IS NULL OR "socialPlatform" <> \'APPLE\'';
+  await prisma.$executeRawUnsafe(deleteNonAppleUsersSql);
+  console.log("✅ Usuarios no Apple eliminados");
 }
 
 main()
