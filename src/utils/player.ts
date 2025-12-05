@@ -70,12 +70,7 @@ export const createOrGetPlayer = async (player: PlayerDTO, allowedGenderId: numb
   return { id: createdPlayer.id };
 };
 
-export const createPlayer = async (
-  name: string,
-  lastName: string,
-  data: CreatePlayerBody,
-  user: User
-) => {
+export const createPlayer = async (name: string, lastName: string, data: CreatePlayerBody, user: User) => {
   const category = await calculatePlayerCategory(data);
   const rankingPoints = category.initialPoints;
 
@@ -130,13 +125,14 @@ const calculatePlayerCategory = async (data: CreatePlayerBody): Promise<Category
 
       const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
       const averagePoints = totalPoints / answers.length;
+      const isMale = (await getGenderById(data.genderId))?.code === GENDER.CABALLERO;
 
       if (averagePoints <= 18) {
-        categoryCode = CATEGORY.C9;
+        categoryCode = isMale ? CATEGORY.C9 : CATEGORY.D9;
       } else if (averagePoints <= 28) {
-        categoryCode = CATEGORY.C8;
+        categoryCode = isMale ? CATEGORY.C8 : CATEGORY.D8;
       } else {
-        categoryCode = CATEGORY.C7;
+        categoryCode = isMale ? CATEGORY.C7 : CATEGORY.D7;
       }
     }
     where = { code: categoryCode };
