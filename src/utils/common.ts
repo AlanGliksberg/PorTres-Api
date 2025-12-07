@@ -2,8 +2,8 @@ export const formatName = (value?: string | null) =>
   value
     ? value
         .trim()
-        .toLowerCase()
-        .replace(/\b\p{L}/gu, (char) => char.toUpperCase())
+        .toLocaleLowerCase("es")
+        .replace(/\p{L}+/gu, (word) => word.charAt(0).toLocaleUpperCase("es") + word.slice(1))
     : "";
 
 export const convertStringIntoArray = <P = string>(data: string | string[] | undefined): P[] => {
