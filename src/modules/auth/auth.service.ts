@@ -60,8 +60,8 @@ export const loginWithGoogle = async (idToken: string) => {
     where: { socialId: payload.sub },
     create: {
       email: payload.email,
-      firstName: payload.given_name || "",
-      lastName: payload.family_name || "",
+      firstName: formatName(payload.given_name || ""),
+      lastName: formatName(payload.family_name || ""),
       photoUrl: payload.picture,
       socialId: payload.sub,
       socialPlatform: SocialPlatform.GOOGLE
