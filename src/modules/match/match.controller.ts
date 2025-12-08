@@ -154,7 +154,7 @@ export const deleteMatch = async (req: Request, res: Response) => {
       return;
     }
 
-    const match = await matchService.deleteMatch(matchId, req.user.playerId);
+    const match = await matchService.cancelMatch(matchId, req.user.playerId);
     res.status(200).json(new OkResponse({ match }));
   } catch (e: any) {
     console.error(e);

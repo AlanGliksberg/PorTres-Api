@@ -423,7 +423,7 @@ export const getMatchById = async (matchId: number) => {
   });
 };
 
-export const deleteMatch = async (matchId: number, playerId: number) => {
+export const cancelMatch = async (matchId: number, playerId: number) => {
   const match = await prisma.match.update({
     where: {
       id: matchId

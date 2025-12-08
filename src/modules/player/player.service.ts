@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import type { Express } from "express";
+import * as matchService from "../match/match.service";
 import {
   CreatePlayerBody,
   UpdatePlayerBody,
@@ -183,7 +183,10 @@ export const deleteUserAccount = async (userId: number) => {
 
   const playerId = user.player?.id;
 
+  let hasPlayedMatches = false;
+  let createdMatches = [];
   if (playerId) {
+    hasPlayedMatches = !!(await matchService.getPlayedMatchesCount(playerId));
     const activeMatches = await prisma.match.findMany({
       where: {
         players: {
@@ -203,6 +206,15 @@ export const deleteUserAccount = async (userId: number) => {
     for (const match of activeMatches) {
       await deletePlayerFromMatch({ matchId: match.id, playerId }, playerId);
     }
+
+    createdMatches = await prisma.match.findMany({
+      where: {
+        creatorPlayerId: playerId
+      }
+    });
+    for (const match of createdMatches) {
+      await matchService.cancelMatch(match.id, playerId);
+    }
   }
 
   await prisma.$transaction(async (tx) => {
@@ -211,12 +223,18 @@ export const deleteUserAccount = async (userId: number) => {
         where: { playerId }
       });
 
-      await tx.player.update({
-        where: { id: playerId },
-        data: {
-          userId: null
-        }
-      });
+      if (hasPlayedMatches) {
+        await tx.player.update({
+          where: { id: playerId },
+          data: {
+            userId: null
+          }
+        });
+      } else if (createdMatches.length === 0) {
+        await tx.player.delete({
+          where: { id: playerId }
+        });
+      }
     }
 
     await tx.user.delete({

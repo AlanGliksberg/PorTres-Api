@@ -94,7 +94,7 @@ model Team {
   matchId    Int
   teamNumber Int
 
-  match   Match    @relation(fields: [matchId], references: [id])
+  match   Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
   players Player[]
 
   @@unique([matchId, teamNumber])
@@ -116,7 +116,7 @@ model Set {
   team1Score Int
   team2Score Int
 
-  match Match @relation(fields: [matchId], references: [id])
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, setNumber])
 }
@@ -133,7 +133,7 @@ model Application {
   statusId   Int
 
   status ApplicationStatus @relation(fields: [statusId], references: [id])
-  match  Match             @relation(fields: [matchId], references: [id])
+  match  Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
   player Player            @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
@@ -221,7 +221,7 @@ model PlayerRankingChange {
   newPoints   Int
   createdAt   DateTime @default(now())
 
-  match  Match  @relation(fields: [matchId], references: [id])
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
   player Player @relation(fields: [playerId], references: [id])
 
   @@unique([matchId, playerId])
@@ -253,7 +253,7 @@ model NotificationIntent {
   updatedAt   DateTime                 @updatedAt
   dedupeKey   String?                  @unique
 
-  match  Match   @relation(fields: [matchId], references: [id])
+  match  Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
   player Player? @relation(fields: [playerId], references: [id])
 
   @@index([scheduledAt, status])
