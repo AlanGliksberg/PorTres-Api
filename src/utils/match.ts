@@ -32,8 +32,20 @@ export const createTeam = async (teamNumber: 1 | 2, players: PlayerDTO[] | undef
 };
 
 export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
-  const { page, pageSize, description, dateFrom, dateTo, timeFrom, timeTo, gender, category, status, duration } =
-    filters;
+  const {
+    page,
+    pageSize,
+    matchId,
+    description,
+    dateFrom,
+    dateTo,
+    timeFrom,
+    timeTo,
+    gender,
+    category,
+    status,
+    duration
+  } = filters;
   const [pageNumber, pageSizeNumber] = parsePagesFilters(page, pageSize);
   const matchGenders = convertStringIntoNumberArray(gender);
   const matchStatus = convertStringIntoNumberArray(status);
@@ -43,8 +55,11 @@ export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
   const matchTimeTo = getTimeFromString(timeTo);
   const matchesCategories = convertStringIntoNumberArray(category);
   const matchDuration = convertStringIntoNumberArray(duration);
+  const matchIdNumber =
+    matchId !== undefined && matchId !== "" && !Number.isNaN(Number(matchId)) ? Number(matchId) : undefined;
 
   return {
+    matchId: matchIdNumber,
     description,
     dateFrom: matchDateFrom,
     dateTo: matchDateTo,
@@ -61,13 +76,14 @@ export const parseMatchFilters = (filters: GetMatchesRequest): MatchFilters => {
 
 export const getDBFilter = (filters: MatchFilters) => {
   const where: Prisma.MatchWhereInput = {};
-  const { description, dateFrom, dateTo, timeFrom, timeTo, genders, categories, status, duration } = filters;
+  const { matchId, description, dateFrom, dateTo, timeFrom, timeTo, genders, categories, status, duration } = filters;
 
   if (description)
     where.OR = [
       { location: { contains: description, mode: "insensitive" } },
       { description: { contains: description, mode: "insensitive" } }
     ];
+  if (matchId !== undefined) where.id = matchId;
   if (dateFrom && dateTo) {
     const dateFromOnly = new Date(dateFrom);
     dateFromOnly.setHours(0, 0, 0, 0);

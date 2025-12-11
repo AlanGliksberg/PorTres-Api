@@ -49,6 +49,7 @@ export interface CreateMatchWithResultDto {
 }
 
 export type GetMatchesRequest = {
+  matchId?: string;
   description?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -61,6 +62,7 @@ export type GetMatchesRequest = {
 } & PageFilterString;
 
 export type MatchFilters = {
+  matchId?: number;
   description?: string;
   dateFrom?: Date;
   dateTo?: Date;
