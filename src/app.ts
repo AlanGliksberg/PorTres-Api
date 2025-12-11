@@ -6,6 +6,7 @@ import matchRouter from "./modules/match/match.router";
 import playerRouter from "./modules/player/player.router";
 import applicationRouter from "./modules/application/application.router";
 import storeRouter from "./modules/store/store.router";
+import linkRouter from "./modules/link/link.router";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requestLogger } from "./middlewares/logger";
 
@@ -26,8 +27,9 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+app.use("/", storeRouter);
+app.use("/link", linkRouter);
 app.use("/api/auth", authRouter);
-app.use("/api", storeRouter);
 
 app.use(authenticate as RequestHandler);
 
