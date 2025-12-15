@@ -106,6 +106,13 @@ export const acceptApplication = async (playerId: number, applicationId: number,
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
+  const playerAlreadyInMatch = application.match?.teams.some((team) =>
+    team.players.some((player) => player.id === application.playerId)
+  );
+  if (playerAlreadyInMatch) {
+    await deleteApplication(application.matchId, application.playerId);
+    throw new CustomError("El jugador ya está en el partido", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+  }
   if (application.match.teams.find((t) => t.teamNumber === application.teamNumber)!.players.length >= 2)
     throw new CustomError("Team is full", ErrorCode.APPLICATION_TEAM_FULL);
 
@@ -140,6 +147,13 @@ export const rejectApplication = async (playerId: number, applicationId: number)
     throw new CustomError("Application is closed", ErrorCode.APPLICATION_CLOSED);
   if (application.match?.status.code !== MATCH_STATUS.PENDING)
     throw new CustomError("Match is closed", ErrorCode.APPLICATION_MATCH_CLOSED);
+  const playerAlreadyInMatch = application.match?.teams.some((team) =>
+    team.players.some((player) => player.id === application.playerId)
+  );
+  if (playerAlreadyInMatch) {
+    await deleteApplication(application.matchId, application.playerId);
+    throw new CustomError("El jugador ya está en el partido", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+  }
 
   const applicationStatus = await changeApplicationStatus(applicationId, APPLICATION_STATUS.REJECTED);
 
