@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { SocialPlatform, User } from "@prisma/client";
 import * as matchService from "../match/match.service";
 import {
   CreatePlayerBody,
@@ -230,7 +230,8 @@ export const deleteUserAccount = async (userId: number) => {
             userId: null
           }
         });
-      } else if (createdMatches.length === 0) {
+      } else if (createdMatches.length === 0 && user.socialPlatform !== SocialPlatform.APPLE) {
+        // Si el usuario se creó la cuenta a través de Apple, no se elimina ya que se necesitan sus datos si se crea nuevamente la cuenta
         await tx.player.delete({
           where: { id: playerId }
         });
