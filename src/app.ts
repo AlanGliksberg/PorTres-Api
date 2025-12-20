@@ -7,6 +7,7 @@ import playerRouter from "./modules/player/player.router";
 import applicationRouter from "./modules/application/application.router";
 import storeRouter from "./modules/store/store.router";
 import linkRouter from "./modules/link/link.router";
+import notificationsRouter from "./modules/notifications/notifications.router";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requestLogger } from "./middlewares/logger";
 
@@ -36,5 +37,6 @@ app.use(authenticate as RequestHandler);
 app.use("/api/matches", matchRouter);
 app.use("/api/player", playerRouter);
 app.use("/api/application", applicationRouter);
+app.use("/api/notifications", notificationsRouter);
 
 export default app;

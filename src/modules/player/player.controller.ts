@@ -1,5 +1,10 @@
 import { Response } from "express";
-import { CreatePlayerBody, UpdatePlayerBody, GetPlayersRequest, SaveExpoPushTokenBody } from "../../types/playerTypes";
+import {
+  CreatePlayerBody,
+  UpdatePlayerBody,
+  GetPlayersRequest,
+  SaveExpoPushTokenBody
+} from "../../types/playerTypes";
 import { ErrorResponse, OkResponse } from "../../types/response";
 import * as playerService from "./player.service";
 import { Request } from "../../types/common";

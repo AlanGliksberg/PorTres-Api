@@ -86,3 +86,15 @@ export type ProcessNotificationIntentJobData = {
 };
 
 export type NotificationJobData = any;
+
+export type BroadcastPushMessage = {
+  title: string;
+  body: string;
+};
+
+export type BroadcastPushBody = {
+  messages: BroadcastPushMessage[];
+};
+
+export type BroadcastMessageInput = Partial<BroadcastPushMessage> & { message?: string };
+export type BroadcastBodyInput = BroadcastMessageInput & { messages?: BroadcastMessageInput[] };
