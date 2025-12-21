@@ -195,6 +195,11 @@ const MATCH_CLUBS = [
     id: 39,
     name: "Quality Padel Club",
     description: "15 de Noviembre de 1889, 2365"
+  },
+  {
+    id: 40,
+    name: "El Garage Padel",
+    description: "Marcos Sastre 3152"
   }
 ];
 
