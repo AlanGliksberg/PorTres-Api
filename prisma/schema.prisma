@@ -261,6 +261,13 @@ model NotificationIntent {
   @@index([playerId])
 }
 
+model AppConfig {
+  iosMinVersion     String
+  androidMinVersion String
+
+  @@id([iosMinVersion, androidMinVersion])
+}
+
 enum SocialPlatform {
   GOOGLE
   APPLE

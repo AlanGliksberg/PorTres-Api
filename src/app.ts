@@ -8,6 +8,7 @@ import applicationRouter from "./modules/application/application.router";
 import storeRouter from "./modules/store/store.router";
 import linkRouter from "./modules/link/link.router";
 import notificationsRouter from "./modules/notifications/notifications.router";
+import configRouter from "./modules/config/config.router";
 import { authenticate } from "./middlewares/auth.middleware";
 import { requestLogger } from "./middlewares/logger";
 
@@ -34,6 +35,7 @@ app.use("/api/auth", authRouter);
 
 app.use(authenticate as RequestHandler);
 
+app.use("/api/config", configRouter);
 app.use("/api/matches", matchRouter);
 app.use("/api/player", playerRouter);
 app.use("/api/application", applicationRouter);
