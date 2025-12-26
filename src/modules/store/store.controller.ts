@@ -51,3 +51,17 @@ export const redirectToStore: RequestHandler = (req, res) => {
   res.status(200).send(buildStoreDownloadHtml());
   return;
 };
+
+// Por ahora hace lo mismo que el /download
+export const redirectToQR: RequestHandler = (req, res) => {
+  const userAgent = (req.headers["user-agent"] || "").toString();
+  const target = getStoreUrlForUserAgent(userAgent);
+
+  if (target) {
+    res.redirect(target);
+    return;
+  }
+
+  res.status(200).send(buildStoreDownloadHtml());
+  return;
+};
