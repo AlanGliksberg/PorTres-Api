@@ -193,14 +193,22 @@ export const getMatchClubById = async (matchClubId: number): Promise<MatchClub> 
   return matchClub;
 };
 
+type UpdateTeamsOptions = {
+  updateStatus?: boolean;
+  sendNotifications?: boolean;
+};
+
 export const updateTeams = async (
   matchId: number,
   teams: TeamDTO,
   allowedGenderId: number,
-  matchCreatorPlayerId: number
+  matchCreatorPlayerId: number,
+  options?: UpdateTeamsOptions
 ) => {
   const match = await getMatchById(matchId);
   const actualPlayers = match!.players;
+  const shouldUpdateStatus = options?.updateStatus !== false;
+  const shouldSendNotifications = options?.sendNotifications !== false;
 
   // Primero desconectamos todos los jugadores actuales del partido y de los equipos
   await prisma.match.update({
@@ -247,14 +255,18 @@ export const updateTeams = async (
   const team2 = await createTeam(2, teams.team2, allowedGenderId);
 
   const newPlayers = [...team1.players.connect, ...team2.players.connect];
-  const status = await getMatchStatusByCode(newPlayers.length === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING);
+  const status = shouldUpdateStatus
+    ? await getMatchStatusByCode(newPlayers.length === 4 ? MATCH_STATUS.COMPLETED : MATCH_STATUS.PENDING)
+    : match?.status;
 
   const updatedMatch = await prisma.match.update({
     where: { id: matchId },
     data: {
-      status: {
-        connect: { id: status!.id }
-      },
+      ...(shouldUpdateStatus && {
+        status: {
+          connect: { id: status!.id }
+        }
+      }),
       players: {
         connect: newPlayers
       },
@@ -292,45 +304,47 @@ export const updateTeams = async (
   });
 
   // Notificaciones
-  const removedPlayers = actualPlayers.filter((actualPlayer) => {
-    return !newPlayers.some((newPlayer) => newPlayer.id === actualPlayer.id);
-  });
+  if (shouldSendNotifications) {
+    const removedPlayers = actualPlayers.filter((actualPlayer) => {
+      return !newPlayers.some((newPlayer) => newPlayer.id === actualPlayer.id);
+    });
 
-  const addedPlayers = newPlayers.filter((newPlayer) => {
-    return !actualPlayers.some((actualPlayer) => newPlayer.id === actualPlayer.id);
-  });
+    const addedPlayers = newPlayers.filter((newPlayer) => {
+      return !actualPlayers.some((actualPlayer) => newPlayer.id === actualPlayer.id);
+    });
 
-  removedPlayers.forEach(async (player) => {
-    if (player.userId && player.id !== matchCreatorPlayerId) {
-      await publishPlayerRemovedFromMatch(
+    removedPlayers.forEach(async (player) => {
+      if (player.userId && player.id !== matchCreatorPlayerId) {
+        await publishPlayerRemovedFromMatch(
+          matchId,
+          player.id,
+          matchCreatorPlayerId,
+          matchCreatorPlayerId,
+          [],
+          status?.code as MATCH_STATUS
+        );
+      }
+    });
+
+    addedPlayers.forEach(async (player) => {
+      if (player.id !== matchCreatorPlayerId) {
+        await publishPlayerAddedToMatch(
+          matchId,
+          player.id,
+          matchCreatorPlayerId,
+          team1.players.connect.some((p) => p.id === player.id) ? 1 : 2
+        );
+      }
+    });
+
+    if (status!.code === MATCH_STATUS.COMPLETED) {
+      await publishMatchConfirmed(
         matchId,
-        player.id,
-        matchCreatorPlayerId,
-        matchCreatorPlayerId,
-        [],
-        status?.code as MATCH_STATUS
+        newPlayers.filter((p) => p.id).map((p) => p.id),
+        match?.dateTime!,
+        match!.creatorPlayerId
       );
     }
-  });
-
-  addedPlayers.forEach(async (player) => {
-    if (player.id !== matchCreatorPlayerId) {
-      await publishPlayerAddedToMatch(
-        matchId,
-        player.id,
-        matchCreatorPlayerId,
-        team1.players.connect.some((p) => p.id === player.id) ? 1 : 2
-      );
-    }
-  });
-
-  if (status!.code === MATCH_STATUS.COMPLETED) {
-    await publishMatchConfirmed(
-      matchId,
-      newPlayers.filter((p) => p.id).map((p) => p.id),
-      match?.dateTime!,
-      match!.creatorPlayerId
-    );
   }
 
   return updatedMatch;

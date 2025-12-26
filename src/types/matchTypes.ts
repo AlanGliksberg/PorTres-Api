@@ -31,6 +31,10 @@ export interface UpdateMatchDto {
 export interface UpdateMatchResultDto {
   matchId: number;
   sets: [number, number][];
+  teams?: {
+    team1: number[];
+    team2: number[];
+  };
 }
 
 export interface AcceptResultDto {

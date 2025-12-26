@@ -757,20 +757,40 @@ export const updateMatchResult = async (
   body: UpdateMatchResultDto,
   resultLoadedByTeam: number
 ) => {
+  let currentMatch = match;
+  if (body.teams) {
+    const allPlayers = [...body.teams.team1, ...body.teams.team2];
+    const uniquePlayerIds = [...new Set(allPlayers)];
+    if (allPlayers.length !== uniquePlayerIds.length) {
+      throw new CustomError("No se puede agregar el mismo jugador 2 veces", ErrorCode.PLAYER_ALREADY_IN_MATCH);
+    }
+
+    const teams = {
+      team1: body.teams.team1.map((id) => ({ id })),
+      team2: body.teams.team2.map((id) => ({ id }))
+    };
+
+    await updateTeams(match.id, teams, match.genderId, match.creatorPlayerId, {
+      updateStatus: false,
+      sendNotifications: false
+    });
+    currentMatch = (await getMatchById(match.id)) as MatchWithFullDetails;
+  }
+
   const sets = body.sets.map((set, index) => ({
-    matchId: match.id,
+    matchId: currentMatch.id,
     setNumber: index + 1,
     team1Score: set[0],
     team2Score: set[1]
   }));
   let winnerTeamNumber = null;
-  const otherTeam = match.teams.find((team) => team.teamNumber !== resultLoadedByTeam);
+  const otherTeam = currentMatch.teams.find((team) => team.teamNumber !== resultLoadedByTeam);
   const otherTeamHasPlayerWithApp = otherTeam?.players.some((player) => player.userId);
   if (!otherTeamHasPlayerWithApp) {
     winnerTeamNumber = getWinnerTeamNumber(sets);
   }
 
-  if (!match.resultLoadedByTeam) {
+  if (!currentMatch.resultLoadedByTeam) {
     // Es la primera vez que se carga el resultado
     await prisma.set.createMany({
       data: sets
@@ -778,7 +798,7 @@ export const updateMatchResult = async (
 
     if (otherTeamHasPlayerWithApp)
       await publishResultCreated(
-        match.id,
+        currentMatch.id,
         otherTeam!.players.filter((p) => p.id).map((p) => p.id),
         resultLoadedByTeam
       );
@@ -792,7 +812,7 @@ export const updateMatchResult = async (
       // Buscar si el set ya existe
       const existingSet = await prisma.set.findFirst({
         where: {
-          matchId: match.id,
+          matchId: currentMatch.id,
           setNumber: setNumber
         }
       });
@@ -810,7 +830,7 @@ export const updateMatchResult = async (
         // Crear el set si no existe
         await prisma.set.create({
           data: {
-            matchId: match.id,
+            matchId: currentMatch.id,
             setNumber,
             team1Score,
             team2Score
@@ -821,14 +841,14 @@ export const updateMatchResult = async (
 
     if (otherTeamHasPlayerWithApp)
       await publishResultRejected(
-        match.id,
+        currentMatch.id,
         otherTeam!.players.filter((p) => p.id).map((p) => p.id),
         resultLoadedByTeam
       );
   }
 
   await prisma.match.update({
-    where: { id: match.id },
+    where: { id: currentMatch.id },
     data: { resultLoadedByTeam, winnerTeamNumber }
   });
 };

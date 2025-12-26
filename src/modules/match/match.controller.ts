@@ -335,7 +335,11 @@ export const updateResult = async (req: Request<UpdateMatchResultDto>, res: Resp
 
     // TODO - validar que el resultado sea válido
 
-    await matchService.updateMatchResult(match, req.body, isMatchPlayer.teamNumber);
+    let resultLoadedByTeam = isMatchPlayer.teamNumber;
+    if (req.body.teams?.team1?.includes(req.user.playerId)) resultLoadedByTeam = 1;
+    if (req.body.teams?.team2?.includes(req.user.playerId)) resultLoadedByTeam = 2;
+
+    await matchService.updateMatchResult(match, req.body, resultLoadedByTeam);
     res.status(200).json(new OkResponse());
   } catch (e: any) {
     console.error(e);
