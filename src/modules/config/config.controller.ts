@@ -8,7 +8,6 @@ import * as configService from "./config.service";
 export const getConfig = async (_req: Request, res: Response) => {
   try {
     const config = await configService.getLatestConfig();
-    console.log({ config });
 
     if (!config) {
       res
